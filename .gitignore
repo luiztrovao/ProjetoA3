@@ -1,0 +1,36 @@
+# ===== Java / Maven =====
+target/
+*.class
+*.jar
+*.war
+*.log
+hs_err_pid*
+
+# ===== Node / React =====
+node_modules/
+dist/
+build/
+coverage/
+npm-debug.log*
+yarn-error.log*
+
+# ===== Variáveis de ambiente / segredos =====
+.env
+.env.*
+!.env.example
+application-local.properties
+application-local.yml
+
+# ===== IDEs =====
+.idea/
+*.iml
+.vscode/
+!.vscode/extensions.json
+.settings/
+.project
+.classpath
+.factorypath
+
+# ===== Sistema operacional =====
+.DS_Store
+Thumbs.db
