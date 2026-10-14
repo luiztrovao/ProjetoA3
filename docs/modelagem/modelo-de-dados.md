@@ -2,7 +2,7 @@
 
 Proposta do banco de dados (PostgreSQL) do sistema **Ponto & Sabor**.
 
-> **Status:** em validação pela equipe. As decisões em aberto estão no final do documento.
+> **Status:** validado pela equipe (veja as decisões no final do documento).
 
 ## Diagrama entidade-relacionamento
 
@@ -202,10 +202,10 @@ GROUP BY dia_semana
 ORDER BY faturamento DESC;
 ```
 
-## Pontos para a equipe validar
+## Decisões validadas pela equipe
 
-- [ ] O CPF do cliente deve ser **obrigatório** ou **opcional**? (proposta: opcional)
-- [ ] Precisamos de **endereço do cliente** (delivery)? (proposta: não, por enquanto)
-- [ ] A tabela de permissões por perfil está correta?
-- [ ] Faltam formas de pagamento (ex.: vale-refeição)?
-- [ ] Vamos controlar **estoque** de todos os produtos ou só de alguns (ex.: bebidas)?
+- [x] **CPF do cliente é opcional** (único quando informado).
+- [x] **Sem endereço do cliente**: o sistema não terá delivery.
+- [x] **Permissões por perfil** aprovadas conforme a tabela acima.
+- [x] **Formas de pagamento:** apenas Dinheiro, PIX, Crédito e Débito.
+- [x] **Estoque controlado para todos os produtos.**
