@@ -32,6 +32,45 @@ Ative o perfil `prod` e informe a conexão por variáveis de ambiente (nunca no 
 SPRING_PROFILES_ACTIVE=prod DB_URL=jdbc:postgresql://<host>/<banco>?sslmode=require DB_USERNAME=<usuario> DB_PASSWORD=<senha> ./mvnw spring-boot:run
 ```
 
+## Endpoints
+
+A documentação completa e interativa fica no Swagger. Resumo:
+
+| Recurso | Endpoints |
+|---|---|
+| Categorias | `GET /api/categorias` |
+| Produtos | `GET /api/produtos` · `GET /api/produtos/{id}` · `POST /api/produtos` · `PUT /api/produtos/{id}` · `DELETE /api/produtos/{id}` · `PATCH /api/produtos/{id}/ativar` |
+| Clientes | `GET /api/clientes` · `GET /api/clientes/{id}` · `POST /api/clientes` · `PUT /api/clientes/{id}` · `DELETE /api/clientes/{id}` · `PATCH /api/clientes/{id}/ativar` |
+| Usuários | `GET /api/usuarios` · `GET /api/usuarios/{id}` · `POST /api/usuarios` · `PUT /api/usuarios/{id}` · `DELETE /api/usuarios/{id}` · `PATCH /api/usuarios/{id}/ativar` |
+
+**Convenções:**
+
+- `DELETE` faz **exclusão lógica** (marca como inativo); `PATCH .../ativar` desfaz.
+- Listagens aceitam `termo`, `ativo` (`true`/`false`), `page` (começa em 0), `size` e `sort` (ex.: `sort=preco,desc`), e devolvem `{conteudo, pagina, tamanho, totalElementos, totalPaginas}`.
+- Filtros extras: `categoriaId` em produtos e `perfil` em usuários. Em clientes, `termo` busca por nome, CPF, telefone ou e-mail.
+- CPF e telefone podem ser enviados com ou sem máscara; a API guarda só os dígitos.
+- A senha do usuário é guardada com BCrypt e **nunca** aparece nas respostas.
+
+**Erros** seguem sempre o mesmo formato:
+
+```json
+{
+  "timestamp": "2026-10-14T20:00:00Z",
+  "status": 400,
+  "erro": "Bad Request",
+  "mensagem": "Existem campos inválidos.",
+  "caminho": "/api/clientes",
+  "campos": [{ "campo": "cpf", "mensagem": "CPF inválido." }]
+}
+```
+
+| Status | Quando |
+|---|---|
+| 400 | Campos inválidos, JSON mal formatado ou parâmetro inválido |
+| 404 | Registro não encontrado |
+| 409 | Violação de restrição do banco |
+| 422 | Regra de negócio violada (ex.: CPF ou e-mail já cadastrado, inativar o último Dono) |
+
 ## Testes e cobertura
 
 ```bash
@@ -46,12 +85,13 @@ SPRING_PROFILES_ACTIVE=prod DB_URL=jdbc:postgresql://<host>/<banco>?sslmode=requ
 ```
 src/main/java/com/pontoesabor/lanchonete/
 ├── config/       → segurança e configurações gerais
-├── exception/    → exceções de regra de negócio
+├── controller/   → endpoints HTTP (recebem e devolvem DTOs)
+├── dto/          → objetos de entrada (com validação) e saída da API
+├── exception/    → exceções e tratamento global de erros
 ├── model/        → entidades JPA e enums (com as regras de negócio)
-├── repository/   → acesso ao banco (Spring Data JPA)
-├── service/      → regras de negócio que envolvem várias entidades (próximas etapas)
-├── controller/   → endpoints HTTP (próximas etapas)
-└── dto/          → objetos de entrada/saída da API (próximas etapas)
+├── repository/   → acesso ao banco (Spring Data JPA) e filtros de busca
+├── service/      → casos de uso e regras que envolvem o banco
+└── util/         → funções auxiliares (normalização de textos)
 
 src/main/resources/
 ├── application.properties        → configuração comum
