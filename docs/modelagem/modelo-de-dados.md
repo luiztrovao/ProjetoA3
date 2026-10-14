@@ -45,7 +45,7 @@ erDiagram
     PRODUTO {
         bigint id PK
         varchar nome
-        text descricao
+        varchar descricao
         bigint categoria_id FK
         numeric preco "10,2"
         integer estoque_atual
@@ -65,7 +65,7 @@ erDiagram
         numeric subtotal "10,2"
         numeric desconto "10,2"
         numeric total "10,2"
-        text observacao
+        varchar observacao
     }
 
     ITEM_VENDA {
@@ -131,7 +131,7 @@ Exemplos: Lanches, Bebidas, Porções, Sobremesas. Serve para filtrar produtos e
 |---|---|---|
 | `id` | BIGSERIAL | PK |
 | `nome` | VARCHAR(120) | obrigatório |
-| `descricao` | TEXT | opcional |
+| `descricao` | VARCHAR(500) | opcional |
 | `categoria_id` | BIGINT | FK → `categoria`, obrigatório |
 | `preco` | NUMERIC(10,2) | obrigatório, maior que zero |
 | `estoque_atual` | INTEGER | maior ou igual a zero |
@@ -153,7 +153,7 @@ Representa tanto a **venda** quanto o **pedido**. O status mostra em que etapa e
 | `subtotal` | NUMERIC(10,2) | soma dos itens |
 | `desconto` | NUMERIC(10,2) | padrão 0, não pode passar do subtotal |
 | `total` | NUMERIC(10,2) | `subtotal - desconto` |
-| `observacao` | TEXT | opcional (ex.: "sem cebola") |
+| `observacao` | VARCHAR(500) | opcional (ex.: "sem cebola") |
 
 ### `item_venda`
 
