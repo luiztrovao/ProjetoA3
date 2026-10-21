@@ -61,8 +61,9 @@ public class UsuarioService {
         return UsuarioResponse.de(usuarioRepository.save(usuario));
     }
 
+    /** {@code idUsuarioLogado}: ninguém pode alterar o próprio perfil (regra do protótipo). */
     @Transactional
-    public UsuarioResponse atualizar(Long id, UsuarioAtualizacaoRequest request) {
+    public UsuarioResponse atualizar(Long id, UsuarioAtualizacaoRequest request, Long idUsuarioLogado) {
         Usuario usuario = buscarEntidade(id);
         boolean duplicado = usuarioRepository.existsByUsernameAndIdNot(request.username(), id)
                 || (request.email() != null && usuarioRepository.existsByEmailAndIdNot(request.email(), id))
@@ -71,6 +72,9 @@ public class UsuarioService {
             throw new RegraNegocioException(MENSAGEM_DUPLICADO);
         }
         if (usuario.getPerfil() != request.perfil()) {
+            if (id.equals(idUsuarioLogado)) {
+                throw new RegraNegocioException("Não é possível alterar o perfil do usuário da sessão atual.");
+            }
             garantirQueNaoEhUltimoDono(usuario);
         }
         usuario.setNome(request.nome());
@@ -87,7 +91,10 @@ public class UsuarioService {
 
     /** Exclusão lógica: o usuário perde o acesso, mas continua ligado às vendas que registrou. */
     @Transactional
-    public void inativar(Long id) {
+    public void inativar(Long id, Long idUsuarioLogado) {
+        if (id.equals(idUsuarioLogado)) {
+            throw new RegraNegocioException("Não é possível desativar o usuário da sessão atual.");
+        }
         Usuario usuario = buscarEntidade(id);
         garantirQueNaoEhUltimoDono(usuario);
         usuario.setAtivo(false);

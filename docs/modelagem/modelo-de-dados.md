@@ -240,7 +240,9 @@ Regras extras do protótipo:
 - Ninguém pode alterar o próprio perfil nem desativar a própria conta.
 - O sistema precisa ter sempre **pelo menos um Dono ativo**.
 
-> As permissões passam a ser aplicadas pela API na etapa de autenticação (JWT).
+> As permissões são aplicadas pela API: o login gera um token JWT, e cada rota confere o perfil do
+> usuário (lido do banco a cada requisição). Telas de vendas, pedidos e relatórios recebem as regras
+> correspondentes quando essas APIs forem criadas.
 
 ## Fluxo da venda
 

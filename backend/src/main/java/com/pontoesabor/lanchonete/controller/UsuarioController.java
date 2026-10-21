@@ -5,6 +5,8 @@ import com.pontoesabor.lanchonete.dto.UsuarioAtualizacaoRequest;
 import com.pontoesabor.lanchonete.dto.UsuarioCriacaoRequest;
 import com.pontoesabor.lanchonete.dto.UsuarioResponse;
 import com.pontoesabor.lanchonete.model.Perfil;
+import com.pontoesabor.lanchonete.security.Permissoes;
+import com.pontoesabor.lanchonete.security.UsuarioLogado;
 import com.pontoesabor.lanchonete.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +17,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -39,6 +42,7 @@ public class UsuarioController {
 
     @GetMapping
     @Operation(summary = "Lista usuários com filtros e paginação")
+    @PreAuthorize(Permissoes.GESTAO)
     public PaginaResponse<UsuarioResponse> listar(
             @Parameter(description = "Busca por nome ou e-mail") @RequestParam(required = false) String termo,
             @RequestParam(required = false) Perfil perfil,
@@ -50,12 +54,14 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca um usuário pelo id")
+    @PreAuthorize(Permissoes.GESTAO)
     public UsuarioResponse buscar(@PathVariable Long id) {
         return usuarioService.buscar(id);
     }
 
     @PostMapping
     @Operation(summary = "Cadastra um usuário")
+    @PreAuthorize(Permissoes.DONO)
     public ResponseEntity<UsuarioResponse> criar(@Valid @RequestBody UsuarioCriacaoRequest request) {
         UsuarioResponse criado = usuarioService.criar(request);
         return ResponseEntity.created(URI.create("/api/usuarios/" + criado.id())).body(criado);
@@ -63,19 +69,22 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um usuário (senha opcional)")
+    @PreAuthorize(Permissoes.DONO)
     public UsuarioResponse atualizar(@PathVariable Long id, @Valid @RequestBody UsuarioAtualizacaoRequest request) {
-        return usuarioService.atualizar(id, request);
+        return usuarioService.atualizar(id, request, UsuarioLogado.id());
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Inativa um usuário (exclusão lógica)")
+    @PreAuthorize(Permissoes.DONO)
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
-        usuarioService.inativar(id);
+        usuarioService.inativar(id, UsuarioLogado.id());
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/ativar")
     @Operation(summary = "Reativa um usuário inativo")
+    @PreAuthorize(Permissoes.DONO)
     public ResponseEntity<Void> ativar(@PathVariable Long id) {
         usuarioService.ativar(id);
         return ResponseEntity.noContent().build();
