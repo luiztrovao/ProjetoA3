@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class ProdutoTest {
 
     private Produto produtoComEstoque(int atual, int minimo) {
-        return new Produto("X-Burguer", new Categoria("Lanches"), new BigDecimal("25.90"), atual, minimo);
+        return new Produto("PRD-TESTE", "X-Burguer", new Categoria("Lanches"), new BigDecimal("25.90"), atual, minimo);
     }
 
     @Test

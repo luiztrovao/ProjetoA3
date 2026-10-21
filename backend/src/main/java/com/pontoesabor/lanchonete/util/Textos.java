@@ -25,7 +25,18 @@ public final class Textos {
 
     /** E-mail sem espaços e em minúsculas; vazio vira {@code null}. */
     public static String email(String valor) {
+        return minusculas(valor);
+    }
+
+    /** Texto sem espaços nas pontas e em minúsculas (ex.: nome de usuário); vazio vira {@code null}. */
+    public static String minusculas(String valor) {
         String limpo = limpar(valor);
         return limpo == null ? null : limpo.toLowerCase();
+    }
+
+    /** Texto sem espaços nas pontas e em maiúsculas (ex.: UF, código de produto); vazio vira {@code null}. */
+    public static String maiusculas(String valor) {
+        String limpo = limpar(valor);
+        return limpo == null ? null : limpo.toUpperCase();
     }
 }

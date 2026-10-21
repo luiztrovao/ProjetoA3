@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-/** Funcionário com acesso ao sistema. */
+/** Funcionário com acesso ao sistema. Entra com o nome de usuário ou o e-mail. */
 @Entity
 @Table(name = "usuario")
 public class Usuario {
@@ -24,8 +24,21 @@ public class Usuario {
     @Column(nullable = false, length = 120)
     private String nome;
 
-    @Column(nullable = false, length = 150, unique = true)
+    /** Nome de usuário para login (minúsculo, único). */
+    @Column(nullable = false, length = 50, unique = true)
+    private String username;
+
+    /** Opcional; também pode ser usado no login. */
+    @Column(length = 150, unique = true)
     private String email;
+
+    /** Opcional; só números. */
+    @Column(length = 11, unique = true)
+    private String cpf;
+
+    /** Opcional; só números. */
+    @Column(length = 11)
+    private String telefone;
 
     @Column(name = "senha_hash", nullable = false, length = 100)
     private String senhaHash;
@@ -36,6 +49,9 @@ public class Usuario {
 
     @Column(nullable = false)
     private boolean ativo = true;
+
+    @Column(name = "ultimo_acesso")
+    private LocalDateTime ultimoAcesso;
 
     @CreationTimestamp
     @Column(name = "criado_em", nullable = false, updatable = false)
@@ -48,9 +64,9 @@ public class Usuario {
     protected Usuario() {
     }
 
-    public Usuario(String nome, String email, String senhaHash, Perfil perfil) {
+    public Usuario(String nome, String username, String senhaHash, Perfil perfil) {
         this.nome = nome;
-        this.email = email;
+        this.username = username;
         this.senhaHash = senhaHash;
         this.perfil = perfil;
     }
@@ -67,12 +83,36 @@ public class Usuario {
         this.nome = nome;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
     }
 
     public String getSenhaHash() {
@@ -97,6 +137,14 @@ public class Usuario {
 
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public LocalDateTime getUltimoAcesso() {
+        return ultimoAcesso;
+    }
+
+    public void registrarAcesso(LocalDateTime momento) {
+        this.ultimoAcesso = momento;
     }
 
     public LocalDateTime getCriadoEm() {

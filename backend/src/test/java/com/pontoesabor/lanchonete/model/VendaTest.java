@@ -19,9 +19,9 @@ class VendaTest {
     void setUp() {
         Categoria lanches = new Categoria("Lanches");
         Categoria bebidas = new Categoria("Bebidas");
-        xBurguer = new Produto("X-Burguer", lanches, new BigDecimal("25.90"), 10, 2);
-        refrigerante = new Produto("Refrigerante lata", bebidas, new BigDecimal("6.50"), 20, 5);
-        Usuario vendedor = new Usuario("Ana", "ana@pontoesabor.com", "hash", Perfil.VENDEDOR);
+        xBurguer = new Produto("PRD-TESTE", "X-Burguer", lanches, new BigDecimal("25.90"), 10, 2);
+        refrigerante = new Produto("PRD-TESTE", "Refrigerante lata", bebidas, new BigDecimal("6.50"), 20, 5);
+        Usuario vendedor = new Usuario("Ana", "ana", "hash", Perfil.VENDEDOR);
         venda = new Venda(vendedor, null, FormaPagamento.PIX, LocalDateTime.of(2026, 10, 14, 12, 30));
     }
 

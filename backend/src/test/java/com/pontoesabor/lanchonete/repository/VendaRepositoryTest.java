@@ -35,22 +35,22 @@ class VendaRepositoryTest {
     private ProdutoRepository produtoRepository;
 
     @Test
-    void migrationCriaCategoriasIniciais() {
+    void migrationsCriamCategoriasDoPrototipo() {
         assertThat(categoriaRepository.findByAtivoTrueOrderByNome())
                 .extracting(Categoria::getNome)
-                .containsExactly("Bebidas", "Lanches", "Porções", "Sobremesas");
+                .containsExactly("Acompanhamentos", "Bebidas", "Combos", "Hambúrgueres", "Sobremesas");
     }
 
     @Test
     void salvaVendaComItensEBuscaPorPeriodo() {
         Usuario vendedor = usuarioRepository.save(
-                new Usuario("Ana", "ana@pontoesabor.com", "hash", Perfil.VENDEDOR));
+                new Usuario("Ana", "ana", "hash", Perfil.VENDEDOR));
         Categoria lanches = categoriaRepository.findByAtivoTrueOrderByNome().stream()
-                .filter(c -> c.getNome().equals("Lanches"))
+                .filter(c -> c.getNome().equals("Hambúrgueres"))
                 .findFirst()
                 .orElseThrow();
         Produto xBurguer = produtoRepository.save(
-                new Produto("X-Burguer", lanches, new BigDecimal("25.90"), 10, 2));
+                new Produto("PRD-TESTE", "X-Burguer", lanches, new BigDecimal("25.90"), 10, 2));
 
         Venda venda = new Venda(vendedor, null, FormaPagamento.DINHEIRO, LocalDateTime.of(2026, 10, 14, 12, 0));
         venda.adicionarItem(xBurguer, 2);

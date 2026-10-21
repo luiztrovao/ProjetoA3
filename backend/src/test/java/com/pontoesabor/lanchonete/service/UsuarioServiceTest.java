@@ -36,49 +36,74 @@ class UsuarioServiceTest {
     @InjectMocks
     private UsuarioService usuarioService;
 
+    private static UsuarioCriacaoRequest criacao(String username, String email, String cpf) {
+        return new UsuarioCriacaoRequest("Fernanda Souza", username, email, cpf, "(81) 97766-3300", "senha1", Perfil.VENDEDOR);
+    }
+
+    private static UsuarioAtualizacaoRequest atualizacao(String nome, String senha, Perfil perfil) {
+        return new UsuarioAtualizacaoRequest(nome, "matheus", null, null, null, senha, perfil);
+    }
+
     @Test
-    void criarGuardaSenhaCriptografada() {
-        when(usuarioRepository.existsByEmail("ana@pontoesabor.com")).thenReturn(false);
-        when(passwordEncoder.encode("senhaSegura1")).thenReturn("$2a$hash");
+    void criarGuardaSenhaCriptografadaENormalizaCampos() {
+        when(passwordEncoder.encode("senha1")).thenReturn("$2a$hash");
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
 
-        UsuarioResponse resposta = usuarioService.criar(
-                new UsuarioCriacaoRequest("Ana", " Ana@PontoeSabor.com ", "senhaSegura1", Perfil.VENDEDOR));
+        UsuarioResponse resposta = usuarioService.criar(criacao(" Fernanda ", "Fernanda@PontoeSabor.com", "529.982.247-25"));
 
         ArgumentCaptor<Usuario> salvo = ArgumentCaptor.forClass(Usuario.class);
         verify(usuarioRepository).save(salvo.capture());
         assertThat(salvo.getValue().getSenhaHash()).isEqualTo("$2a$hash");
-        assertThat(resposta.email()).isEqualTo("ana@pontoesabor.com");
+        assertThat(resposta.username()).isEqualTo("fernanda");
+        assertThat(resposta.email()).isEqualTo("fernanda@pontoesabor.com");
+        assertThat(resposta.cpf()).isEqualTo("52998224725");
+        assertThat(resposta.telefone()).isEqualTo("81977663300");
     }
 
     @Test
-    void criarComEmailRepetidoLancaExcecao() {
-        when(usuarioRepository.existsByEmail("ana@pontoesabor.com")).thenReturn(true);
+    void criarSemEmailECpfNaoConsultaDuplicidadeDeles() {
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
 
-        assertThatThrownBy(() -> usuarioService.criar(
-                new UsuarioCriacaoRequest("Ana", "ana@pontoesabor.com", "senhaSegura1", Perfil.VENDEDOR)))
+        usuarioService.criar(criacao("fernanda", null, null));
+
+        verify(usuarioRepository, never()).existsByEmail(any());
+        verify(usuarioRepository, never()).existsByCpf(any());
+    }
+
+    @Test
+    void criarComUsuarioRepetidoLancaExcecao() {
+        when(usuarioRepository.existsByUsername("fernanda")).thenReturn(true);
+
+        assertThatThrownBy(() -> usuarioService.criar(criacao("fernanda", null, null)))
                 .isInstanceOf(RegraNegocioException.class)
-                .hasMessageContaining("e-mail");
+                .hasMessage("Já existe um funcionário com o mesmo CPF, usuário ou e-mail.");
         verify(usuarioRepository, never()).save(any());
     }
 
     @Test
+    void criarComCpfRepetidoLancaExcecao() {
+        when(usuarioRepository.existsByCpf("52998224725")).thenReturn(true);
+
+        assertThatThrownBy(() -> usuarioService.criar(criacao("fernanda", null, "52998224725")))
+                .isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
     void atualizarSemSenhaMantemSenhaAtual() {
-        Usuario usuario = new Usuario("Ana", "ana@pontoesabor.com", "hashAntigo", Perfil.VENDEDOR);
+        Usuario usuario = new Usuario("Matheus", "matheus", "hashAntigo", Perfil.VENDEDOR);
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.saveAndFlush(usuario)).thenReturn(usuario);
 
-        usuarioService.atualizar(1L,
-                new UsuarioAtualizacaoRequest("Ana Souza", "ana@pontoesabor.com", "  ", Perfil.VENDEDOR));
+        usuarioService.atualizar(1L, atualizacao("Matheus Almeida", "  ", Perfil.VENDEDOR));
 
         assertThat(usuario.getSenhaHash()).isEqualTo("hashAntigo");
-        assertThat(usuario.getNome()).isEqualTo("Ana Souza");
+        assertThat(usuario.getNome()).isEqualTo("Matheus Almeida");
         verify(passwordEncoder, never()).encode(any());
     }
 
     @Test
     void naoPermiteInativarUltimoDono() {
-        Usuario dono = new Usuario("Matheus", "matheus@pontoesabor.com", "hash", Perfil.DONO);
+        Usuario dono = new Usuario("Matheus", "matheus", "hash", Perfil.DONO);
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(dono));
         when(usuarioRepository.countByPerfilAndAtivoTrue(Perfil.DONO)).thenReturn(1L);
 
@@ -90,7 +115,7 @@ class UsuarioServiceTest {
 
     @Test
     void permiteInativarDonoQuandoExisteOutro() {
-        Usuario dono = new Usuario("Matheus", "matheus@pontoesabor.com", "hash", Perfil.DONO);
+        Usuario dono = new Usuario("Matheus", "matheus", "hash", Perfil.DONO);
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(dono));
         when(usuarioRepository.countByPerfilAndAtivoTrue(Perfil.DONO)).thenReturn(2L);
 
@@ -101,12 +126,11 @@ class UsuarioServiceTest {
 
     @Test
     void naoPermiteRebaixarUltimoDono() {
-        Usuario dono = new Usuario("Matheus", "matheus@pontoesabor.com", "hash", Perfil.DONO);
+        Usuario dono = new Usuario("Matheus", "matheus", "hash", Perfil.DONO);
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(dono));
         when(usuarioRepository.countByPerfilAndAtivoTrue(Perfil.DONO)).thenReturn(1L);
 
-        assertThatThrownBy(() -> usuarioService.atualizar(1L,
-                new UsuarioAtualizacaoRequest("Matheus", "matheus@pontoesabor.com", null, Perfil.GERENTE)))
+        assertThatThrownBy(() -> usuarioService.atualizar(1L, atualizacao("Matheus", null, Perfil.GERENTE)))
                 .isInstanceOf(RegraNegocioException.class);
         assertThat(dono.getPerfil()).isEqualTo(Perfil.DONO);
     }

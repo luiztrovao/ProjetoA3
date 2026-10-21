@@ -11,9 +11,19 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpec
 
     Optional<Usuario> findByEmail(String email);
 
+    Optional<Usuario> findByUsername(String username);
+
+    boolean existsByUsername(String username);
+
+    boolean existsByUsernameAndIdNot(String username, Long id);
+
     boolean existsByEmail(String email);
 
     boolean existsByEmailAndIdNot(String email, Long id);
+
+    boolean existsByCpf(String cpf);
+
+    boolean existsByCpfAndIdNot(String cpf, Long id);
 
     long countByPerfilAndAtivoTrue(Perfil perfil);
 
@@ -23,13 +33,19 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpec
         private Filtros() {
         }
 
-        public static Specification<Usuario> nomeOuEmailContem(String termo) {
+        /** Procura o termo no nome, nome de usuário, e-mail ou CPF. */
+        public static Specification<Usuario> buscaGeral(String termo) {
             return (root, query, cb) -> {
                 if (termo == null) {
                     return null;
                 }
                 String padrao = "%" + termo.toLowerCase() + "%";
-                return cb.or(cb.like(cb.lower(root.get("nome")), padrao), cb.like(root.get("email"), padrao));
+                var textos = cb.or(
+                        cb.like(cb.lower(root.get("nome")), padrao),
+                        cb.like(root.get("username"), padrao),
+                        cb.like(root.get("email"), padrao));
+                String digitos = termo.replaceAll("\\D", "");
+                return digitos.isEmpty() ? textos : cb.or(textos, cb.like(root.get("cpf"), "%" + digitos + "%"));
             };
         }
 

@@ -23,11 +23,18 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Código interno do produto (ex.: XBG001), único e em maiúsculas. */
+    @Column(nullable = false, length = 20, unique = true)
+    private String codigo;
+
     @Column(nullable = false, length = 120)
     private String nome;
 
     @Column(length = 500)
     private String descricao;
+
+    @Column(name = "imagem_url", length = 500)
+    private String imagemUrl;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "categoria_id", nullable = false)
@@ -56,7 +63,8 @@ public class Produto {
     protected Produto() {
     }
 
-    public Produto(String nome, Categoria categoria, BigDecimal preco, int estoqueAtual, int estoqueMinimo) {
+    public Produto(String codigo, String nome, Categoria categoria, BigDecimal preco, int estoqueAtual, int estoqueMinimo) {
+        this.codigo = codigo;
         this.nome = nome;
         this.categoria = categoria;
         this.preco = preco;
@@ -96,6 +104,14 @@ public class Produto {
         return id;
     }
 
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
     public String getNome() {
         return nome;
     }
@@ -110,6 +126,14 @@ public class Produto {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public String getImagemUrl() {
+        return imagemUrl;
+    }
+
+    public void setImagemUrl(String imagemUrl) {
+        this.imagemUrl = imagemUrl;
     }
 
     public Categoria getCategoria() {
