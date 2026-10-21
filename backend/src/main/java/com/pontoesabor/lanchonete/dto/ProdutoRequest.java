@@ -5,15 +5,23 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
-/** Dados para cadastrar ou editar um produto. */
+/**
+ * Dados para cadastrar ou editar um produto. Obrigatórios: nome, código, categoria e preço.
+ * Sem estoque informado, começa em 0; sem estoque mínimo, usa o "alerta de estoque baixo" das configurações.
+ */
 public record ProdutoRequest(
         @NotBlank(message = "O nome é obrigatório.")
         @Size(max = 120, message = "O nome deve ter no máximo 120 caracteres.")
         String nome,
+
+        @NotBlank(message = "O código é obrigatório.")
+        @Pattern(regexp = "[A-Z0-9-]{1,20}", message = "O código deve ter até 20 caracteres: letras, números ou hífen.")
+        String codigo,
 
         @Size(max = 500, message = "A descrição deve ter no máximo 500 caracteres.")
         String descricao,
@@ -26,16 +34,19 @@ public record ProdutoRequest(
         @Digits(integer = 8, fraction = 2, message = "O preço deve ter no máximo 2 casas decimais.")
         BigDecimal preco,
 
-        @NotNull(message = "O estoque atual é obrigatório.")
-        @PositiveOrZero(message = "O estoque atual não pode ser negativo.")
+        @PositiveOrZero(message = "O estoque não pode ser negativo.")
         Integer estoqueAtual,
 
-        @NotNull(message = "O estoque mínimo é obrigatório.")
         @PositiveOrZero(message = "O estoque mínimo não pode ser negativo.")
-        Integer estoqueMinimo) {
+        Integer estoqueMinimo,
+
+        @Size(max = 500, message = "O endereço da imagem deve ter no máximo 500 caracteres.")
+        String imagemUrl) {
 
     public ProdutoRequest {
         nome = Textos.limpar(nome);
+        codigo = Textos.maiusculas(codigo);
         descricao = Textos.limpar(descricao);
+        imagemUrl = Textos.limpar(imagemUrl);
     }
 }

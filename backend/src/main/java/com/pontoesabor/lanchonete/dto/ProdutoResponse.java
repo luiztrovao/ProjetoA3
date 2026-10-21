@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 public record ProdutoResponse(
         Long id,
+        String codigo,
         String nome,
         String descricao,
         CategoriaResponse categoria,
@@ -13,6 +14,7 @@ public record ProdutoResponse(
         int estoqueAtual,
         int estoqueMinimo,
         boolean estoqueBaixo,
+        String imagemUrl,
         boolean ativo,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm) {
@@ -20,6 +22,7 @@ public record ProdutoResponse(
     public static ProdutoResponse de(Produto produto) {
         return new ProdutoResponse(
                 produto.getId(),
+                produto.getCodigo(),
                 produto.getNome(),
                 produto.getDescricao(),
                 CategoriaResponse.de(produto.getCategoria()),
@@ -27,6 +30,7 @@ public record ProdutoResponse(
                 produto.getEstoqueAtual(),
                 produto.getEstoqueMinimo(),
                 produto.isEstoqueBaixo(),
+                produto.getImagemUrl(),
                 produto.isAtivo(),
                 produto.getCriadoEm(),
                 produto.getAtualizadoEm());

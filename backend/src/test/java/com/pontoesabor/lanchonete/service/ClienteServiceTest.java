@@ -34,7 +34,7 @@ class ClienteServiceTest {
         when(clienteRepository.save(any(Cliente.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
 
         ClienteResponse resposta = clienteService.criar(
-                new ClienteRequest(" João Silva ", "529.982.247-25", "(81) 99999-1234", "JOAO@EMAIL.COM"));
+                ClienteRequest.basico(" João Silva ", "529.982.247-25", "(81) 99999-1234", "JOAO@EMAIL.COM"));
 
         assertThat(resposta.nome()).isEqualTo("João Silva");
         assertThat(resposta.cpf()).isEqualTo("52998224725");
@@ -46,7 +46,7 @@ class ClienteServiceTest {
     void criarSemCpfNaoConsultaDuplicidade() {
         when(clienteRepository.save(any(Cliente.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
 
-        ClienteResponse resposta = clienteService.criar(new ClienteRequest("Cliente de balcão", "", null, null));
+        ClienteResponse resposta = clienteService.criar(ClienteRequest.basico("Cliente de balcão", "", null, null));
 
         assertThat(resposta.cpf()).isNull();
         verify(clienteRepository, never()).existsByCpf(any());
@@ -56,7 +56,7 @@ class ClienteServiceTest {
     void criarComCpfRepetidoLancaExcecao() {
         when(clienteRepository.existsByCpf("52998224725")).thenReturn(true);
 
-        assertThatThrownBy(() -> clienteService.criar(new ClienteRequest("João", "52998224725", null, null)))
+        assertThatThrownBy(() -> clienteService.criar(ClienteRequest.basico("João", "52998224725", null, null)))
                 .isInstanceOf(RegraNegocioException.class)
                 .hasMessageContaining("CPF");
         verify(clienteRepository, never()).save(any());
@@ -67,7 +67,7 @@ class ClienteServiceTest {
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(new Cliente("João")));
         when(clienteRepository.existsByCpfAndIdNot("52998224725", 1L)).thenReturn(true);
 
-        assertThatThrownBy(() -> clienteService.atualizar(1L, new ClienteRequest("João", "52998224725", null, null)))
+        assertThatThrownBy(() -> clienteService.atualizar(1L, ClienteRequest.basico("João", "52998224725", null, null)))
                 .isInstanceOf(RegraNegocioException.class);
     }
 

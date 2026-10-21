@@ -37,17 +37,19 @@ class ProdutoControllerTest {
     @BeforeEach
     void setUp() {
         lanchesId = categoriaRepository.findByAtivoTrueOrderByNome().stream()
-                .filter(c -> c.getNome().equals("Lanches"))
+                .filter(c -> c.getNome().equals("Hambúrgueres"))
                 .findFirst()
                 .orElseThrow()
                 .getId();
     }
 
+    /** Código gerado a partir do nome (ex.: "X-Salada" vira "XSALADA"). */
     private String produtoJson(String nome, String preco, int estoqueAtual, int estoqueMinimo) {
+        String codigo = nome.toUpperCase().replaceAll("[^A-Z0-9]", "");
         return """
-                {"nome": "%s", "descricao": "Lanche da casa", "categoriaId": %d,
+                {"nome": "%s", "codigo": "%s", "descricao": "Lanche da casa", "categoriaId": %d,
                  "preco": %s, "estoqueAtual": %d, "estoqueMinimo": %d}
-                """.formatted(nome, lanchesId, preco, estoqueAtual, estoqueMinimo);
+                """.formatted(nome, codigo, lanchesId, preco, estoqueAtual, estoqueMinimo);
     }
 
     private long criarProduto(String nome) throws Exception {
@@ -63,7 +65,7 @@ class ProdutoControllerTest {
     void listaCategorias() throws Exception {
         mockMvc.perform(get("/api/categorias"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].nome", hasItem("Lanches")));
+                .andExpect(jsonPath("$[*].nome", hasItem("Hambúrgueres")));
     }
 
     @Test
@@ -74,7 +76,7 @@ class ProdutoControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", containsString("/api/produtos/")))
                 .andExpect(jsonPath("$.nome").value("X-Salada"))
-                .andExpect(jsonPath("$.categoria.nome").value("Lanches"))
+                .andExpect(jsonPath("$.categoria.nome").value("Hambúrgueres"))
                 .andExpect(jsonPath("$.preco").value(27.50))
                 .andExpect(jsonPath("$.estoqueBaixo").value(true))
                 .andExpect(jsonPath("$.ativo").value(true));
@@ -91,7 +93,28 @@ class ProdutoControllerTest {
                 .andExpect(jsonPath("$.campos[*].campo", hasItem("nome")))
                 .andExpect(jsonPath("$.campos[*].campo", hasItem("preco")))
                 .andExpect(jsonPath("$.campos[*].campo", hasItem("categoriaId")))
+                .andExpect(jsonPath("$.campos[*].campo", hasItem("codigo")))
                 .andExpect(jsonPath("$.campos[*].campo", hasItem("estoqueAtual")));
+    }
+
+    @Test
+    void recusaCodigoDuplicado() throws Exception {
+        criarProduto("Combo Casa");
+
+        mockMvc.perform(post("/api/produtos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(produtoJson("Combo Casa", "35.00", 5, 1)))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.mensagem").value("Já existe um produto cadastrado com este código."));
+    }
+
+    @Test
+    void buscaPorCodigo() throws Exception {
+        criarProduto("Suco Natural");
+
+        mockMvc.perform(get("/api/produtos").param("termo", "suconat"))
+                .andExpect(jsonPath("$.totalElementos").value(1))
+                .andExpect(jsonPath("$.conteudo[0].codigo").value("SUCONATURAL"));
     }
 
     @Test

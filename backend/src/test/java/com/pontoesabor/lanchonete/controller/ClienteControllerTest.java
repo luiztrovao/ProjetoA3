@@ -53,6 +53,36 @@ class ClienteControllerTest {
     }
 
     @Test
+    void criaClienteComEnderecoEObservacoes() throws Exception {
+        mockMvc.perform(post("/api/clientes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nome": "João Silva", "cep": "50030-230", "logradouro": "Rua do Sol", "numero": "120",
+                                 "complemento": "Apto. 302", "bairro": "Santo Antônio", "cidade": "Recife", "uf": "pe",
+                                 "observacoes": "Prefere contato pelo WhatsApp."}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.cep").value("50030230"))
+                .andExpect(jsonPath("$.logradouro").value("Rua do Sol"))
+                .andExpect(jsonPath("$.complemento").value("Apto. 302"))
+                .andExpect(jsonPath("$.cidade").value("Recife"))
+                .andExpect(jsonPath("$.uf").value("PE"))
+                .andExpect(jsonPath("$.observacoes").value("Prefere contato pelo WhatsApp."));
+    }
+
+    @Test
+    void recusaCepEUfInvalidos() throws Exception {
+        mockMvc.perform(post("/api/clientes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nome": "João", "cep": "5003", "uf": "Pernambuco"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos[*].campo", hasItem("cep")))
+                .andExpect(jsonPath("$.campos[*].campo", hasItem("uf")));
+    }
+
+    @Test
     void criaClienteSemCpf() throws Exception {
         criarCliente("Cliente sem CPF 1", null, "81988887777");
         criarCliente("Cliente sem CPF 2", null, "81988887766");
