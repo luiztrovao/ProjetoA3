@@ -24,13 +24,33 @@ Por padrão a API sobe com um **banco H2 em memória** (perfil `h2`), sem instal
 | Swagger (documentação da API) | http://localhost:8080/swagger-ui.html |
 | Console do banco H2 | http://localhost:8080/h2-console (JDBC URL `jdbc:h2:mem:lanchonete`, usuário `sa`, sem senha) |
 
+### Login
+
+Quase todas as rotas exigem login. No perfil `h2` a API já sobe com os **funcionários de demonstração
+do protótipo**: `matheus` (Dono), `carlos` (Gerente) e `fernanda` (Vendedor). A senha de todos está em
+`app.dados-demo.senha`, no arquivo `src/main/resources/application-h2.properties`.
+
+1. `POST /api/auth/login` com `{"login": "matheus", "senha": "..."}` (o login aceita nome de usuário ou e-mail).
+2. Copie o `token` da resposta.
+3. Envie o token em todas as requisições: `Authorization: Bearer <token>`. No Swagger, clique em **Authorize**
+   e cole o token.
+
+O token vale **8 horas**. Se o funcionário for desativado ou mudar de perfil, a mudança vale na hora.
+
 ### Usando o PostgreSQL (Neon)
 
 Ative o perfil `prod` e informe a conexão por variáveis de ambiente (nunca no código):
 
 ```bash
-SPRING_PROFILES_ACTIVE=prod DB_URL=jdbc:postgresql://<host>/<banco>?sslmode=require DB_USERNAME=<usuario> DB_PASSWORD=<senha> ./mvnw spring-boot:run
+SPRING_PROFILES_ACTIVE=prod DB_URL=jdbc:postgresql://<host>/<banco>?sslmode=require DB_USERNAME=<usuario> DB_PASSWORD=<senha> JWT_SECRET=<segredo> ADMIN_USERNAME=<usuario> ADMIN_SENHA=<senha> ./mvnw spring-boot:run
 ```
+
+| Variável | Para que serve |
+|---|---|
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Conexão com o PostgreSQL |
+| `JWT_SECRET` | Segredo que assina os tokens (**obrigatório**, mínimo de 32 caracteres, aleatório) |
+| `ADMIN_USERNAME`, `ADMIN_SENHA` | Primeiro usuário **Dono**, criado só quando o banco não tem nenhum usuário |
+| `CORS_ORIGENS` | Endereços do frontend que podem chamar a API (padrão `http://localhost:5173`) |
 
 ## Endpoints
 
@@ -38,11 +58,24 @@ A documentação completa e interativa fica no Swagger. Resumo:
 
 | Recurso | Endpoints |
 |---|---|
+| Login e Minha Conta | `POST /api/auth/login` · `GET /api/conta` · `PUT /api/conta` · `PUT /api/conta/senha` |
 | Categorias | `GET /api/categorias` |
 | Produtos | `GET /api/produtos` · `GET /api/produtos/{id}` · `POST /api/produtos` · `PUT /api/produtos/{id}` · `DELETE /api/produtos/{id}` · `PATCH /api/produtos/{id}/ativar` |
 | Clientes | `GET /api/clientes` · `GET /api/clientes/{id}` · `POST /api/clientes` · `PUT /api/clientes/{id}` · `DELETE /api/clientes/{id}` · `PATCH /api/clientes/{id}/ativar` |
 | Usuários | `GET /api/usuarios` · `GET /api/usuarios/{id}` · `POST /api/usuarios` · `PUT /api/usuarios/{id}` · `DELETE /api/usuarios/{id}` · `PATCH /api/usuarios/{id}/ativar` |
 | Configurações | `GET /api/configuracoes` · `PUT /api/configuracoes/empresa` · `PUT /api/configuracoes/vendas` |
+
+**Permissões por perfil** (tabela do protótipo; detalhes em [modelo-de-dados.md](../docs/modelagem/modelo-de-dados.md#permissões-por-perfil)):
+
+| Rota | Dono | Gerente | Vendedor |
+|---|:---:|:---:|:---:|
+| Consultar clientes, produtos, categorias e configurações; cadastrar cliente | ✅ | ✅ | ✅ |
+| Editar, desativar e reativar clientes | ✅ | ✅ | ❌ |
+| Cadastrar, editar, desativar e reativar produtos | ✅ | ✅ | ❌ |
+| Consultar funcionários | ✅ | ✅ | ❌ |
+| Cadastrar, editar, desativar e reativar funcionários | ✅ | ❌ | ❌ |
+| Alterar configurações | ✅ | ❌ | ❌ |
+| Minha Conta | ✅ | ✅ | ✅ |
 
 **Convenções:**
 
@@ -73,9 +106,11 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | Status | Quando |
 |---|---|
 | 400 | Campos inválidos, JSON mal formatado ou parâmetro inválido |
+| 401 | Sem login, token inválido/expirado, ou usuário/senha incorretos |
+| 403 | Perfil sem permissão para a funcionalidade |
 | 404 | Registro não encontrado |
 | 409 | Violação de restrição do banco |
-| 422 | Regra de negócio violada (ex.: CPF ou e-mail já cadastrado, inativar o último Dono) |
+| 422 | Regra de negócio violada (ex.: CPF ou usuário já cadastrado, desativar a própria conta, inativar o último Dono) |
 
 ## Testes e cobertura
 

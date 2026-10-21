@@ -3,10 +3,12 @@ package com.pontoesabor.lanchonete.controller;
 import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.ConfiguracaoResponse;
 import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.EmpresaDto;
 import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.PreferenciasVendaDto;
+import com.pontoesabor.lanchonete.security.Permissoes;
 import com.pontoesabor.lanchonete.service.ConfiguracaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,12 +34,14 @@ public class ConfiguracaoController {
 
     @PutMapping("/empresa")
     @Operation(summary = "Atualiza os dados da lanchonete")
+    @PreAuthorize(Permissoes.DONO)
     public ConfiguracaoResponse atualizarEmpresa(@Valid @RequestBody EmpresaDto dados) {
         return configuracaoService.atualizarEmpresa(dados);
     }
 
     @PutMapping("/vendas")
     @Operation(summary = "Atualiza as preferências de vendas")
+    @PreAuthorize(Permissoes.DONO)
     public ConfiguracaoResponse atualizarPreferenciasVenda(@Valid @RequestBody PreferenciasVendaDto dados) {
         return configuracaoService.atualizarPreferenciasVenda(dados);
     }

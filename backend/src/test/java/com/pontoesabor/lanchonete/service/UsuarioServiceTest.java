@@ -36,6 +36,9 @@ class UsuarioServiceTest {
     @InjectMocks
     private UsuarioService usuarioService;
 
+    /** Id do usuário da sessão nos testes (diferente do usuário editado, que tem id 1). */
+    private static final Long ID_LOGADO = 99L;
+
     private static UsuarioCriacaoRequest criacao(String username, String email, String cpf) {
         return new UsuarioCriacaoRequest("Fernanda Souza", username, email, cpf, "(81) 97766-3300", "senha1", Perfil.VENDEDOR);
     }
@@ -94,7 +97,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.saveAndFlush(usuario)).thenReturn(usuario);
 
-        usuarioService.atualizar(1L, atualizacao("Matheus Almeida", "  ", Perfil.VENDEDOR));
+        usuarioService.atualizar(1L, atualizacao("Matheus Almeida", "  ", Perfil.VENDEDOR), ID_LOGADO);
 
         assertThat(usuario.getSenhaHash()).isEqualTo("hashAntigo");
         assertThat(usuario.getNome()).isEqualTo("Matheus Almeida");
@@ -107,7 +110,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(dono));
         when(usuarioRepository.countByPerfilAndAtivoTrue(Perfil.DONO)).thenReturn(1L);
 
-        assertThatThrownBy(() -> usuarioService.inativar(1L))
+        assertThatThrownBy(() -> usuarioService.inativar(1L, ID_LOGADO))
                 .isInstanceOf(RegraNegocioException.class)
                 .hasMessageContaining("Dono");
         assertThat(dono.isAtivo()).isTrue();
@@ -119,7 +122,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(dono));
         when(usuarioRepository.countByPerfilAndAtivoTrue(Perfil.DONO)).thenReturn(2L);
 
-        usuarioService.inativar(1L);
+        usuarioService.inativar(1L, ID_LOGADO);
 
         assertThat(dono.isAtivo()).isFalse();
     }
@@ -130,7 +133,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(dono));
         when(usuarioRepository.countByPerfilAndAtivoTrue(Perfil.DONO)).thenReturn(1L);
 
-        assertThatThrownBy(() -> usuarioService.atualizar(1L, atualizacao("Matheus", null, Perfil.GERENTE)))
+        assertThatThrownBy(() -> usuarioService.atualizar(1L, atualizacao("Matheus", null, Perfil.GERENTE), ID_LOGADO))
                 .isInstanceOf(RegraNegocioException.class);
         assertThat(dono.getPerfil()).isEqualTo(Perfil.DONO);
     }
@@ -142,5 +145,35 @@ class UsuarioServiceTest {
         assertThatThrownBy(() -> usuarioService.buscar(99L))
                 .isInstanceOf(RecursoNaoEncontradoException.class)
                 .hasMessageContaining("99");
+    }
+
+    @Test
+    void naoPermiteDesativarOProprioUsuario() {
+        assertThatThrownBy(() -> usuarioService.inativar(1L, 1L))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessage("Não é possível desativar o usuário da sessão atual.");
+        verify(usuarioRepository, never()).findById(any());
+    }
+
+    @Test
+    void naoPermiteAlterarOProprioPerfil() {
+        Usuario gerente = new Usuario("Carlos", "matheus", "hash", Perfil.GERENTE);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(gerente));
+
+        assertThatThrownBy(() -> usuarioService.atualizar(1L, atualizacao("Carlos", null, Perfil.DONO), 1L))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessage("Não é possível alterar o perfil do usuário da sessão atual.");
+        assertThat(gerente.getPerfil()).isEqualTo(Perfil.GERENTE);
+    }
+
+    @Test
+    void permiteEditarOsPropriosDadosSemMudarOPerfil() {
+        Usuario gerente = new Usuario("Carlos", "matheus", "hash", Perfil.GERENTE);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(gerente));
+        when(usuarioRepository.saveAndFlush(gerente)).thenReturn(gerente);
+
+        usuarioService.atualizar(1L, atualizacao("Carlos Lima", null, Perfil.GERENTE), 1L);
+
+        assertThat(gerente.getNome()).isEqualTo("Carlos Lima");
     }
 }
