@@ -60,10 +60,11 @@ A documentação completa e interativa fica no Swagger. Resumo:
 |---|---|
 | Login e Minha Conta | `POST /api/auth/login` · `GET /api/conta` · `PUT /api/conta` · `PUT /api/conta/senha` |
 | Categorias | `GET /api/categorias` |
-| Produtos | `GET /api/produtos` · `GET /api/produtos/{id}` · `POST /api/produtos` · `PUT /api/produtos/{id}` · `DELETE /api/produtos/{id}` · `PATCH /api/produtos/{id}/ativar` |
+| Produtos | `GET /api/produtos` · `GET /api/produtos/{id}` · `POST /api/produtos` · `PUT /api/produtos/{id}` · `DELETE /api/produtos/{id}` · `PATCH /api/produtos/{id}/ativar` · `PUT /api/produtos/{id}/imagem` · `DELETE /api/produtos/{id}/imagem` |
 | Clientes | `GET /api/clientes` · `GET /api/clientes/{id}` · `POST /api/clientes` · `PUT /api/clientes/{id}` · `DELETE /api/clientes/{id}` · `PATCH /api/clientes/{id}/ativar` |
 | Usuários | `GET /api/usuarios` · `GET /api/usuarios/{id}` · `POST /api/usuarios` · `PUT /api/usuarios/{id}` · `DELETE /api/usuarios/{id}` · `PATCH /api/usuarios/{id}/ativar` |
-| Configurações | `GET /api/configuracoes` · `PUT /api/configuracoes/empresa` · `PUT /api/configuracoes/vendas` |
+| Configurações | `GET /api/configuracoes` · `PUT /api/configuracoes/empresa` · `PUT /api/configuracoes/vendas` · `PUT /api/configuracoes/logo` · `DELETE /api/configuracoes/logo` |
+| Público (sem login) | `GET /api/publico/identidade` (nome e logo para a tela de login) · `GET /api/imagens/{id}` |
 
 **Permissões por perfil** (tabela do protótipo; detalhes em [modelo-de-dados.md](../docs/modelagem/modelo-de-dados.md#permissões-por-perfil)):
 
@@ -88,6 +89,9 @@ A documentação completa e interativa fica no Swagger. Resumo:
 - CPF, CNPJ, telefone e CEP podem ser enviados com ou sem máscara; a API guarda só os dígitos.
 - Código de produto e UF são guardados em maiúsculas; nome de usuário e e-mail, em minúsculas.
 - Produto sem `estoqueMinimo` usa o "alerta de estoque baixo" das configurações.
+- **Imagens** (logo e foto de produto): envio em `multipart/form-data` no campo `arquivo`, só **PNG ou JPG de até 1 MB**
+  (o formato é conferido pelo conteúdo do arquivo). Ficam guardadas no banco e as respostas trazem `logoUrl`/`imagemUrl`
+  como caminho relativo (ex.: `/api/imagens/5`). Trocar a imagem apaga a anterior.
 - A senha do usuário é guardada com BCrypt e **nunca** aparece nas respostas.
 
 **Erros** seguem sempre o mesmo formato:
@@ -109,6 +113,7 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | 401 | Sem login, token inválido/expirado, ou usuário/senha incorretos |
 | 403 | Perfil sem permissão para a funcionalidade |
 | 404 | Registro não encontrado |
+| 413 | Arquivo enviado maior que o limite do servidor |
 | 409 | Violação de restrição do banco |
 | 422 | Regra de negócio violada (ex.: CPF ou usuário já cadastrado, desativar a própria conta, inativar o último Dono) |
 

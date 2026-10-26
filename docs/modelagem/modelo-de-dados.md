@@ -14,6 +14,16 @@ erDiagram
     VENDA ||--|{ ITEM_VENDA : "contém"
     PRODUTO ||--o{ ITEM_VENDA : "é vendido em"
     CATEGORIA ||--o{ PRODUTO : "agrupa"
+    IMAGEM |o--o| PRODUTO : "foto de"
+    IMAGEM |o--o| CONFIGURACAO : "logo de"
+
+    IMAGEM {
+        bigint id PK
+        bytea conteudo
+        varchar tipo_conteudo "image/png | image/jpeg"
+        integer tamanho
+        timestamp criado_em
+    }
 
     USUARIO {
         bigint id PK
@@ -64,7 +74,7 @@ erDiagram
         numeric preco "10,2"
         integer estoque_atual
         integer estoque_minimo
-        varchar imagem_url
+        bigint imagem_id FK "opcional"
         boolean ativo
         timestamp criado_em
         timestamp atualizado_em
@@ -101,7 +111,7 @@ erDiagram
         bigint id PK "sempre 1"
         varchar nome_fantasia
         varchar cnpj
-        varchar logo_url
+        bigint logo_id FK "opcional"
         boolean controle_estoque
         boolean bloquear_sem_estoque
         integer alerta_estoque_baixo
@@ -171,7 +181,7 @@ Obrigatórios: **nome, código, categoria e preço**.
 | `preco` | NUMERIC(10,2) | obrigatório, maior que zero |
 | `estoque_atual` | INTEGER | ≥ 0; padrão 0 |
 | `estoque_minimo` | INTEGER | ≥ 0; abaixo ou igual a ele o produto aparece como **estoque baixo**. Se não for informado, usa o "alerta de estoque baixo" das configurações |
-| `imagem_url` | VARCHAR(500) | opcional |
+| `imagem_id` | BIGINT | FK → `imagem`, opcional (foto do produto) |
 | `ativo` | BOOLEAN | padrão `true` |
 | `criado_em` / `atualizado_em` | TIMESTAMP | automáticos |
 
@@ -212,10 +222,24 @@ Registro **único** (`id = 1`) com os dados da tela Configurações.
 
 | Grupo | Colunas |
 |---|---|
-| Dados da lanchonete | `nome_fantasia` (obrigatório), `razao_social`, `cnpj` (validado), `telefone`, `email`, `cep`, `logradouro`, `numero`, `bairro`, `cidade`, `uf`, `logo_url` |
+| Dados da lanchonete | `nome_fantasia` (obrigatório), `razao_social`, `cnpj` (validado), `telefone`, `email`, `cep`, `logradouro`, `numero`, `bairro`, `cidade`, `uf`, `logo_id` (FK → `imagem`) |
 | Estoque | `controle_estoque` (padrão `true`), `bloquear_sem_estoque` (padrão `true`; só vale com o controle ligado), `alerta_estoque_baixo` (padrão 5) |
 | Pedidos | `confirmar_cancelamento` (padrão `true`), `permitir_venda_sem_cliente` (padrão `true`), `status_inicial_venda` (`EM_PREPARO` ou `CONCLUIDA`) |
 | Pagamentos | `aceita_dinheiro`, `aceita_credito`, `aceita_debito`, `aceita_pix` (pelo menos uma ligada) |
+
+### `imagem`
+Logo da lanchonete e fotos dos produtos, guardados **no próprio banco** (sem serviço externo, custo zero).
+
+| Coluna | Tipo | Regras |
+|---|---|---|
+| `id` | BIGINT (identity) | PK; a imagem é servida em `/api/imagens/{id}` |
+| `conteudo` | BYTEA | o arquivo em si, até **1 MB** |
+| `tipo_conteudo` | VARCHAR(30) | `image/png` ou `image/jpeg`, detectado pelos primeiros bytes do arquivo |
+| `tamanho` | INTEGER | em bytes |
+| `criado_em` | TIMESTAMP | automático |
+
+Cada troca cria uma imagem nova e apaga a anterior; como o endereço muda, o navegador pode guardar a
+imagem em cache sem risco de mostrar uma versão antiga.
 
 ## Permissões por perfil
 
@@ -313,3 +337,6 @@ decidiu seguir o Figma, o que mudou:
 | Cancelamento sem motivo | **Motivo obrigatório** |
 | Estoque baixado ao concluir a venda | Estoque baixado ao **confirmar** a venda |
 | Sem tela de configurações | Tabela `configuracao` (dados da lanchonete e preferências) |
+
+**Upload de imagens (migration `V4__imagens.sql`):** as colunas `produto.imagem_url` e
+`configuracao.logo_url` (que só guardavam endereços, sem upload) foram trocadas pela tabela `imagem`.

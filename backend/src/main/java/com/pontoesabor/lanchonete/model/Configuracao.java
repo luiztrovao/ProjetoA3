@@ -61,8 +61,9 @@ public class Configuracao {
     @Column(length = 2)
     private String uf;
 
-    @Column(name = "logo_url", length = 500)
-    private String logoUrl;
+    /** Logo da lanchonete (tabela imagem); só o id. */
+    @Column(name = "logo_id")
+    private Long logoId;
 
     // ===== Preferências de vendas =====
 
@@ -254,12 +255,12 @@ public class Configuracao {
         this.uf = uf;
     }
 
-    public String getLogoUrl() {
-        return logoUrl;
+    public Long getLogoId() {
+        return logoId;
     }
 
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
+    public void setLogoId(Long logoId) {
+        this.logoId = logoId;
     }
 
     public boolean isControleEstoque() {

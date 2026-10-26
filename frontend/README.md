@@ -36,7 +36,8 @@ e estão sendo ligadas à API do backend aos poucos, sem mudar o visual:
 - Toda requisição envia `Authorization: Bearer <token>`. Se a API responder **401** (token expirado ou inválido),
   o token é apagado e a tela volta para o login.
 - Os erros de validação da API (`campos[]`) aparecem embaixo de cada campo do formulário.
-- Imagens de produto e logo escolhidas no computador aparecem só na tela: a API guarda apenas endereços (URL).
+- Logo e fotos de produto (PNG ou JPG, até 1 MB) são enviados à API ao salvar e ficam guardados no banco.
+  A tela de login mostra o nome e o logo da lanchonete pela rota pública `GET /api/publico/identidade`.
 
 ## Pré-requisitos
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { configuracoesApi, contaApi, onUnauthorized, tokenStorage, type Usuario } from "./api";
+import { configuracoesApi, contaApi, imageUrl, onUnauthorized, publicoApi, tokenStorage, type Usuario } from "./api";
 import { BrandMark, Icon, type IconName } from "./components/Icon";
 import { PersonCell, StatusBadge } from "./components/ui";
 import { RegistrationsPage } from "./pages/cadastros/RegistrationsPage";
@@ -1026,7 +1026,6 @@ type PersistedPrototypeState = {
   clients: ClientRecord[];
   products: ProductRecord[];
   sales: Array<Omit<SaleRecord, "createdAt" | "confirmedAt"> & { createdAt: string; confirmedAt: string }>;
-  company: CompanySettings;
   preferences: SalesPreferences;
 };
 
@@ -1041,7 +1040,6 @@ const loadPrototypeState = (): Partial<{
   clients: ClientRecord[];
   products: ProductRecord[];
   sales: SaleRecord[];
-  company: CompanySettings;
   preferences: SalesPreferences;
 }> => {
   try {
@@ -1052,7 +1050,6 @@ const loadPrototypeState = (): Partial<{
       clients: Array.isArray(parsed.clients) ? parsed.clients : undefined,
       products: Array.isArray(parsed.products) ? parsed.products : undefined,
       sales: Array.isArray(parsed.sales) ? parsed.sales.map((sale) => ({ ...sale, createdAt: new Date(sale.createdAt), confirmedAt: new Date(sale.confirmedAt) })) : undefined,
-      company: parsed.company,
       preferences: parsed.preferences,
     };
   } catch {
@@ -1089,7 +1086,8 @@ export default function App() {
   const [reportStartDate, setReportStartDate] = useState("");
   const [reportEndDate, setReportEndDate] = useState("");
   const [reportSeller, setReportSeller] = useState("");
-  const [companySettings, setCompanySettings] = useState<CompanySettings>(persistedState.company || defaultCompany);
+  // Dados da lanchonete vêm sempre da API (nunca do armazenamento local do protótipo).
+  const [companySettings, setCompanySettings] = useState<CompanySettings>(defaultCompany);
   const [salesPreferences, setSalesPreferences] = useState<SalesPreferences>(persistedState.preferences || defaultPreferences);
   const confirmationLock = useRef(false);
   const currentUser = sessionUser ? toEmployeeRecord(sessionUser) : emptyUser;
@@ -1133,6 +1131,24 @@ export default function App() {
       .finally(() => setCheckingSession(false));
   }, []);
 
+  // Tela de login: nome e logo da lanchonete vêm da rota pública, sem precisar de token.
+  useEffect(() => {
+    if (sessionUser) return;
+    let cancelled = false;
+    publicoApi.identidade()
+      .then((identidade) => {
+        if (cancelled) return;
+        setCompanySettings((current) => ({
+          ...current,
+          tradeName: identidade.nomeFantasia,
+          logo: imageUrl(identidade.logoUrl),
+        }));
+      })
+      // Com a API fora do ar, a tela de login mostra o nome e o logo padrão.
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [sessionUser]);
+
   // Dados da lanchonete e preferências de vendas vêm da API a cada login.
   const sessionUserId = sessionUser?.id;
   useEffect(() => {
@@ -1156,18 +1172,16 @@ export default function App() {
 
   useEffect(() => {
     try {
-      const persistedCompany = { ...companySettings, logo: companySettings.logo.startsWith("blob:") ? "" : companySettings.logo };
       window.localStorage.setItem(prototypeStorageKey, JSON.stringify({
         clients: clientRecords,
         products: productRecords.map((product) => ({ ...product, image: product.image.startsWith("blob:") ? "" : product.image })),
         sales: salesRecords.map((sale) => ({ ...sale, createdAt: sale.createdAt.toISOString(), confirmedAt: sale.confirmedAt.toISOString() })),
-        company: persistedCompany,
         preferences: salesPreferences,
       } satisfies PersistedPrototypeState));
     } catch {
       // The prototype continues in memory if browser storage is unavailable.
     }
-  }, [clientRecords, productRecords, salesRecords, companySettings, salesPreferences]);
+  }, [clientRecords, productRecords, salesRecords, salesPreferences]);
 
   const addToCart = (productId: number) => {
     const product = productRecords.find((record) => record.id === productId);

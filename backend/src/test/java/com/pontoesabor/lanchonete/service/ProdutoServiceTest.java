@@ -40,7 +40,7 @@ class ProdutoServiceTest {
 
     private static ProdutoRequest request(Integer estoqueAtual, Integer estoqueMinimo) {
         return new ProdutoRequest("X-Burger", "xbg001", "Pão, carne e queijo", 1L,
-                new BigDecimal("18.00"), estoqueAtual, estoqueMinimo, null);
+                new BigDecimal("18.00"), estoqueAtual, estoqueMinimo);
     }
 
     @Test

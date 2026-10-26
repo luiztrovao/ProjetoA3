@@ -57,6 +57,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(ROTAS_PUBLICAS).permitAll()
+                        // Nome/logo da lanchonete na tela de login e imagens exibidas em <img>
+                        .requestMatchers(HttpMethod.GET, "/api/publico/**", "/api/imagens/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(conversorToken))

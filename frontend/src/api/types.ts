@@ -112,7 +112,12 @@ export type ProdutoRequest = {
   preco: number | null;
   estoqueAtual: number | null;
   estoqueMinimo: number | null;
-  imagemUrl: string | null;
+};
+
+/** Identidade pública da lanchonete (GET /api/publico/identidade). */
+export type Identidade = {
+  nomeFantasia: string;
+  logoUrl: string | null;
 };
 
 export type Empresa = {
@@ -127,7 +132,8 @@ export type Empresa = {
   bairro: string | null;
   cidade: string | null;
   uf: string | null;
-  logoUrl: string | null;
+  /** Somente leitura: o logo é enviado por `configuracoesApi.enviarLogo`. */
+  logoUrl?: string | null;
 };
 
 export type PreferenciasVenda = {

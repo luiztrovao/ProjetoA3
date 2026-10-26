@@ -1,4 +1,5 @@
 // Conversão entre a API de configurações/conta e os formatos da tela Configurações.
+import { imageUrl } from "../../api";
 import type { ContaRequest, Empresa, FormaPagamento, PreferenciasVenda } from "../../api";
 import type { EmployeeRecord, PaymentMethod } from "../../types";
 import { maskCep, maskCnpj, maskPhone, optional, optionalDigits } from "../../utils/format";
@@ -51,7 +52,7 @@ export const toCompanySettings = (empresa: Empresa): CompanySettings => ({
   district: empresa.bairro || "",
   city: empresa.cidade || "",
   state: empresa.uf || "",
-  logo: empresa.logoUrl || "",
+  logo: imageUrl(empresa.logoUrl),
 });
 
 export const toEmpresa = (company: CompanySettings): Empresa => ({
@@ -66,13 +67,11 @@ export const toEmpresa = (company: CompanySettings): Empresa => ({
   bairro: optional(company.district),
   cidade: optional(company.city),
   uf: optional(company.state)?.toUpperCase() ?? null,
-  // Logos escolhidos no computador ficam só nesta tela (blob:); a API guarda apenas endereços.
-  logoUrl: company.logo && !company.logo.startsWith("blob:") ? company.logo : null,
 });
 
 export const companyFieldNames: Record<string, keyof CompanySettings> = {
   nomeFantasia: "tradeName", razaoSocial: "legalName", cnpj: "cnpj", telefone: "phone", email: "email", cep: "cep",
-  logradouro: "address", numero: "number", bairro: "district", cidade: "city", uf: "state", logoUrl: "logo",
+  logradouro: "address", numero: "number", bairro: "district", cidade: "city", uf: "state",
 };
 
 export const toSalesPreferences = (preferencias: PreferenciasVenda): SalesPreferences => ({

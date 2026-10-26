@@ -4,6 +4,7 @@ import { ApiError, errorMessage, type Categoria } from "../../api";
 import { Icon } from "../../components/Icon";
 import type { FormValues, ModalMode, TabId } from "../../types";
 import { maskCep, maskCpf, maskCurrency, maskPhone, onlyDigits } from "../../utils/format";
+import { validarImagem } from "../../utils/imagem";
 import { apiFieldNames } from "./mappers";
 
 export const emptyValues: Record<TabId, FormValues> = {
@@ -70,8 +71,8 @@ export function RecordModal({
   categories: Categoria[];
   onClose: () => void;
   onEdit: () => void;
-  /** Salva na API; em caso de erro, os erros de validação aparecem nos campos. */
-  onSave: (values: FormValues) => Promise<void>;
+  /** Salva na API; em caso de erro, os erros de validação aparecem nos campos. `imagem`: foto nova escolhida. */
+  onSave: (values: FormValues, imagem: File | null) => Promise<void>;
   canEdit?: boolean;
 }) {
   const [values, setValues] = useState<FormValues>({ ...emptyValues[type], ...initial });
@@ -80,6 +81,7 @@ export function RecordModal({
   const [resetPassword, setResetPassword] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const readOnly = mode === "view";
   const copy = modalCopy[type];
   const title = mode === "create" ? copy.create : mode === "edit" ? `Editar ${copy.singular}` : `Detalhes do ${copy.singular}`;
@@ -130,7 +132,7 @@ export function RecordModal({
     if (readOnly || saving || !validate()) return;
     setSaving(true);
     try {
-      await onSave(values);
+      await onSave(values, imageFile);
     } catch (error) {
       if (error instanceof ApiError) setErrors(error.fieldErrors(apiFieldNames[type]));
       setSubmitError(errorMessage(error));
@@ -226,7 +228,15 @@ export function RecordModal({
 
   const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
+    const erro = validarImagem(file);
+    if (erro) {
+      setErrors((current) => ({ ...current, image: erro }));
+      return;
+    }
+    if (values.image.startsWith("blob:")) URL.revokeObjectURL(values.image);
+    setImageFile(file);
     update("image", URL.createObjectURL(file));
     update("imageName", file.name);
   };
@@ -265,7 +275,8 @@ export function RecordModal({
           </div>
           <div>
             <strong>{values.imageName || (values.image ? "Imagem do produto" : "Adicione uma imagem do produto")}</strong>
-            <small>PNG ou JPG. A imagem será usada na identificação do produto.</small>
+            <small>PNG ou JPG, até 1 MB. A imagem será usada na identificação do produto.</small>
+            {errors.image && <small className="field-error" role="alert">{errors.image}</small>}
             {!readOnly && <label className="upload-button" htmlFor="field-image"><Icon name="upload" />Selecionar imagem</label>}
             <input className="sr-only" id="field-image" type="file" accept="image/png,image/jpeg" disabled={readOnly} onChange={handleImage} />
           </div>

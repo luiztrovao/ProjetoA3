@@ -4,6 +4,7 @@ import { ApiError, configuracoesApi, contaApi, errorMessage, type Usuario } from
 import { BrandMark, Icon, type IconName } from "../../components/Icon";
 import { paymentLabels, type EmployeeRecord, type PaymentMethod, type UserRole } from "../../types";
 import { maskCep, maskCnpj, maskPhone } from "../../utils/format";
+import { validarImagem } from "../../utils/imagem";
 import { toEmployeeRecord } from "../cadastros/mappers";
 import {
   accountFieldNames,
@@ -67,6 +68,7 @@ export function SettingsPage({
   const [companyErrors, setCompanyErrors] = useState<Record<string, string>>({});
   const [companyError, setCompanyError] = useState("");
   const [savingCompany, setSavingCompany] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [accountDraft, setAccountDraft] = useState(currentUser);
   const [accountErrors, setAccountErrors] = useState<Record<string, string>>({});
   const [accountError, setAccountError] = useState("");
@@ -106,9 +108,19 @@ export function SettingsPage({
     setAccountErrors((current) => ({ ...current, [field]: "" }));
     setAccountError("");
   };
+  // O logo escolhido aparece como prévia e só é enviado à API ao salvar os dados da lanchonete.
   const handleLogo = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) updateCompany("logo", URL.createObjectURL(file));
+    event.target.value = "";
+    if (!file) return;
+    const erro = validarImagem(file);
+    if (erro) {
+      setCompanyErrors((current) => ({ ...current, logo: erro }));
+      return;
+    }
+    if (companyDraft.logo.startsWith("blob:")) URL.revokeObjectURL(companyDraft.logo);
+    setLogoFile(file);
+    updateCompany("logo", URL.createObjectURL(file));
   };
 
   const saveCompany = async (event: FormEvent) => {
@@ -117,10 +129,13 @@ export function SettingsPage({
     if (savingCompany) return;
     setSavingCompany(true);
     try {
-      const saved = await configuracoesApi.atualizarEmpresa(toEmpresa(companyDraft));
+      let saved = await configuracoesApi.atualizarEmpresa(toEmpresa(companyDraft));
+      if (logoFile) {
+        saved = await configuracoesApi.enviarLogo(logoFile);
+        setLogoFile(null);
+        if (companyDraft.logo.startsWith("blob:")) URL.revokeObjectURL(companyDraft.logo);
+      }
       const next = toCompanySettings(saved.empresa);
-      // O logo escolhido no computador continua visível nesta sessão, mesmo sem ir para a API.
-      if (companyDraft.logo.startsWith("blob:")) next.logo = companyDraft.logo;
       setCompanyDraft(next);
       onCompanySaved(next);
       onSuccess("Dados da lanchonete atualizados com sucesso.");
@@ -216,7 +231,7 @@ export function SettingsPage({
               <label><span>Cidade</span><input value={companyDraft.city} onChange={(event) => updateCompany("city", event.target.value)} /><FieldError message={companyErrors.city} /></label>
               <label><span>Estado</span><input value={companyDraft.state} maxLength={2} onChange={(event) => updateCompany("state", event.target.value.toUpperCase())} placeholder="UF" /><FieldError message={companyErrors.state} /></label>
             </div>
-            <div className="business-logo-setting"><div className={companyDraft.logo ? "filled" : ""}>{companyDraft.logo ? <img src={companyDraft.logo} alt="Logo da lanchonete" /> : <BrandMark />}</div><p><strong>Logo da lanchonete</strong><small>PNG ou JPG. Utilizada para identificar o estabelecimento.</small></p><label htmlFor="business-logo"><Icon name="upload" />Selecionar imagem</label><input className="sr-only" id="business-logo" type="file" accept="image/png,image/jpeg" onChange={handleLogo} /></div>
+            <div className="business-logo-setting"><div className={companyDraft.logo ? "filled" : ""}>{companyDraft.logo ? <img src={companyDraft.logo} alt="Logo da lanchonete" /> : <BrandMark />}</div><p><strong>Logo da lanchonete</strong><small>PNG ou JPG, até 1 MB. Utilizada para identificar o estabelecimento.</small>{companyErrors.logo && <small className="field-error" role="alert">{companyErrors.logo}</small>}</p><label htmlFor="business-logo"><Icon name="upload" />Selecionar imagem</label><input className="sr-only" id="business-logo" type="file" accept="image/png,image/jpeg" onChange={handleLogo} /></div>
             <footer className="settings-form-footer"><button type="submit" disabled={savingCompany}>{savingCompany ? "Salvando..." : "Salvar alterações"}</button></footer>
           </form>
         </section>
