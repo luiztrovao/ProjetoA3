@@ -216,6 +216,7 @@ forma de pagamento), já com o status inicial definido nas configurações.
 | `quantidade` | INTEGER | maior que zero |
 | `preco_unitario` | NUMERIC(10,2) | **cópia do preço no momento da venda** |
 | `subtotal` | NUMERIC(10,2) | `quantidade × preco_unitario` |
+| `quantidade_baixada_estoque` | INTEGER | quanto saiu do estoque na confirmação (0 se o estoque não é controlado) |
 
 ### `configuracao`
 Registro **único** (`id = 1`) com os dados da tela Configurações.
@@ -277,8 +278,9 @@ Regras extras do protótipo:
 4. Pedidos **Em preparo** podem ser marcados como **Concluídos**.
 5. Ao **cancelar**, é obrigatório informar o motivo, e os produtos voltam ao estoque.
 
-> Este fluxo é implementado na etapa de **vendas**. Até lá, a entidade `Venda` ainda baixa o estoque
-> ao concluir (regra do modelo inicial).
+> Sem bloqueio de venda sem estoque, a confirmação retira só o que houver (o estoque nunca fica negativo);
+> cada item guarda quanto saiu (`quantidade_baixada_estoque`) para devolver exatamente isso no cancelamento.
+> Só **Dono e Gerente** dão desconto, concluem e cancelam; o **Vendedor** vê apenas os próprios pedidos.
 
 ## Decisões de projeto
 
@@ -340,3 +342,5 @@ decidiu seguir o Figma, o que mudou:
 
 **Upload de imagens (migration `V4__imagens.sql`):** as colunas `produto.imagem_url` e
 `configuracao.logo_url` (que só guardavam endereços, sem upload) foram trocadas pela tabela `imagem`.
+
+**Vendas (migration `V5__vendas.sql`):** `item_venda.quantidade_baixada_estoque` e índices para a tela de Pedidos.
