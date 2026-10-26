@@ -3,6 +3,7 @@ package com.pontoesabor.lanchonete.controller;
 import com.pontoesabor.lanchonete.dto.ClienteRequest;
 import com.pontoesabor.lanchonete.dto.ClienteResponse;
 import com.pontoesabor.lanchonete.dto.PaginaResponse;
+import com.pontoesabor.lanchonete.security.Permissoes;
 import com.pontoesabor.lanchonete.service.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +14,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -61,12 +63,14 @@ public class ClienteController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um cliente")
+    @PreAuthorize(Permissoes.GESTAO)
     public ClienteResponse atualizar(@PathVariable Long id, @Valid @RequestBody ClienteRequest request) {
         return clienteService.atualizar(id, request);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Inativa um cliente (exclusão lógica)")
+    @PreAuthorize(Permissoes.GESTAO)
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
         clienteService.inativar(id);
         return ResponseEntity.noContent().build();
@@ -74,6 +78,7 @@ public class ClienteController {
 
     @PatchMapping("/{id}/ativar")
     @Operation(summary = "Reativa um cliente inativo")
+    @PreAuthorize(Permissoes.GESTAO)
     public ResponseEntity<Void> ativar(@PathVariable Long id) {
         clienteService.ativar(id);
         return ResponseEntity.noContent().build();
