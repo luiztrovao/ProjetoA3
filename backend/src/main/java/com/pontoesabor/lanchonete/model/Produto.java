@@ -78,7 +78,7 @@ public class Produto {
         return estoqueAtual <= estoqueMinimo;
     }
 
-    /** Retira do estoque ao concluir uma venda. */
+    /** Retira do estoque ao confirmar uma venda; falha se não houver o suficiente. */
     public void baixarEstoque(int quantidade) {
         validarQuantidade(quantidade);
         if (quantidade > estoqueAtual) {
@@ -89,7 +89,19 @@ public class Produto {
         estoqueAtual -= quantidade;
     }
 
-    /** Devolve ao estoque quando uma venda concluída é cancelada. */
+    /**
+     * Retira até {@code quantidade} do estoque, sem deixá-lo negativo (venda sem estoque permitida).
+     *
+     * @return quantidade efetivamente retirada
+     */
+    public int baixarAte(int quantidade) {
+        validarQuantidade(quantidade);
+        int retirada = Math.min(quantidade, estoqueAtual);
+        estoqueAtual -= retirada;
+        return retirada;
+    }
+
+    /** Devolve ao estoque quando uma venda é cancelada. */
     public void devolverEstoque(int quantidade) {
         validarQuantidade(quantidade);
         estoqueAtual += quantidade;

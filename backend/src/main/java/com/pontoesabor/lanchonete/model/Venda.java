@@ -20,7 +20,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Venda/pedido. O status indica a etapa em que ela está. */
+/**
+ * Venda/pedido, no fluxo do protótipo:
+ * <ol>
+ *   <li><b>Montagem</b>: itens e desconto são definidos (ainda não gravada);</li>
+ *   <li><b>Confirmação</b>: forma de pagamento escolhida, estoque baixado e status inicial das configurações;</li>
+ *   <li><b>Em preparo → Concluída</b>;</li>
+ *   <li><b>Cancelada</b> (com motivo), devolvendo ao estoque o que foi retirado.</li>
+ * </ol>
+ */
 @Entity
 @Table(name = "venda")
 public class Venda {
@@ -41,9 +49,10 @@ public class Venda {
     @Column(name = "data_hora", nullable = false)
     private LocalDateTime dataHora;
 
+    /** Nulo enquanto a venda está em montagem; preenchido na confirmação. */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private StatusVenda status = StatusVenda.EM_PREPARO;
+    private StatusVenda status;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "forma_pagamento", nullable = false, length = 20)
@@ -83,6 +92,7 @@ public class Venda {
     protected Venda() {
     }
 
+    /** Inicia a montagem de uma venda. */
     public Venda(Usuario usuario, Cliente cliente, FormaPagamento formaPagamento, LocalDateTime dataHora) {
         this.usuario = usuario;
         this.cliente = cliente;
@@ -90,14 +100,19 @@ public class Venda {
         this.dataHora = dataHora;
     }
 
+    // ===== Montagem =====
+
     public void adicionarItem(Produto produto, int quantidade) {
-        exigirEmPreparo();
+        exigirEmMontagem();
+        if (!produto.isAtivo()) {
+            throw new RegraNegocioException("O produto \"" + produto.getNome() + "\" está inativo.");
+        }
         itens.add(new ItemVenda(this, produto, quantidade));
         recalcularTotais();
     }
 
     public void aplicarDesconto(BigDecimal valor) {
-        exigirEmPreparo();
+        exigirEmMontagem();
         if (valor.signum() < 0) {
             throw new RegraNegocioException("O desconto não pode ser negativo.");
         }
@@ -108,36 +123,92 @@ public class Venda {
         recalcularTotais();
     }
 
-    /** Conclui a venda e baixa o estoque de cada produto. */
-    public void concluir() {
-        exigirEmPreparo();
+    public void setObservacao(String observacao) {
+        this.observacao = observacao;
+    }
+
+    // ===== Confirmação =====
+
+    /**
+     * Confirma a venda: valida o pagamento, baixa o estoque (se controlado) e aplica o status inicial.
+     *
+     * @param valorRecebido obrigatório e maior ou igual ao total quando a forma é dinheiro; ignorado nas demais
+     */
+    public void confirmar(
+            StatusVenda statusInicial,
+            BigDecimal valorRecebido,
+            boolean controleEstoque,
+            boolean bloquearSemEstoque,
+            LocalDateTime momento) {
+        exigirEmMontagem();
         if (itens.isEmpty()) {
-            throw new RegraNegocioException("Não é possível concluir uma venda sem itens.");
+            throw new RegraNegocioException("O pedido não possui produtos para confirmar.");
         }
-        itens.forEach(item -> item.getProduto().baixarEstoque(item.getQuantidade()));
+        if (statusInicial == StatusVenda.CANCELADA) {
+            throw new RegraNegocioException("O status inicial da venda deve ser Em preparo ou Concluída.");
+        }
+        registrarPagamento(valorRecebido);
+        if (controleEstoque) {
+            itens.forEach(item -> item.baixarEstoque(bloquearSemEstoque));
+        }
+        this.status = statusInicial;
+        this.confirmadaEm = momento;
+    }
+
+    private void registrarPagamento(BigDecimal recebido) {
+        if (formaPagamento != FormaPagamento.DINHEIRO) {
+            valorRecebido = null;
+            troco = null;
+            return;
+        }
+        if (recebido == null || recebido.compareTo(total) < 0) {
+            throw new RegraNegocioException("O valor recebido deve ser igual ou superior ao total do pedido.");
+        }
+        valorRecebido = recebido;
+        troco = recebido.subtract(total);
+    }
+
+    // ===== Depois de confirmada =====
+
+    /** Marca um pedido em preparo como concluído. */
+    public void concluir() {
+        if (status != StatusVenda.EM_PREPARO) {
+            throw new RegraNegocioException("Só pedidos em preparo podem ser concluídos.");
+        }
         status = StatusVenda.CONCLUIDA;
     }
 
-    /** Cancela a venda; se ela já estava concluída, devolve os produtos ao estoque. */
-    public void cancelar() {
+    /** Cancela o pedido com motivo; os produtos retirados voltam ao estoque. */
+    public void cancelar(String motivo, LocalDateTime momento) {
+        if (status == null) {
+            throw new RegraNegocioException("A venda ainda não foi confirmada.");
+        }
         if (status == StatusVenda.CANCELADA) {
-            throw new RegraNegocioException("A venda já está cancelada.");
+            throw new RegraNegocioException("O pedido já está cancelado.");
         }
-        if (status == StatusVenda.CONCLUIDA) {
-            itens.forEach(item -> item.getProduto().devolverEstoque(item.getQuantidade()));
+        if (motivo == null || motivo.isBlank()) {
+            throw new RegraNegocioException("Informe o motivo do cancelamento.");
         }
+        itens.forEach(ItemVenda::devolverEstoque);
         status = StatusVenda.CANCELADA;
+        motivoCancelamento = motivo.strip();
+        canceladaEm = momento;
     }
 
-    private void exigirEmPreparo() {
-        if (status != StatusVenda.EM_PREPARO) {
-            throw new RegraNegocioException("A venda não pode ser alterada no status " + status + ".");
+    private void exigirEmMontagem() {
+        if (status != null) {
+            throw new RegraNegocioException("A venda já foi confirmada e não pode ser alterada.");
         }
     }
 
     private void recalcularTotais() {
         subtotal = itens.stream().map(ItemVenda::getSubtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
         total = subtotal.subtract(desconto);
+    }
+
+    /** Número exibido nas telas, no formato do protótipo (ex.: #PV-000123). */
+    public String getNumero() {
+        return id == null ? null : "#PV-%06d".formatted(id);
     }
 
     public Long getId() {
@@ -178,10 +249,6 @@ public class Venda {
 
     public String getObservacao() {
         return observacao;
-    }
-
-    public void setObservacao(String observacao) {
-        this.observacao = observacao;
     }
 
     public BigDecimal getValorRecebido() {

@@ -63,6 +63,7 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | Produtos | `GET /api/produtos` · `GET /api/produtos/{id}` · `POST /api/produtos` · `PUT /api/produtos/{id}` · `DELETE /api/produtos/{id}` · `PATCH /api/produtos/{id}/ativar` · `PUT /api/produtos/{id}/imagem` · `DELETE /api/produtos/{id}/imagem` |
 | Clientes | `GET /api/clientes` · `GET /api/clientes/{id}` · `POST /api/clientes` · `PUT /api/clientes/{id}` · `DELETE /api/clientes/{id}` · `PATCH /api/clientes/{id}/ativar` |
 | Usuários | `GET /api/usuarios` · `GET /api/usuarios/{id}` · `POST /api/usuarios` · `PUT /api/usuarios/{id}` · `DELETE /api/usuarios/{id}` · `PATCH /api/usuarios/{id}/ativar` |
+| Vendas e Pedidos | `GET /api/vendas` · `GET /api/vendas/{id}` · `POST /api/vendas` · `PATCH /api/vendas/{id}/concluir` · `PATCH /api/vendas/{id}/cancelar` |
 | Configurações | `GET /api/configuracoes` · `PUT /api/configuracoes/empresa` · `PUT /api/configuracoes/vendas` · `PUT /api/configuracoes/logo` · `DELETE /api/configuracoes/logo` |
 | Público (sem login) | `GET /api/publico/identidade` (nome e logo para a tela de login) · `GET /api/imagens/{id}` |
 
@@ -76,6 +77,10 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | Consultar funcionários | ✅ | ✅ | ❌ |
 | Cadastrar, editar, desativar e reativar funcionários | ✅ | ❌ | ❌ |
 | Alterar configurações | ✅ | ❌ | ❌ |
+| Confirmar vendas (sem desconto) | ✅ | ✅ | ✅ |
+| Dar desconto na venda | ✅ | ✅ | ❌ |
+| Consultar pedidos | todos | todos | só os próprios |
+| Concluir e cancelar pedidos | ✅ | ✅ | ❌ |
 | Minha Conta | ✅ | ✅ | ✅ |
 
 **Convenções:**
@@ -89,6 +94,12 @@ A documentação completa e interativa fica no Swagger. Resumo:
 - CPF, CNPJ, telefone e CEP podem ser enviados com ou sem máscara; a API guarda só os dígitos.
 - Código de produto e UF são guardados em maiúsculas; nome de usuário e e-mail, em minúsculas.
 - Produto sem `estoqueMinimo` usa o "alerta de estoque baixo" das configurações.
+- **Vendas** (`POST /api/vendas`): `{clienteId?, itens: [{produtoId, quantidade}], desconto?, formaPagamento, valorRecebido?, observacao?}`.
+  A confirmação segue as **Preferências de Vendas**: formas de pagamento habilitadas, cliente obrigatório ou não,
+  controle de estoque (bloqueando ou não a venda sem estoque) e status inicial (`EM_PREPARO` ou `CONCLUIDA`).
+  Em dinheiro, `valorRecebido` deve cobrir o total e a resposta traz o `troco`. O pedido tem um `numero` no formato `#PV-000123`.
+- Pedidos aceitam os filtros `termo` (número, cliente ou vendedor), `status`, `vendedorId`, `clienteId`, `formaPagamento`,
+  `inicio` e `fim` (`aaaa-mm-dd`); ordem padrão: mais recentes primeiro. Cancelar exige `{"motivo": "..."}` e devolve ao estoque o que foi retirado.
 - **Imagens** (logo e foto de produto): envio em `multipart/form-data` no campo `arquivo`, só **PNG ou JPG de até 1 MB**
   (o formato é conferido pelo conteúdo do arquivo). Ficam guardadas no banco e as respostas trazem `logoUrl`/`imagemUrl`
   como caminho relativo (ex.: `/api/imagens/5`). Trocar a imagem apaga a anterior.

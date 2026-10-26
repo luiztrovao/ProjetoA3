@@ -38,6 +38,13 @@ public class ItemVenda {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
 
+    /**
+     * Quanto deste item saiu do estoque na confirmação. Pode ser menor que a quantidade quando a venda
+     * sem estoque é permitida; no cancelamento, só esse valor volta ao estoque.
+     */
+    @Column(name = "quantidade_baixada_estoque", nullable = false)
+    private int quantidadeBaixadaEstoque;
+
     protected ItemVenda() {
     }
 
@@ -74,5 +81,27 @@ public class ItemVenda {
 
     public BigDecimal getSubtotal() {
         return subtotal;
+    }
+
+    public int getQuantidadeBaixadaEstoque() {
+        return quantidadeBaixadaEstoque;
+    }
+
+    /** Retira o item do estoque; com {@code bloquearSemEstoque} desligado, retira só o que houver. */
+    void baixarEstoque(boolean bloquearSemEstoque) {
+        if (bloquearSemEstoque) {
+            produto.baixarEstoque(quantidade);
+            quantidadeBaixadaEstoque = quantidade;
+        } else {
+            quantidadeBaixadaEstoque = produto.baixarAte(quantidade);
+        }
+    }
+
+    /** Devolve ao estoque o que foi retirado na confirmação. */
+    void devolverEstoque() {
+        if (quantidadeBaixadaEstoque > 0) {
+            produto.devolverEstoque(quantidadeBaixadaEstoque);
+            quantidadeBaixadaEstoque = 0;
+        }
     }
 }

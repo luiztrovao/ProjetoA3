@@ -54,7 +54,7 @@ class VendaRepositoryTest {
 
         Venda venda = new Venda(vendedor, null, FormaPagamento.DINHEIRO, LocalDateTime.of(2026, 10, 14, 12, 0));
         venda.adicionarItem(xBurguer, 2);
-        venda.concluir();
+        venda.confirmar(StatusVenda.CONCLUIDA, new BigDecimal("60.00"), true, true, LocalDateTime.of(2026, 10, 14, 12, 0));
         vendaRepository.saveAndFlush(venda);
 
         List<Venda> encontradas = vendaRepository.findByStatusAndDataHoraBetween(
