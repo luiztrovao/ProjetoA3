@@ -1128,7 +1128,8 @@ export default function App() {
     if (!tokenStorage.get()) return;
     contaApi.consultar()
       .then(startSession)
-      .catch(() => tokenStorage.clear())
+      // Um 401 já apaga o token (onUnauthorized); com a API fora do ar, o token é mantido.
+      .catch(() => undefined)
       .finally(() => setCheckingSession(false));
   }, []);
 
