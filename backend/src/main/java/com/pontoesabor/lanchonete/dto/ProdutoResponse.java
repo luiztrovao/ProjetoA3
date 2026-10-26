@@ -1,5 +1,6 @@
 package com.pontoesabor.lanchonete.dto;
 
+import com.pontoesabor.lanchonete.model.Imagem;
 import com.pontoesabor.lanchonete.model.Produto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public record ProdutoResponse(
                 produto.getEstoqueAtual(),
                 produto.getEstoqueMinimo(),
                 produto.isEstoqueBaixo(),
-                produto.getImagemUrl(),
+                Imagem.url(produto.getImagemId()),
                 produto.isAtivo(),
                 produto.getCriadoEm(),
                 produto.getAtualizadoEm());

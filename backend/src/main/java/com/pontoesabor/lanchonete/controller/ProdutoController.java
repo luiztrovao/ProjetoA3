@@ -13,6 +13,7 @@ import java.net.URI;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/produtos")
@@ -67,6 +69,20 @@ public class ProdutoController {
     @PreAuthorize(Permissoes.GESTAO)
     public ProdutoResponse atualizar(@PathVariable Long id, @Valid @RequestBody ProdutoRequest request) {
         return produtoService.atualizar(id, request);
+    }
+
+    @PutMapping(value = "/{id}/imagem", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Envia a foto do produto (campo \"arquivo\": PNG ou JPG, até 1 MB)")
+    @PreAuthorize(Permissoes.GESTAO)
+    public ProdutoResponse atualizarImagem(@PathVariable Long id, @RequestParam("arquivo") MultipartFile arquivo) {
+        return produtoService.atualizarImagem(id, arquivo);
+    }
+
+    @DeleteMapping("/{id}/imagem")
+    @Operation(summary = "Remove a foto do produto")
+    @PreAuthorize(Permissoes.GESTAO)
+    public ProdutoResponse removerImagem(@PathVariable Long id) {
+        return produtoService.removerImagem(id);
     }
 
     @DeleteMapping("/{id}")

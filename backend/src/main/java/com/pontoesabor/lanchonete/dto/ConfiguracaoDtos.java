@@ -2,6 +2,7 @@ package com.pontoesabor.lanchonete.dto;
 
 import com.pontoesabor.lanchonete.model.Configuracao;
 import com.pontoesabor.lanchonete.model.FormaPagamento;
+import com.pontoesabor.lanchonete.model.Imagem;
 import com.pontoesabor.lanchonete.model.StatusVenda;
 import com.pontoesabor.lanchonete.util.Textos;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public final class ConfiguracaoDtos {
     private ConfiguracaoDtos() {
     }
 
-    /** Aba "Dados da Lanchonete". CNPJ, telefone e CEP podem vir formatados. */
+    /** Aba "Dados da Lanchonete". CNPJ, telefone e CEP podem vir formatados; {@code logoUrl} é ignorado na entrada. */
     public record EmpresaDto(
             @NotBlank(message = "O nome fantasia é obrigatório.")
             @Size(max = 120, message = "O nome fantasia deve ter no máximo 120 caracteres.")
@@ -59,7 +60,7 @@ public final class ConfiguracaoDtos {
             @Pattern(regexp = "[A-Z]{2}", message = "A UF deve ter 2 letras.")
             String uf,
 
-            @Size(max = 500, message = "O endereço do logo deve ter no máximo 500 caracteres.")
+            /** Somente leitura: o logo é enviado em PUT /api/configuracoes/logo. */
             String logoUrl) {
 
         public EmpresaDto {
@@ -74,12 +75,12 @@ public final class ConfiguracaoDtos {
             bairro = Textos.limpar(bairro);
             cidade = Textos.limpar(cidade);
             uf = Textos.maiusculas(uf);
-            logoUrl = Textos.limpar(logoUrl);
         }
 
         public static EmpresaDto de(Configuracao c) {
             return new EmpresaDto(c.getNomeFantasia(), c.getRazaoSocial(), c.getCnpj(), c.getTelefone(), c.getEmail(),
-                    c.getCep(), c.getLogradouro(), c.getNumero(), c.getBairro(), c.getCidade(), c.getUf(), c.getLogoUrl());
+                    c.getCep(), c.getLogradouro(), c.getNumero(), c.getBairro(), c.getCidade(), c.getUf(),
+                    Imagem.url(c.getLogoId()));
         }
     }
 
@@ -112,6 +113,10 @@ public final class ConfiguracaoDtos {
                     c.isConfirmarCancelamento(), c.isPermitirVendaSemCliente(), c.getStatusInicialVenda(),
                     c.getFormasPagamentoAceitas());
         }
+    }
+
+    /** Identidade pública da lanchonete (GET /api/publico/identidade), usada na tela de login. */
+    public record IdentidadeResponse(String nomeFantasia, String logoUrl) {
     }
 
     /** Resposta completa de GET /api/configuracoes. */

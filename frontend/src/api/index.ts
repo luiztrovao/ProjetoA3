@@ -8,6 +8,7 @@ import type {
   Configuracao,
   ContaRequest,
   Empresa,
+  Identidade,
   ListagemParams,
   LoginResponse,
   Pagina,
@@ -18,7 +19,14 @@ import type {
   UsuarioRequest,
 } from "./types";
 
-export { ApiError, API_URL, errorMessage, onUnauthorized, tokenStorage } from "./client";
+export { ApiError, API_URL, errorMessage, imageUrl, onUnauthorized, tokenStorage } from "./client";
+
+/** Corpo multipart com a imagem no campo "arquivo", como a API espera. */
+const comArquivo = (arquivo: File) => {
+  const dados = new FormData();
+  dados.append("arquivo", arquivo);
+  return dados;
+};
 export type * from "./types";
 
 /** CRUD padrão da API: listagem paginada, cadastro, edição e exclusão lógica. */
@@ -44,7 +52,12 @@ export const contaApi = {
 
 export const clientesApi = recurso<Cliente, ClienteRequest>("/api/clientes");
 export const usuariosApi = recurso<Usuario, UsuarioRequest>("/api/usuarios");
-export const produtosApi = recurso<Produto, ProdutoRequest>("/api/produtos");
+export const produtosApi = {
+  ...recurso<Produto, ProdutoRequest>("/api/produtos"),
+  enviarImagem: (id: number, arquivo: File) =>
+    request<Produto>(`/api/produtos/${id}/imagem`, { method: "PUT", body: comArquivo(arquivo) }),
+  removerImagem: (id: number) => request<Produto>(`/api/produtos/${id}/imagem`, { method: "DELETE" }),
+};
 
 export const categoriasApi = {
   listar: () => request<Categoria[]>("/api/categorias"),
@@ -54,4 +67,11 @@ export const configuracoesApi = {
   consultar: () => request<Configuracao>("/api/configuracoes"),
   atualizarEmpresa: (dados: Empresa) => request<Configuracao>("/api/configuracoes/empresa", { method: "PUT", body: dados }),
   atualizarVendas: (dados: PreferenciasVenda) => request<Configuracao>("/api/configuracoes/vendas", { method: "PUT", body: dados }),
+  enviarLogo: (arquivo: File) => request<Configuracao>("/api/configuracoes/logo", { method: "PUT", body: comArquivo(arquivo) }),
+  removerLogo: () => request<Configuracao>("/api/configuracoes/logo", { method: "DELETE" }),
+};
+
+/** Rotas sem login: nome e logo da lanchonete para a tela de login. */
+export const publicoApi = {
+  identidade: () => request<Identidade>("/api/publico/identidade", { skipAuthRedirect: true }),
 };

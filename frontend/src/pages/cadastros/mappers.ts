@@ -1,4 +1,5 @@
 // Conversão entre os registros da API e os formatos usados nas tabelas e no formulário de Cadastros.
+import { imageUrl } from "../../api";
 import type { Cliente, ClienteRequest, Produto, ProdutoRequest, Usuario, UsuarioRequest } from "../../api";
 import { perfilFromLabel, perfilLabels, type ClientRecord, type EmployeeRecord, type FormValues, type ProductRecord, type TabId } from "../../types";
 import {
@@ -59,7 +60,7 @@ export const toProductRecord = (produto: Produto): ProductRecord => ({
   price: formatCurrency(produto.preco),
   stock: produto.estoqueAtual,
   minimumStock: produto.estoqueMinimo,
-  image: produto.imagemUrl || "",
+  image: imageUrl(produto.imagemUrl),
   status: status(produto.ativo),
 });
 
@@ -119,8 +120,6 @@ export const productRequest = (values: FormValues): ProdutoRequest => ({
   preco: values.price ? parseCurrency(values.price) : null,
   estoqueAtual: optionalInteger(values.stock),
   estoqueMinimo: optionalInteger(values.minimumStock),
-  // Imagens escolhidas no computador ficam só na tela (blob:); a API guarda apenas endereços.
-  imagemUrl: values.image && !values.image.startsWith("blob:") ? values.image : null,
 });
 
 /** Nome do campo na API → nome do campo no formulário, para exibir os erros de validação. */
@@ -132,6 +131,6 @@ export const apiFieldNames: Record<TabId, Record<string, string>> = {
   employees: { nome: "name", username: "username", email: "email", cpf: "cpf", telefone: "phone", senha: "password", perfil: "role" },
   products: {
     nome: "name", codigo: "code", descricao: "description", categoriaId: "categoryId", preco: "price",
-    estoqueAtual: "stock", estoqueMinimo: "minimumStock", imagemUrl: "image",
+    estoqueAtual: "stock", estoqueMinimo: "minimumStock",
   },
 };

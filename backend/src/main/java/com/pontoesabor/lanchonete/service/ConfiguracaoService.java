@@ -2,24 +2,54 @@ package com.pontoesabor.lanchonete.service;
 
 import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.ConfiguracaoResponse;
 import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.EmpresaDto;
+import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.IdentidadeResponse;
 import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.PreferenciasVendaDto;
 import com.pontoesabor.lanchonete.model.Configuracao;
+import com.pontoesabor.lanchonete.model.Imagem;
 import com.pontoesabor.lanchonete.repository.ConfiguracaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
 public class ConfiguracaoService {
 
     private final ConfiguracaoRepository configuracaoRepository;
+    private final ImagemService imagemService;
 
-    public ConfiguracaoService(ConfiguracaoRepository configuracaoRepository) {
+    public ConfiguracaoService(ConfiguracaoRepository configuracaoRepository, ImagemService imagemService) {
         this.configuracaoRepository = configuracaoRepository;
+        this.imagemService = imagemService;
     }
 
     public ConfiguracaoResponse consultar() {
         return ConfiguracaoResponse.de(obter());
+    }
+
+    /** Nome e logo da lanchonete, públicos: aparecem na tela de login, antes de entrar. */
+    public IdentidadeResponse identidade() {
+        Configuracao configuracao = obter();
+        return new IdentidadeResponse(configuracao.getNomeFantasia(), Imagem.url(configuracao.getLogoId()));
+    }
+
+    /** Troca o logo (PNG ou JPG, até 1 MB); o anterior é apagado. */
+    @Transactional
+    public ConfiguracaoResponse atualizarLogo(MultipartFile arquivo) {
+        Configuracao configuracao = obter();
+        configuracao.setLogoId(imagemService.substituir(configuracao.getLogoId(), arquivo));
+        return ConfiguracaoResponse.de(configuracaoRepository.saveAndFlush(configuracao));
+    }
+
+    /** Volta ao logo padrão do sistema. */
+    @Transactional
+    public ConfiguracaoResponse removerLogo() {
+        Configuracao configuracao = obter();
+        Long logoAnterior = configuracao.getLogoId();
+        configuracao.setLogoId(null);
+        configuracaoRepository.saveAndFlush(configuracao);
+        imagemService.remover(logoAnterior);
+        return ConfiguracaoResponse.de(configuracao);
     }
 
     @Transactional
@@ -36,7 +66,6 @@ public class ConfiguracaoService {
         configuracao.setBairro(dados.bairro());
         configuracao.setCidade(dados.cidade());
         configuracao.setUf(dados.uf());
-        configuracao.setLogoUrl(dados.logoUrl());
         return ConfiguracaoResponse.de(configuracaoRepository.saveAndFlush(configuracao));
     }
 

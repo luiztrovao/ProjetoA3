@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,14 +27,17 @@ public class ProdutoService {
     private final ProdutoRepository produtoRepository;
     private final CategoriaService categoriaService;
     private final ConfiguracaoService configuracaoService;
+    private final ImagemService imagemService;
 
     public ProdutoService(
             ProdutoRepository produtoRepository,
             CategoriaService categoriaService,
-            ConfiguracaoService configuracaoService) {
+            ConfiguracaoService configuracaoService,
+            ImagemService imagemService) {
         this.produtoRepository = produtoRepository;
         this.categoriaService = categoriaService;
         this.configuracaoService = configuracaoService;
+        this.imagemService = imagemService;
     }
 
     public PaginaResponse<ProdutoResponse> listar(String termo, Long categoriaId, Boolean ativo, Pageable pageable) {
@@ -62,7 +66,6 @@ public class ProdutoService {
                 request.estoqueAtual() != null ? request.estoqueAtual() : 0,
                 estoqueMinimo);
         produto.setDescricao(request.descricao());
-        produto.setImagemUrl(request.imagemUrl());
         return ProdutoResponse.de(produtoRepository.save(produto));
     }
 
@@ -80,7 +83,6 @@ public class ProdutoService {
         produto.setNome(request.nome());
         produto.setDescricao(request.descricao());
         produto.setPreco(request.preco());
-        produto.setImagemUrl(request.imagemUrl());
         if (request.estoqueAtual() != null) {
             produto.setEstoqueAtual(request.estoqueAtual());
         }
@@ -88,6 +90,24 @@ public class ProdutoService {
             produto.setEstoqueMinimo(request.estoqueMinimo());
         }
         return ProdutoResponse.de(produtoRepository.saveAndFlush(produto));
+    }
+
+    /** Troca a foto do produto (PNG ou JPG, até 1 MB); a anterior é apagada. */
+    @Transactional
+    public ProdutoResponse atualizarImagem(Long id, MultipartFile arquivo) {
+        Produto produto = buscarEntidade(id);
+        produto.setImagemId(imagemService.substituir(produto.getImagemId(), arquivo));
+        return ProdutoResponse.de(produtoRepository.saveAndFlush(produto));
+    }
+
+    @Transactional
+    public ProdutoResponse removerImagem(Long id) {
+        Produto produto = buscarEntidade(id);
+        Long imagemAnterior = produto.getImagemId();
+        produto.setImagemId(null);
+        produtoRepository.saveAndFlush(produto);
+        imagemService.remover(imagemAnterior);
+        return ProdutoResponse.de(produto);
     }
 
     /** Exclusão lógica: o produto some das vendas novas, mas continua no histórico. */

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 
 /**
  * Dados para cadastrar ou editar um produto. Obrigatórios: nome, código, categoria e preço.
+ * A imagem é enviada à parte, em PUT /api/produtos/{id}/imagem.
  * Sem estoque informado, começa em 0; sem estoque mínimo, usa o "alerta de estoque baixo" das configurações.
  */
 public record ProdutoRequest(
@@ -38,15 +39,11 @@ public record ProdutoRequest(
         Integer estoqueAtual,
 
         @PositiveOrZero(message = "O estoque mínimo não pode ser negativo.")
-        Integer estoqueMinimo,
-
-        @Size(max = 500, message = "O endereço da imagem deve ter no máximo 500 caracteres.")
-        String imagemUrl) {
+        Integer estoqueMinimo) {
 
     public ProdutoRequest {
         nome = Textos.limpar(nome);
         codigo = Textos.maiusculas(codigo);
         descricao = Textos.limpar(descricao);
-        imagemUrl = Textos.limpar(imagemUrl);
     }
 }

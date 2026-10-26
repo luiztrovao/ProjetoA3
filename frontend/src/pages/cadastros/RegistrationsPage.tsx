@@ -158,7 +158,7 @@ export function RegistrationsPage({
     return record ? productToForm(record) : emptyValues.products;
   };
 
-  const saveRecord = async (values: FormValues) => {
+  const saveRecord = async (values: FormValues, imagem: File | null) => {
     if (!modal) return;
     const canSave = canManageTab(modal.type) || (currentRole === "seller" && modal.type === "clients" && modal.mode === "create");
     if (!canSave) {
@@ -181,6 +181,14 @@ export function RegistrationsPage({
 
     const singular = modalCopy[modal.type].singular;
     let message = `${singular.charAt(0).toUpperCase()}${singular.slice(1)} ${editId ? "atualizado" : "cadastrado"} com sucesso!`;
+    // A foto vai por uma rota própria (multipart), depois que o produto existe.
+    if (modal.type === "products" && imagem) {
+      try {
+        await produtosApi.enviarImagem(saved.id, imagem);
+      } catch (error) {
+        message = `Produto salvo, mas a imagem não foi enviada: ${errorMessage(error)}`;
+      }
+    }
     // O status é alterado por rotas próprias (DELETE desativa, PATCH .../ativar reativa).
     const shouldBeActive = values.status !== "Inativo";
     if (saved.ativo !== shouldBeActive) {

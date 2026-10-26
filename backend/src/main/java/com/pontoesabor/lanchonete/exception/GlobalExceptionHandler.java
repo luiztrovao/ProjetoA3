@@ -13,6 +13,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 /** Converte exceções em respostas HTTP com o formato {@link ErroResponse}. */
 @RestControllerAdvice
@@ -55,6 +58,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PropertyReferenceException.class)
     ResponseEntity<ErroResponse> ordenacaoInvalida(PropertyReferenceException ex, HttpServletRequest request) {
         return resposta(HttpStatus.BAD_REQUEST, "Não é possível ordenar por '" + ex.getPropertyName() + "'.", request, List.of());
+    }
+
+    /** Arquivo acima do limite de upload (spring.servlet.multipart.max-file-size). */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<ErroResponse> arquivoGrandeDemais(HttpServletRequest request) {
+        return resposta(HttpStatus.CONTENT_TOO_LARGE, "A imagem deve ter no máximo 1 MB.", request, List.of());
+    }
+
+    /** Upload sem o campo "arquivo" ou requisição que não é multipart. */
+    @ExceptionHandler({MissingServletRequestPartException.class, MultipartException.class})
+    ResponseEntity<ErroResponse> arquivoAusente(HttpServletRequest request) {
+        return resposta(HttpStatus.BAD_REQUEST, "Envie a imagem no campo \"arquivo\".", request, List.of());
     }
 
     /** Última barreira para violações de restrições do banco (ex.: valor único duplicado). */

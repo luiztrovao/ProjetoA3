@@ -30,6 +30,9 @@ export class ApiError extends Error {
   }
 }
 
+/** A API devolve imagens como caminho relativo ("/api/imagens/5"); a tag <img> precisa do endereço completo. */
+export const imageUrl = (path: string | null | undefined) => (path ? `${API_URL}${path}` : "");
+
 export const errorMessage = (error: unknown, fallback = "Não foi possível concluir a operação. Tente novamente.") =>
   error instanceof ApiError ? error.message : fallback;
 
@@ -92,14 +95,16 @@ export async function request<T>(path: string, { method = "GET", body, query, sk
   const headers: Record<string, string> = { Accept: "application/json" };
   const token = tokenStorage.get();
   if (token) headers.Authorization = `Bearer ${token}`;
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  // Uploads (FormData) definem o próprio Content-Type, com o "boundary" do multipart.
+  const isFormData = body instanceof FormData;
+  if (body !== undefined && !isFormData) headers["Content-Type"] = "application/json";
 
   let response: Response;
   try {
     response = await fetch(buildUrl(path, query), {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiError(0, "Não foi possível conectar ao servidor. Verifique se a API está em execução.");

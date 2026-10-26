@@ -33,8 +33,9 @@ public class Produto {
     @Column(length = 500)
     private String descricao;
 
-    @Column(name = "imagem_url", length = 500)
-    private String imagemUrl;
+    /** Foto do produto (tabela imagem); só o id, para não carregar a imagem nas listagens. */
+    @Column(name = "imagem_id")
+    private Long imagemId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "categoria_id", nullable = false)
@@ -128,12 +129,12 @@ public class Produto {
         this.descricao = descricao;
     }
 
-    public String getImagemUrl() {
-        return imagemUrl;
+    public Long getImagemId() {
+        return imagemId;
     }
 
-    public void setImagemUrl(String imagemUrl) {
-        this.imagemUrl = imagemUrl;
+    public void setImagemId(Long imagemId) {
+        this.imagemId = imagemId;
     }
 
     public Categoria getCategoria() {
