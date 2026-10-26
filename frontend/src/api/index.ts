@@ -7,16 +7,23 @@ import type {
   ClienteRequest,
   Configuracao,
   ContaRequest,
+  Dashboard,
   Empresa,
   Identidade,
   ListagemParams,
   LoginResponse,
   Pagina,
+  PeriodoPico,
+  Picos,
   PreferenciasVenda,
   Produto,
   ProdutoRequest,
+  Relatorio,
   Usuario,
   UsuarioRequest,
+  Venda,
+  VendaListagemParams,
+  VendaRequest,
 } from "./types";
 
 export { ApiError, API_URL, errorMessage, imageUrl, onUnauthorized, tokenStorage } from "./client";
@@ -74,4 +81,22 @@ export const configuracoesApi = {
 /** Rotas sem login: nome e logo da lanchonete para a tela de login. */
 export const publicoApi = {
   identidade: () => request<Identidade>("/api/publico/identidade", { skipAuthRedirect: true }),
+};
+
+export const vendasApi = {
+  listar: (params: VendaListagemParams = {}) => request<Pagina<Venda>>("/api/vendas", { query: params }),
+  buscar: (id: number) => request<Venda>(`/api/vendas/${id}`),
+  confirmar: (dados: VendaRequest) => request<Venda>("/api/vendas", { method: "POST", body: dados }),
+  concluir: (id: number) => request<Venda>(`/api/vendas/${id}/concluir`, { method: "PATCH" }),
+  cancelar: (id: number, motivo: string) =>
+    request<Venda>(`/api/vendas/${id}/cancelar`, { method: "PATCH", body: { motivo } }),
+};
+
+/** Dashboard e Relatórios (Dono e Gerente). Datas no formato aaaa-mm-dd. */
+export const relatoriosApi = {
+  dashboard: () => request<Dashboard>("/api/dashboard"),
+  resumo: (params: { inicio?: string; fim?: string; vendedorId?: number }) =>
+    request<Relatorio>("/api/relatorios/resumo", { query: params }),
+  picos: (params: { periodo: PeriodoPico; referencia?: string; vendedorId?: number }) =>
+    request<Picos>("/api/relatorios/picos", { query: params }),
 };

@@ -1,7 +1,7 @@
 // Conversão entre a API de configurações/conta e os formatos da tela Configurações.
 import { imageUrl } from "../../api";
-import type { ContaRequest, Empresa, FormaPagamento, PreferenciasVenda } from "../../api";
-import type { EmployeeRecord, PaymentMethod } from "../../types";
+import type { ContaRequest, Empresa, PreferenciasVenda } from "../../api";
+import { paymentCodes, type EmployeeRecord, type PaymentMethod } from "../../types";
 import { maskCep, maskCnpj, maskPhone, optional, optionalDigits } from "../../utils/format";
 
 export type CompanySettings = {
@@ -32,13 +32,6 @@ export type SalesPreferences = {
 export const defaultCompany: CompanySettings = { tradeName: "Ponto & Sabor", legalName: "", cnpj: "", phone: "", email: "", cep: "", address: "", number: "", district: "", city: "", state: "", logo: "" };
 
 export const defaultPreferences: SalesPreferences = { stockControl: true, blockWithoutStock: true, lowStockThreshold: 5, confirmCancellation: true, allowAnonymousCustomer: true, initialOrderStatus: "Em preparo", paymentMethods: { cash: true, credit: true, debit: true, pix: true } };
-
-const paymentCodes: Record<PaymentMethod, FormaPagamento> = {
-  cash: "DINHEIRO",
-  credit: "CREDITO",
-  debit: "DEBITO",
-  pix: "PIX",
-};
 
 export const toCompanySettings = (empresa: Empresa): CompanySettings => ({
   tradeName: empresa.nomeFantasia || "",
