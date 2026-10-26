@@ -61,6 +61,22 @@ public class Venda {
     @Column(length = 500)
     private String observacao;
 
+    /** Pagamento em dinheiro: valor entregue pelo cliente e troco. */
+    @Column(name = "valor_recebido", precision = 10, scale = 2)
+    private BigDecimal valorRecebido;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal troco;
+
+    @Column(name = "confirmada_em")
+    private LocalDateTime confirmadaEm;
+
+    @Column(name = "cancelada_em")
+    private LocalDateTime canceladaEm;
+
+    @Column(name = "motivo_cancelamento", length = 500)
+    private String motivoCancelamento;
+
     @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemVenda> itens = new ArrayList<>();
 
@@ -166,6 +182,26 @@ public class Venda {
 
     public void setObservacao(String observacao) {
         this.observacao = observacao;
+    }
+
+    public BigDecimal getValorRecebido() {
+        return valorRecebido;
+    }
+
+    public BigDecimal getTroco() {
+        return troco;
+    }
+
+    public LocalDateTime getConfirmadaEm() {
+        return confirmadaEm;
+    }
+
+    public LocalDateTime getCanceladaEm() {
+        return canceladaEm;
+    }
+
+    public String getMotivoCancelamento() {
+        return motivoCancelamento;
     }
 
     public List<ItemVenda> getItens() {

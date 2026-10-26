@@ -1,8 +1,8 @@
 package com.pontoesabor.lanchonete.service;
 
+import static com.pontoesabor.lanchonete.repository.UsuarioRepository.Filtros.buscaGeral;
 import static com.pontoesabor.lanchonete.repository.UsuarioRepository.Filtros.comAtivo;
 import static com.pontoesabor.lanchonete.repository.UsuarioRepository.Filtros.comPerfil;
-import static com.pontoesabor.lanchonete.repository.UsuarioRepository.Filtros.nomeOuEmailContem;
 
 import com.pontoesabor.lanchonete.dto.PaginaResponse;
 import com.pontoesabor.lanchonete.dto.UsuarioAtualizacaoRequest;
@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UsuarioService {
 
+    private static final String MENSAGEM_DUPLICADO = "Já existe um funcionário com o mesmo CPF, usuário ou e-mail.";
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -35,7 +37,7 @@ public class UsuarioService {
 
     public PaginaResponse<UsuarioResponse> listar(String termo, Perfil perfil, Boolean ativo, Pageable pageable) {
         Specification<Usuario> filtro = Specification.allOf(List.of(
-                nomeOuEmailContem(Textos.limpar(termo)), comPerfil(perfil), comAtivo(ativo)));
+                buscaGeral(Textos.limpar(termo)), comPerfil(perfil), comAtivo(ativo)));
         return PaginaResponse.de(usuarioRepository.findAll(filtro, pageable).map(UsuarioResponse::de));
     }
 
@@ -45,25 +47,37 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponse criar(UsuarioCriacaoRequest request) {
-        if (usuarioRepository.existsByEmail(request.email())) {
-            throw new RegraNegocioException("Já existe um usuário com este e-mail.");
+        boolean duplicado = usuarioRepository.existsByUsername(request.username())
+                || (request.email() != null && usuarioRepository.existsByEmail(request.email()))
+                || (request.cpf() != null && usuarioRepository.existsByCpf(request.cpf()));
+        if (duplicado) {
+            throw new RegraNegocioException(MENSAGEM_DUPLICADO);
         }
         Usuario usuario = new Usuario(
-                request.nome(), request.email(), passwordEncoder.encode(request.senha()), request.perfil());
+                request.nome(), request.username(), passwordEncoder.encode(request.senha()), request.perfil());
+        usuario.setEmail(request.email());
+        usuario.setCpf(request.cpf());
+        usuario.setTelefone(request.telefone());
         return UsuarioResponse.de(usuarioRepository.save(usuario));
     }
 
     @Transactional
     public UsuarioResponse atualizar(Long id, UsuarioAtualizacaoRequest request) {
         Usuario usuario = buscarEntidade(id);
-        if (usuarioRepository.existsByEmailAndIdNot(request.email(), id)) {
-            throw new RegraNegocioException("Já existe um usuário com este e-mail.");
+        boolean duplicado = usuarioRepository.existsByUsernameAndIdNot(request.username(), id)
+                || (request.email() != null && usuarioRepository.existsByEmailAndIdNot(request.email(), id))
+                || (request.cpf() != null && usuarioRepository.existsByCpfAndIdNot(request.cpf(), id));
+        if (duplicado) {
+            throw new RegraNegocioException(MENSAGEM_DUPLICADO);
         }
         if (usuario.getPerfil() != request.perfil()) {
             garantirQueNaoEhUltimoDono(usuario);
         }
         usuario.setNome(request.nome());
+        usuario.setUsername(request.username());
         usuario.setEmail(request.email());
+        usuario.setCpf(request.cpf());
+        usuario.setTelefone(request.telefone());
         usuario.setPerfil(request.perfil());
         if (request.senha() != null) {
             usuario.setSenhaHash(passwordEncoder.encode(request.senha()));

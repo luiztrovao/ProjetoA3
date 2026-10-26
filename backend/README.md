@@ -42,13 +42,19 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | Produtos | `GET /api/produtos` · `GET /api/produtos/{id}` · `POST /api/produtos` · `PUT /api/produtos/{id}` · `DELETE /api/produtos/{id}` · `PATCH /api/produtos/{id}/ativar` |
 | Clientes | `GET /api/clientes` · `GET /api/clientes/{id}` · `POST /api/clientes` · `PUT /api/clientes/{id}` · `DELETE /api/clientes/{id}` · `PATCH /api/clientes/{id}/ativar` |
 | Usuários | `GET /api/usuarios` · `GET /api/usuarios/{id}` · `POST /api/usuarios` · `PUT /api/usuarios/{id}` · `DELETE /api/usuarios/{id}` · `PATCH /api/usuarios/{id}/ativar` |
+| Configurações | `GET /api/configuracoes` · `PUT /api/configuracoes/empresa` · `PUT /api/configuracoes/vendas` |
 
 **Convenções:**
 
 - `DELETE` faz **exclusão lógica** (marca como inativo); `PATCH .../ativar` desfaz.
 - Listagens aceitam `termo`, `ativo` (`true`/`false`), `page` (começa em 0), `size` e `sort` (ex.: `sort=preco,desc`), e devolvem `{conteudo, pagina, tamanho, totalElementos, totalPaginas}`.
-- Filtros extras: `categoriaId` em produtos e `perfil` em usuários. Em clientes, `termo` busca por nome, CPF, telefone ou e-mail.
-- CPF e telefone podem ser enviados com ou sem máscara; a API guarda só os dígitos.
+- Filtros extras: `categoriaId` em produtos e `perfil` em usuários. O `termo` busca:
+  - produtos: nome ou código;
+  - clientes: nome, CPF, telefone ou e-mail;
+  - usuários: nome, nome de usuário, e-mail ou CPF.
+- CPF, CNPJ, telefone e CEP podem ser enviados com ou sem máscara; a API guarda só os dígitos.
+- Código de produto e UF são guardados em maiúsculas; nome de usuário e e-mail, em minúsculas.
+- Produto sem `estoqueMinimo` usa o "alerta de estoque baixo" das configurações.
 - A senha do usuário é guardada com BCrypt e **nunca** aparece nas respostas.
 
 **Erros** seguem sempre o mesmo formato:

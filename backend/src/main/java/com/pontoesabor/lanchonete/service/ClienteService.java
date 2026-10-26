@@ -72,6 +72,14 @@ public class ClienteService {
         cliente.setCpf(request.cpf());
         cliente.setTelefone(request.telefone());
         cliente.setEmail(request.email());
+        cliente.setCep(request.cep());
+        cliente.setLogradouro(request.logradouro());
+        cliente.setNumero(request.numero());
+        cliente.setComplemento(request.complemento());
+        cliente.setBairro(request.bairro());
+        cliente.setCidade(request.cidade());
+        cliente.setUf(request.uf());
+        cliente.setObservacoes(request.observacoes());
     }
 
     private Cliente buscarEntidade(Long id) {

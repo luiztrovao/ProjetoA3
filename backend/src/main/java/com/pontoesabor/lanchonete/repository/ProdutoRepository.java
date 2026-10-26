@@ -10,16 +10,25 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long>, JpaSpec
 
     List<Produto> findByAtivoTrueOrderByNome();
 
+    boolean existsByCodigo(String codigo);
+
+    boolean existsByCodigoAndIdNot(String codigo, Long id);
+
     /** Filtros da listagem de produtos. Parâmetros nulos são ignorados. */
     final class Filtros {
 
         private Filtros() {
         }
 
-        public static Specification<Produto> nomeContem(String termo) {
-            return (root, query, cb) -> termo == null
-                    ? null
-                    : cb.like(cb.lower(root.get("nome")), "%" + termo.toLowerCase() + "%");
+        /** Procura o termo no nome ou no código do produto. */
+        public static Specification<Produto> nomeOuCodigoContem(String termo) {
+            return (root, query, cb) -> {
+                if (termo == null) {
+                    return null;
+                }
+                String padrao = "%" + termo.toLowerCase() + "%";
+                return cb.or(cb.like(cb.lower(root.get("nome")), padrao), cb.like(cb.lower(root.get("codigo")), padrao));
+            };
         }
 
         public static Specification<Produto> daCategoria(Long categoriaId) {
