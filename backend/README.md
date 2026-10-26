@@ -35,6 +35,20 @@ do protótipo**: `matheus` (Dono), `carlos` (Gerente) e `fernanda` (Vendedor). A
 3. Envie o token em todas as requisições: `Authorization: Bearer <token>`. No Swagger, clique em **Authorize**
    e cole o token.
 
+### Dados de demonstração (apresentação)
+
+No perfil `h2`, ao subir com o banco vazio, a API cria uma lanchonete fictícia completa:
+
+- **Equipe:** `matheus` (Dono), `carlos` (Gerente), `fernanda`, `julia` e `bruno` (Vendedores) e `rafael` (desligado)
+- **Cardápio** com 16 itens (hambúrgueres, bebidas, acompanhamentos, combos e sobremesas) e **20 clientes**
+- **Cerca de 13 mil vendas nos últimos 18 meses**, com padrões realistas para os dashboards: picos no **almoço (12h)**
+  e no **jantar (19h–20h)**, **sexta e sábado** mais fortes, **julho e dezembro** em alta, crescimento leve mês a mês,
+  ~3% de cancelamentos com motivo e os pedidos mais recentes de hoje "em preparo"
+
+A geração usa uma **semente fixa**: os números são sempre os mesmos (bom para ensaiar a apresentação). O histórico não
+consome o estoque atual dos produtos. Para usar no PostgreSQL (banco vazio), defina `APP_DADOS_DEMO_HABILITADO=true` e
+`APP_DADOS_DEMO_SENHA=<senha>`; `APP_DADOS_DEMO_MESES_DE_HISTORICO` muda o tamanho do histórico (padrão 18).
+
 O token vale **8 horas**. Se o funcionário for desativado ou mudar de perfil, a mudança vale na hora.
 
 ### Usando o PostgreSQL (Neon)

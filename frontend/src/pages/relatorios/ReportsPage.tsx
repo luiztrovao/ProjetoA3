@@ -97,7 +97,7 @@ function PeaksSection({ sellerId }: { sellerId: string }) {
       </div>
       <div className="peaks-toolbar">
         <label><span>Data de referência</span><input type="date" value={reference} onChange={(event) => setReference(event.target.value)} /></label>
-        {data && <p>Período analisado: <strong>{formatDay(data.inicio)}</strong> a <strong>{formatDay(data.fim)}</strong></p>}
+        {data && <p>Período analisado: <strong>{formatDay(data.inicio)}</strong> a <strong>{formatDay(data.fim)}</strong>{data.fim >= isoDate(new Date()) && " · em andamento (a comparação considera o período anterior completo)"}</p>}
       </div>
       {error && <div className="form-alert" role="alert">{error}</div>}
       {data && (
