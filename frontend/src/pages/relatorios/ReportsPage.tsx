@@ -41,6 +41,8 @@ const HISTORY_PAGE_SIZE = 6;
 
 const formatDay = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR");
 
+const formatOrders = (count: number) => `${count} ${count === 1 ? "pedido" : "pedidos"}`;
+
 const formatPercent = (value: number) => `${value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
 
 /** Gráfico de barras no estilo do protótipo; destaca a barra de pico. */
@@ -52,7 +54,7 @@ function Bars({ points, peakKey, emptyText }: { points: Ponto[]; peakKey?: strin
   return (
     <div className="revenue-bars">
       {points.map((point, index) => (
-        <div className="revenue-bar-column" key={point.chave} title={`${point.rotulo}: ${formatCurrency(point.faturamento)} · ${point.pedidos} pedidos`}>
+        <div className="revenue-bar-column" key={point.chave} title={`${point.rotulo}: ${formatCurrency(point.faturamento)} · ${formatOrders(point.pedidos)}`}>
           <span className={`${point.faturamento ? "filled" : ""}${point.chave === peakKey ? " peak" : ""}`} style={{ height: `${Math.max(point.faturamento / max * 100, point.faturamento ? 5 : 1)}%` }}>
             <i>{point.faturamento ? formatCurrency(point.faturamento) : ""}</i>
           </span>
@@ -64,7 +66,7 @@ function Bars({ points, peakKey, emptyText }: { points: Ponto[]; peakKey?: strin
 }
 
 const peakPeriods: Array<{ id: PeriodoPico; label: string; serieTitle: string; peakLabel: string }> = [
-  { id: "SEMANA", label: "Semana", serieTitle: "Faturamento por dia da semana", peakLabel: "Dia de maior venda" },
+  { id: "SEMANA", label: "Semana", serieTitle: "Faturamento dia a dia", peakLabel: "Dia de maior venda" },
   { id: "MES", label: "Mês", serieTitle: "Faturamento por dia do mês", peakLabel: "Dia de maior venda" },
   { id: "SEMESTRE", label: "Semestre", serieTitle: "Faturamento por mês", peakLabel: "Mês de maior venda" },
   { id: "ANO", label: "Ano", serieTitle: "Faturamento por mês", peakLabel: "Mês de maior venda" },
@@ -111,17 +113,17 @@ function PeaksSection({ sellerId }: { sellerId: string }) {
             <article>
               <small>{config.peakLabel}</small>
               <strong>{data.pico ? data.pico.rotulo : "—"}</strong>
-              <span>{data.pico ? `${formatCurrency(data.pico.faturamento)} · ${data.pico.pedidos} pedidos` : "Nenhuma venda no período"}</span>
+              <span>{data.pico ? `${formatCurrency(data.pico.faturamento)} · ${formatOrders(data.pico.pedidos)}` : "Nenhuma venda no período"}</span>
             </article>
             <article>
               <small>Dia da semana mais forte</small>
               <strong>{data.diaDaSemanaPico ? data.diaDaSemanaPico.rotulo : "—"}</strong>
-              <span>{data.diaDaSemanaPico ? `${formatCurrency(data.diaDaSemanaPico.faturamento)} · ${data.diaDaSemanaPico.pedidos} pedidos` : "Nenhuma venda no período"}</span>
+              <span>{data.diaDaSemanaPico ? `${formatCurrency(data.diaDaSemanaPico.faturamento)} · ${formatOrders(data.diaDaSemanaPico.pedidos)}` : "Nenhuma venda no período"}</span>
             </article>
             <article>
               <small>Horário de pico</small>
               <strong>{data.horaPico ? data.horaPico.rotulo : "—"}</strong>
-              <span>{data.horaPico ? `${formatCurrency(data.horaPico.faturamento)} · ${data.horaPico.pedidos} pedidos` : "Nenhuma venda no período"}</span>
+              <span>{data.horaPico ? `${formatCurrency(data.horaPico.faturamento)} · ${formatOrders(data.horaPico.pedidos)}` : "Nenhuma venda no período"}</span>
             </article>
           </div>
           <div className="peaks-charts">
