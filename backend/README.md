@@ -64,6 +64,7 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | Clientes | `GET /api/clientes` · `GET /api/clientes/{id}` · `POST /api/clientes` · `PUT /api/clientes/{id}` · `DELETE /api/clientes/{id}` · `PATCH /api/clientes/{id}/ativar` |
 | Usuários | `GET /api/usuarios` · `GET /api/usuarios/{id}` · `POST /api/usuarios` · `PUT /api/usuarios/{id}` · `DELETE /api/usuarios/{id}` · `PATCH /api/usuarios/{id}/ativar` |
 | Vendas e Pedidos | `GET /api/vendas` · `GET /api/vendas/{id}` · `POST /api/vendas` · `PATCH /api/vendas/{id}/concluir` · `PATCH /api/vendas/{id}/cancelar` |
+| Dashboard e Relatórios | `GET /api/dashboard` · `GET /api/relatorios/resumo` · `GET /api/relatorios/picos` |
 | Configurações | `GET /api/configuracoes` · `PUT /api/configuracoes/empresa` · `PUT /api/configuracoes/vendas` · `PUT /api/configuracoes/logo` · `DELETE /api/configuracoes/logo` |
 | Público (sem login) | `GET /api/publico/identidade` (nome e logo para a tela de login) · `GET /api/imagens/{id}` |
 
@@ -81,6 +82,7 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | Dar desconto na venda | ✅ | ✅ | ❌ |
 | Consultar pedidos | todos | todos | só os próprios |
 | Concluir e cancelar pedidos | ✅ | ✅ | ❌ |
+| Dashboard e Relatórios | ✅ | ✅ | ❌ |
 | Minha Conta | ✅ | ✅ | ✅ |
 
 **Convenções:**
@@ -98,6 +100,14 @@ A documentação completa e interativa fica no Swagger. Resumo:
   A confirmação segue as **Preferências de Vendas**: formas de pagamento habilitadas, cliente obrigatório ou não,
   controle de estoque (bloqueando ou não a venda sem estoque) e status inicial (`EM_PREPARO` ou `CONCLUIDA`).
   Em dinheiro, `valorRecebido` deve cobrir o total e a resposta traz o `troco`. O pedido tem um `numero` no formato `#PV-000123`.
+- **Dashboard e Relatórios** contam só vendas **não canceladas**:
+  - `GET /api/dashboard`: faturamento, pedidos e ticket médio de hoje; produtos (cadastrados, ativos, estoque baixo);
+    faturamento dia a dia dos últimos 7 dias; 5 pedidos mais recentes.
+  - `GET /api/relatorios/resumo?inicio=&fim=&vendedorId=`: indicadores, produtos vendidos, evolução (por **hora** se for
+    um dia, por **dia** até 62 dias, por **mês** acima disso), 5 mais vendidos, desempenho por vendedor e por forma de pagamento.
+  - `GET /api/relatorios/picos?periodo=SEMANA|MES|SEMESTRE|ANO&referencia=&vendedorId=`: **picos de venda** do período que
+    contém a data de referência (semana de segunda a domingo; semestre jan–jun ou jul–dez): série do período e seu pico,
+    vendas por **dia da semana** e por **hora** com os respectivos picos, e comparação com o período anterior (`variacaoFaturamento` em %).
 - Pedidos aceitam os filtros `termo` (número, cliente ou vendedor), `status`, `vendedorId`, `clienteId`, `formaPagamento`,
   `inicio` e `fim` (`aaaa-mm-dd`); ordem padrão: mais recentes primeiro. Cancelar exige `{"motivo": "..."}` e devolve ao estoque o que foi retirado.
 - **Imagens** (logo e foto de produto): envio em `multipart/form-data` no campo `arquivo`, só **PNG ou JPG de até 1 MB**

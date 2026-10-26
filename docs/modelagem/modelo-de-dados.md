@@ -294,30 +294,24 @@ Regras extras do protótipo:
 
 ## Como os dashboards usam esses dados
 
-Todos os indicadores saem de `venda` + `item_venda`, agrupando por `data_hora`:
+Os indicadores saem de `venda` + `item_venda`, sempre com **vendas não canceladas** e filtradas por
+`data_hora` (indexada). A API faz duas coisas:
 
-| Dashboard | Agrupamento |
-|---|---|
-| Pico por **dia da semana** | `EXTRACT(DOW FROM data_hora)` |
-| Pico por **horário** | `EXTRACT(HOUR FROM data_hora)` |
-| Vendas no **mês** | `DATE_TRUNC('month', data_hora)` |
-| Vendas no **semestre** | `EXTRACT(YEAR ...)` + `CASE WHEN EXTRACT(MONTH ...) <= 6 THEN 1 ELSE 2 END` |
-| Vendas no **ano** | `EXTRACT(YEAR FROM data_hora)` |
-| Produtos mais vendidos | `SUM(item_venda.quantidade)` por produto |
-| Ticket médio | `AVG(venda.total)` |
+1. **Consultas no banco** (`RelatorioRepository`, JPQL portável entre H2 e PostgreSQL): uma lista enxuta das vendas do
+   período (data/hora, total, forma de pagamento, vendedor) e o ranking de produtos (`SUM(item_venda.quantidade)` por produto).
+2. **Agregação em Java** (`AgregadorVendas`, classe pura e testada isoladamente): agrupa por hora, dia, mês e dia da
+   semana, calcula ticket médio, participação de cada vendedor e forma de pagamento, encontra o **pico** de cada série e a
+   variação em relação ao período anterior.
 
-Exemplo, pico de vendas por dia da semana no mês atual:
-
-```sql
-SELECT EXTRACT(DOW FROM data_hora) AS dia_semana,
-       COUNT(*)                    AS quantidade_vendas,
-       SUM(total)                  AS faturamento
-FROM venda
-WHERE status <> 'CANCELADA'
-  AND data_hora >= DATE_TRUNC('month', CURRENT_DATE)
-GROUP BY dia_semana
-ORDER BY faturamento DESC;
-```
+| Dashboard | Rota | Agrupamento |
+|---|---|---|
+| Pico da **semana** | `/api/relatorios/picos?periodo=SEMANA` | por dia (segunda a domingo) |
+| Pico do **mês** | `/api/relatorios/picos?periodo=MES` | por dia do mês |
+| Pico do **semestre** | `/api/relatorios/picos?periodo=SEMESTRE` | por mês (jan–jun ou jul–dez) |
+| Pico do **ano** | `/api/relatorios/picos?periodo=ANO` | por mês |
+| Dia da semana e horário de pico | (todas as acima) | por dia da semana e por hora (0h–23h) |
+| Relatório de período livre | `/api/relatorios/resumo` | por hora, dia ou mês, conforme o tamanho do período |
+| Tela inicial | `/api/dashboard` | hoje e últimos 7 dias |
 
 ## Histórico de decisões
 
