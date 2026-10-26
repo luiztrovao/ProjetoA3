@@ -1,258 +1,14 @@
-import { ChangeEvent, FormEvent, ReactNode, useEffect, useRef, useState } from "react";
-
-type IconName =
-  | "dashboard"
-  | "sales"
-  | "orders"
-  | "registers"
-  | "reports"
-  | "settings"
-  | "bell"
-  | "chevron"
-  | "chevron-left"
-  | "chevron-right"
-  | "more"
-  | "plus"
-  | "menu"
-  | "search"
-  | "filter"
-  | "eye"
-  | "edit"
-  | "users"
-  | "team"
-  | "products"
-  | "shield"
-  | "close"
-  | "upload"
-  | "power"
-  | "lock"
-  | "trash"
-  | "cart"
-  | "clock"
-  | "cash"
-  | "credit-card"
-  | "pix"
-  | "check"
-  | "download"
-  | "trophy";
-
-function Icon({ name, className = "" }: { name: IconName; className?: string }) {
-  const paths: Record<IconName, ReactNode> = {
-    dashboard: (
-      <>
-        <rect x="3" y="3" width="7" height="7" rx="2" />
-        <rect x="14" y="3" width="7" height="7" rx="2" />
-        <rect x="3" y="14" width="7" height="7" rx="2" />
-        <rect x="14" y="14" width="7" height="7" rx="2" />
-      </>
-    ),
-    sales: (
-      <>
-        <path d="M4 19V9m5 10V5m6 14v-7m5 7V3" />
-        <path d="m3 7 5-3 6 5 7-6" />
-      </>
-    ),
-    orders: (
-      <>
-        <path d="M7 3h10l2 3v15H5V6l2-3Z" />
-        <path d="M5 7h14M9 11h6M9 15h6" />
-      </>
-    ),
-    registers: (
-      <>
-        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H10v7H3V6.5A2.5 2.5 0 0 1 5.5 4" />
-        <path d="M14 3h3.5A2.5 2.5 0 0 1 20 5.5V10h-6V3ZM3 14h7v7H5.5A2.5 2.5 0 0 1 3 18.5V14ZM14 14h7v4.5a2.5 2.5 0 0 1-2.5 2.5H14v-7Z" />
-      </>
-    ),
-    reports: (
-      <>
-        <path d="M5 3h10l4 4v14H5V3Z" />
-        <path d="M15 3v5h5M9 17v-4m3 4V9m3 8v-6" />
-      </>
-    ),
-    settings: (
-      <>
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.63 15 1.7 1.7 0 0 0 3.08 14H3v-4h.08A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63 1.7 1.7 0 0 0 10 3.08V3h4v.08A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9 1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z" />
-      </>
-    ),
-    bell: (
-      <>
-        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" />
-      </>
-    ),
-    chevron: <path d="m8 10 4 4 4-4" />,
-    "chevron-left": <path d="m15 18-6-6 6-6" />,
-    "chevron-right": <path d="m9 18 6-6-6-6" />,
-    more: (
-      <>
-        <circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />
-        <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
-        <circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" />
-      </>
-    ),
-    plus: <path d="M12 5v14M5 12h14" />,
-    menu: <path d="M4 7h16M4 12h16M4 17h16" />,
-    search: (
-      <>
-        <circle cx="11" cy="11" r="7" />
-        <path d="m16 16 4 4" />
-      </>
-    ),
-    filter: (
-      <>
-        <path d="M4 6h16M7 12h10M10 18h4" />
-        <circle cx="8" cy="6" r="1.5" fill="currentColor" stroke="none" />
-        <circle cx="15" cy="12" r="1.5" fill="currentColor" stroke="none" />
-      </>
-    ),
-    eye: (
-      <>
-        <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" />
-        <circle cx="12" cy="12" r="2.7" />
-      </>
-    ),
-    edit: (
-      <>
-        <path d="m14 5 5 5M4 20l3.5-.7L19 7.8a2.1 2.1 0 0 0-3-3L4.7 16.4 4 20Z" />
-      </>
-    ),
-    users: (
-      <>
-        <circle cx="9" cy="8" r="3.5" />
-        <path d="M3 20c0-3.6 2.5-6 6-6s6 2.4 6 6M16 5.5a3.2 3.2 0 0 1 0 6.2M17 14c2.5.5 4 2.5 4 5" />
-      </>
-    ),
-    team: (
-      <>
-        <circle cx="9" cy="8" r="3" />
-        <circle cx="17" cy="9" r="2.5" />
-        <path d="M3 20c0-3.6 2.2-6 6-6s6 2.4 6 6M15 15c3.7-.6 6 1.2 6 4.5" />
-      </>
-    ),
-    products: (
-      <>
-        <path d="m4 7 8-4 8 4-8 4-8-4Z" />
-        <path d="m4 7 8 4 8-4v10l-8 4-8-4V7Z" />
-        <path d="M12 11v10" />
-      </>
-    ),
-    shield: (
-      <>
-        <path d="M12 3 5 6v5c0 4.8 2.8 8.2 7 10 4.2-1.8 7-5.2 7-10V6l-7-3Z" />
-        <path d="m9 12 2 2 4-4" />
-      </>
-    ),
-    close: <path d="m6 6 12 12M18 6 6 18" />,
-    upload: (
-      <>
-        <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" />
-        <path d="M5 14v5h14v-5" />
-      </>
-    ),
-    power: (
-      <>
-        <path d="M12 2v10" />
-        <path d="M6.3 5.8a8 8 0 1 0 11.4 0" />
-      </>
-    ),
-    lock: (
-      <>
-        <rect x="5" y="10" width="14" height="11" rx="2" />
-        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-      </>
-    ),
-    trash: (
-      <>
-        <path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14" />
-        <path d="M10 11v6M14 11v6" />
-      </>
-    ),
-    cart: (
-      <>
-        <path d="M3 4h2l2 11h10l3-8H6" />
-        <circle cx="9" cy="20" r="1" />
-        <circle cx="17" cy="20" r="1" />
-      </>
-    ),
-    clock: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v5l3 2" />
-      </>
-    ),
-    cash: (
-      <>
-        <rect x="3" y="6" width="18" height="12" rx="2" />
-        <circle cx="12" cy="12" r="2.5" />
-        <path d="M7 9H6v1M17 15h1v-1" />
-      </>
-    ),
-    "credit-card": (
-      <>
-        <rect x="3" y="5" width="18" height="14" rx="2" />
-        <path d="M3 10h18M7 15h3" />
-      </>
-    ),
-    pix: (
-      <>
-        <path d="m12 3 4 4-4 4-4-4 4-4ZM7 8l-4 4 4 4 4-4M17 8l4 4-4 4-4-4M12 13l4 4-4 4-4-4 4-4Z" />
-      </>
-    ),
-    check: <path d="m5 12 4 4L19 6" />,
-    download: (
-      <>
-        <path d="M12 3v12m0 0 4-4m-4 4-4-4" />
-        <path d="M5 19h14" />
-      </>
-    ),
-    trophy: (
-      <>
-        <path d="M8 4h8v4c0 3-1.8 5-4 5s-4-2-4-5V4Z" />
-        <path d="M8 6H4v1c0 2.2 1.4 3.5 4 3.5M16 6h4v1c0 2.2-1.4 3.5-4 3.5M12 13v4M8 20h8M9 17h6" />
-      </>
-    ),
-  };
-
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.7"
-    >
-      {paths[name]}
-    </svg>
-  );
-}
-
-function BrandMark({ src = "" }: { src?: string }) {
-  return (
-    <div className={`brand-mark${src ? " custom-logo" : ""}`} aria-hidden="true">
-      {src ? <img src={src} alt="" /> : <svg fill="none" viewBox="0 0 48 48">
-        <path
-          d="M13 19.5h22M16.5 15.5h15M14.5 24h19a8.5 8.5 0 0 1-8.5 8.5h-2A8.5 8.5 0 0 1 14.5 24Z"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2.25"
-        />
-        <path
-          d="M18 19.5c.35-4.1 2.35-6.15 6-6.15s5.65 2.05 6 6.15M17 35.5h14"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeWidth="2.25"
-        />
-        <circle cx="21" cy="17.3" r="1" fill="currentColor" />
-        <circle cx="27" cy="17.3" r="1" fill="currentColor" />
-      </svg>}
-    </div>
-  );
-}
+import { useEffect, useRef, useState } from "react";
+import { configuracoesApi, contaApi, onUnauthorized, tokenStorage, type Usuario } from "./api";
+import { BrandMark, Icon, type IconName } from "./components/Icon";
+import { PersonCell, StatusBadge } from "./components/ui";
+import { RegistrationsPage } from "./pages/cadastros/RegistrationsPage";
+import { toEmployeeRecord } from "./pages/cadastros/mappers";
+import { LoginPage } from "./pages/LoginPage";
+import { defaultCompany, defaultPreferences, toCompanySettings, toSalesPreferences, type CompanySettings, type SalesPreferences } from "./pages/settings/mappers";
+import { SettingsPage } from "./pages/settings/SettingsPage";
+import { paymentLabels, roleKey, type ClientRecord, type EmployeeRecord, type PaymentMethod, type ProductRecord, type TabId, type UserRole } from "./types";
+import { formatCurrency, getInitials, maskCurrency, parseCurrency } from "./utils/format";
 
 const navigation: Array<{
   label: string;
@@ -267,10 +23,6 @@ const navigation: Array<{
   { label: "Relatórios", icon: "reports", href: "#relatorios", allowedRoles: ["owner", "manager"] },
   { label: "Configurações", icon: "settings", href: "#configuracoes", allowedRoles: ["owner", "manager", "seller"] },
 ];
-
-type UserRole = "owner" | "manager" | "seller";
-
-const roleKey = (role: EmployeeRecord["role"]): UserRole => role === "Dono" ? "owner" : role === "Gerente" ? "manager" : "seller";
 
 function UserIdentity({ compact = false, user }: { compact?: boolean; user?: EmployeeRecord }) {
   const displayName = user?.name || "Matheus Almeida";
@@ -345,75 +97,12 @@ function Sidebar({
   );
 }
 
-type TabId = "clients" | "employees" | "products";
-type ModalMode = "create" | "view" | "edit";
-type FormValues = Record<string, string>;
-
-type ClientRecord = {
-  id: number;
-  initials: string;
-  name: string;
-  cpf: string;
-  phone: string;
-  email: string;
-  date: string;
-  status: "Ativo" | "Inativo";
-  cep: string;
-  street: string;
-  number: string;
-  complement: string;
-  district: string;
-  city: string;
-  state: string;
-  notes: string;
-};
-
-type EmployeeRecord = {
-  id: number;
-  initials: string;
-  name: string;
-  cpf: string;
-  email: string;
-  phone: string;
-  username: string;
-  role: "Dono" | "Gerente" | "Vendedor";
-  lastAccess: string;
-  status: "Ativo" | "Inativo";
-};
-
-type ProductRecord = {
-  id: number;
-  initials: string;
-  name: string;
-  category: string;
-  code: string;
-  description: string;
-  price: string;
-  stock: number;
-  minimumStock: number;
-  image: string;
-  status: "Ativo" | "Inativo";
-};
-
-const tabs: Array<{ id: TabId; label: string; icon: IconName }> = [
-  { id: "clients", label: "Clientes", icon: "users" },
-  { id: "employees", label: "Funcionários", icon: "team" },
-  { id: "products", label: "Produtos", icon: "products" },
-];
-
 const initialClients: ClientRecord[] = [
   { id: 1, initials: "JS", name: "João Silva", cpf: "123.456.789-00", phone: "(81) 99999-1234", email: "joao@email.com", date: "12/05/2024", status: "Ativo", cep: "50030-230", street: "Rua do Sol", number: "120", complement: "Apto. 302", district: "Santo Antônio", city: "Recife", state: "PE", notes: "Prefere contato pelo WhatsApp." },
   { id: 2, initials: "AS", name: "Ana Souza", cpf: "987.654.321-00", phone: "(81) 98888-5678", email: "ana@email.com", date: "08/05/2024", status: "Ativo", cep: "52050-020", street: "Rua das Graças", number: "45", complement: "", district: "Graças", city: "Recife", state: "PE", notes: "" },
   { id: 3, initials: "PL", name: "Pedro Lima", cpf: "456.789.123-00", phone: "(81) 97777-4321", email: "pedro@email.com", date: "02/05/2024", status: "Inativo", cep: "51020-030", street: "Av. Boa Viagem", number: "980", complement: "", district: "Boa Viagem", city: "Recife", state: "PE", notes: "" },
   { id: 4, initials: "MS", name: "Maria Santos", cpf: "321.654.987-00", phone: "(81) 96666-8910", email: "maria@email.com", date: "28/04/2024", status: "Ativo", cep: "", street: "", number: "", complement: "", district: "", city: "Recife", state: "PE", notes: "" },
   { id: 5, initials: "RC", name: "Rafael Costa", cpf: "741.852.963-00", phone: "(81) 95555-1122", email: "rafael@email.com", date: "22/04/2024", status: "Ativo", cep: "", street: "", number: "", complement: "", district: "", city: "Olinda", state: "PE", notes: "" },
-];
-
-const initialEmployees: EmployeeRecord[] = [
-  { id: 1, initials: "MA", name: "Matheus Almeida", cpf: "123.456.789-00", email: "matheus@pontoesabor.com", phone: "(81) 99988-1100", username: "matheus", role: "Dono", lastAccess: "Hoje, 19:48", status: "Ativo" },
-  { id: 2, initials: "CL", name: "Carlos Lima", cpf: "987.654.321-00", email: "carlos@pontoesabor.com", phone: "(81) 98877-2200", username: "carlos", role: "Gerente", lastAccess: "Hoje, 19:35", status: "Ativo" },
-  { id: 3, initials: "FS", name: "Fernanda Souza", cpf: "456.789.123-00", email: "fernanda@pontoesabor.com", phone: "(81) 97766-3300", username: "fernanda", role: "Vendedor", lastAccess: "Hoje, 18:52", status: "Ativo" },
-  { id: 4, initials: "RM", name: "Rafael Mendes", cpf: "321.654.987-00", email: "rafael@pontoesabor.com", phone: "(81) 96655-4400", username: "rafael", role: "Vendedor", lastAccess: "Ontem, 21:10", status: "Inativo" },
 ];
 
 const initialProducts: ProductRecord[] = [
@@ -423,654 +112,6 @@ const initialProducts: ProductRecord[] = [
   { id: 4, initials: "BF", name: "Batata Frita", category: "Acompanhamentos", code: "BTF001", description: "Porção individual de batatas fritas.", price: "R$ 12,00", stock: 18, minimumStock: 6, image: "", status: "Ativo" },
   { id: 5, initials: "RF", name: "Refrigerante Lata", category: "Bebidas", code: "REF001", description: "Refrigerante em lata, 350 ml.", price: "R$ 6,00", stock: 4, minimumStock: 6, image: "", status: "Ativo" },
 ];
-
-function LoginPage({
-  employees,
-  businessName,
-  businessLogo,
-  onLogin,
-}: {
-  employees: EmployeeRecord[];
-  businessName: string;
-  businessLogo: string;
-  onLogin: (userId: number, remember: boolean) => void;
-}) {
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
-  const [error, setError] = useState("");
-  const [recoveryMessage, setRecoveryMessage] = useState("");
-
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    const normalized = identifier.trim().toLocaleLowerCase();
-    const employee = employees.find((record) =>
-      record.status === "Ativo" &&
-      (record.username.toLocaleLowerCase() === normalized || record.email.toLocaleLowerCase() === normalized),
-    );
-    if (!employee || password !== "demo") {
-      setError("Usuário ou senha demonstrativa inválidos.");
-      return;
-    }
-    onLogin(employee.id, remember);
-  };
-
-  const selectDemoUser = (employee: EmployeeRecord) => {
-    setIdentifier(employee.username);
-    setPassword("demo");
-    setError("");
-    setRecoveryMessage("");
-  };
-
-  return (
-    <main className="login-page">
-      <section className="login-shell">
-        <aside className="presentation-panel">
-          <div className="presentation-content">
-            <div className="brand-lockup"><BrandMark src={businessLogo} /><div><p className="brand-name">{businessName}</p><p className="brand-type">Gestão para lanchonetes</p></div></div>
-            <div className="hero-copy"><span className="eyebrow">Gestão simples, sabor em primeiro lugar</span><h1>Seu negócio organizado em um só lugar.</h1><p>Controle vendas, pedidos, produtos e resultados com agilidade para focar no que realmente importa: seus clientes.</p></div>
-            <div className="order-illustration" aria-hidden="true">
-              <div className="order-card order-card-back" />
-              <div className="order-card order-card-front">
-                <div className="order-card-head"><span className="mini-brand"><BrandMark src={businessLogo} /></span><div><b>Pedido #0142</b><small>Balcão · Agora</small></div><i /></div>
-                <div className="order-line"><span>2× X-Burger</span><strong>R$ 36,00</strong></div>
-                <div className="order-line muted"><span>1× Refrigerante</span><strong>R$ 6,00</strong></div>
-                <div className="order-total"><span>Total do pedido</span><strong>R$ 42,00</strong></div>
-              </div>
-              <div className="status-pill"><span />Pedido em preparo</div>
-            </div>
-          </div>
-          <p className="presentation-footer">Ponto &amp; Sabor · Protótipo demonstrativo</p>
-        </aside>
-        <section className="auth-panel">
-          <div className="mobile-brand"><BrandMark src={businessLogo} /><div><p className="brand-name">{businessName}</p><p className="brand-type">Gestão para lanchonetes</p></div></div>
-          <form className="login-form" onSubmit={submit}>
-            <header><span className="form-kicker">Bem-vindo de volta</span><h2>Acesse sua conta</h2><p>Entre com um usuário demonstrativo para continuar.</p></header>
-            <div className="fields">
-              <div className="field"><label htmlFor="login-identifier">Usuário ou e-mail</label><div className="input-wrap"><input id="login-identifier" value={identifier} autoComplete="username" placeholder="Digite seu usuário ou e-mail" onChange={(event) => { setIdentifier(event.target.value); setError(""); }} /></div></div>
-              <div className="field"><label htmlFor="login-password">Senha</label><div className="input-wrap"><input id="login-password" type={showPassword ? "text" : "password"} value={password} autoComplete="current-password" placeholder="Digite sua senha" onChange={(event) => { setPassword(event.target.value); setError(""); }} /><button className="password-toggle" type="button" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} onClick={() => setShowPassword((value) => !value)}><Icon name="eye" className="eye-icon" /></button></div></div>
-            </div>
-            <div className="form-options"><label className="checkbox-label"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /><span />Lembrar de mim</label><button className="forgot-password-button" type="button" onClick={() => setRecoveryMessage("Recuperação de senha indisponível neste protótipo.")}>Esqueci minha senha</button></div>
-            {error && <div className="login-feedback error" role="alert">{error}</div>}
-            {recoveryMessage && <div className="login-feedback">{recoveryMessage}</div>}
-            <button className="submit-button" type="submit">Entrar <Icon name="chevron-right" /></button>
-            <div className="demo-login-users"><span>Acessos demonstrativos · senha: <strong>demo</strong></span><div>{employees.filter((employee) => employee.status === "Ativo").slice(0, 3).map((employee) => <button key={employee.id} type="button" onClick={() => selectDemoUser(employee)}>{employee.role}</button>)}</div></div>
-            <p className="security-note">Acesso exclusivamente demonstrativo. Não utilize credenciais reais.</p>
-          </form>
-        </section>
-      </section>
-    </main>
-  );
-}
-
-const getInitials = (name: string) =>
-  name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-
-function RowActions({
-  name,
-  inactive,
-  menuOpen,
-  onView,
-  onEdit,
-  onMore,
-  onToggleStatus,
-  canEdit = true,
-  canManage = true,
-}: {
-  name: string;
-  inactive: boolean;
-  menuOpen: boolean;
-  onView: () => void;
-  onEdit: () => void;
-  onMore: () => void;
-  onToggleStatus: () => void;
-  canEdit?: boolean;
-  canManage?: boolean;
-}) {
-  return (
-    <div className="row-actions">
-      <button type="button" aria-label={`Visualizar ${name}`} title="Visualizar" onClick={onView}><Icon name="eye" /></button>
-      {canEdit && <button type="button" aria-label={`Editar ${name}`} title="Editar" onClick={onEdit}><Icon name="edit" /></button>}
-      {canManage && <button type="button" aria-label={`Mais opções para ${name}`} title="Mais opções" aria-expanded={menuOpen} onClick={onMore}><Icon name="more" /></button>}
-      {canManage && menuOpen && (
-        <div className="row-action-menu">
-          <button type="button" onClick={onToggleStatus}>
-            <Icon name="power" />
-            {inactive ? "Ativar registro" : "Desativar registro"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PersonCell({ initials, name, detail, image }: { initials: string; name: string; detail?: string; image?: string }) {
-  return (
-    <div className="entity-cell">
-      <span className={`entity-avatar${image ? " has-image" : ""}`}>
-        {image ? <img src={image} alt="" /> : initials}
-      </span>
-      <span>
-        <strong>{name}</strong>
-        {detail && <small>{detail}</small>}
-      </span>
-    </div>
-  );
-}
-
-function StatusBadge({ value }: { value: string }) {
-  const statusClass =
-    value === "Ativo" || value === "Disponível" || value === "Concluído"
-      ? "success"
-      : value === "Estoque baixo" || value === "Aguardando confirmação"
-        ? "warning"
-        : "inactive";
-  return <span className={`management-badge ${statusClass}`}><i />{value}</span>;
-}
-
-function Pagination({ total }: { total: string }) {
-  return (
-    <footer className="pagination">
-      <p>Mostrando <strong>1–5</strong> de {total} registros</p>
-      <div>
-        <button type="button" aria-label="Página anterior" disabled><Icon name="chevron-left" /></button>
-        <button className="current-page" type="button" aria-current="page">1</button>
-        <button type="button">2</button>
-        <button type="button">3</button>
-        <span>...</span>
-        <button type="button">8</button>
-        <button type="button" aria-label="Próxima página"><Icon name="chevron-right" /></button>
-      </div>
-    </footer>
-  );
-}
-
-function SearchToolbar({
-  placeholder,
-  filters,
-  value,
-  activeFilters,
-  onChange,
-  onToggleFilter,
-}: {
-  placeholder: string;
-  filters: string[];
-  value: string;
-  activeFilters: string[];
-  onChange: (value: string) => void;
-  onToggleFilter: (filter: string) => void;
-}) {
-  return (
-    <div className="management-toolbar">
-      <label className="search-field">
-        <span className="sr-only">Pesquisar</span>
-        <Icon name="search" />
-        <input type="search" placeholder={placeholder} value={value} onChange={(event) => onChange(event.target.value)} />
-      </label>
-      <div className="filter-controls">
-        {filters.map((filter) => (
-          <button key={filter} className={`filter-button${activeFilters.includes(filter) ? " active" : ""}`} type="button" onClick={() => onToggleFilter(filter)}>
-            {filters.length === 1 && <Icon name="filter" />}
-            {filter}
-            {filters.length > 1 && <Icon name="chevron" />}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-type TableActions = {
-  menuId: string | null;
-  onOpen: (mode: ModalMode, id: number) => void;
-  onMenu: (id: string) => void;
-  onToggleStatus: (id: number) => void;
-  canEdit: boolean;
-  canManage: boolean;
-};
-
-function ClientsTable({
-  records,
-  search,
-  activeFilters,
-  onSearch,
-  onToggleFilter,
-  ...actions
-}: {
-  records: ClientRecord[];
-  search: string;
-  activeFilters: string[];
-  onSearch: (value: string) => void;
-  onToggleFilter: (filter: string) => void;
-} & TableActions) {
-  const visible = records.filter((record) =>
-    `${record.name} ${record.cpf} ${record.phone}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-  );
-  return (
-    <>
-      <SearchToolbar placeholder="Pesquisar por nome, CPF ou telefone..." filters={["Filtros"]} value={search} activeFilters={activeFilters} onChange={onSearch} onToggleFilter={onToggleFilter} />
-      <div className="management-table-scroll">
-        <table className="management-table">
-          <thead><tr><th>Cliente</th><th>CPF</th><th>Telefone</th><th>E-mail</th><th>Cadastro</th><th>Status</th><th>Ações</th></tr></thead>
-          <tbody>
-            {visible.map((client) => (
-              <tr key={client.cpf}>
-                <td><PersonCell initials={client.initials} name={client.name} /></td>
-                <td>{client.cpf}</td><td>{client.phone}</td><td>{client.email}</td><td>{client.date}</td>
-                <td><StatusBadge value={client.status} /></td>
-                <td><RowActions name={client.name} inactive={client.status === "Inativo"} menuOpen={actions.menuId === `clients-${client.id}`} canEdit={actions.canEdit} canManage={actions.canManage} onView={() => actions.onOpen("view", client.id)} onEdit={() => actions.onOpen("edit", client.id)} onMore={() => actions.onMenu(`clients-${client.id}`)} onToggleStatus={() => actions.onToggleStatus(client.id)} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <Pagination total="38" />
-    </>
-  );
-}
-
-function EmployeesTable({
-  records,
-  search,
-  activeFilters,
-  onSearch,
-  onToggleFilter,
-  ...actions
-}: {
-  records: EmployeeRecord[];
-  search: string;
-  activeFilters: string[];
-  onSearch: (value: string) => void;
-  onToggleFilter: (filter: string) => void;
-} & TableActions) {
-  const visible = records.filter((record) =>
-    `${record.name} ${record.cpf} ${record.email}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-  );
-  return (
-    <>
-      <div className="access-note">
-        <span><Icon name="shield" /></span>
-        <p><strong>Níveis de acesso</strong>Dono possui acesso total, Gerente acesso administrativo e Vendedor acesso focado em vendas.</p>
-      </div>
-      <SearchToolbar placeholder="Pesquisar por nome, CPF ou e-mail..." filters={["Perfil", "Status"]} value={search} activeFilters={activeFilters} onChange={onSearch} onToggleFilter={onToggleFilter} />
-      <div className="management-table-scroll">
-        <table className="management-table">
-          <thead><tr><th>Funcionário</th><th>Contato</th><th>Perfil</th><th>Último acesso</th><th>Status</th><th>Ações</th></tr></thead>
-          <tbody>
-            {visible.map((employee) => (
-              <tr key={employee.email}>
-                <td><PersonCell initials={employee.initials} name={employee.name} detail={employee.email} /></td>
-                <td>{employee.phone}</td>
-                <td><span className={`role-badge ${employee.role.toLowerCase()}`}>{employee.role}</span></td>
-                <td>{employee.lastAccess}</td><td><StatusBadge value={employee.status} /></td>
-                <td><RowActions name={employee.name} inactive={employee.status === "Inativo"} menuOpen={actions.menuId === `employees-${employee.id}`} canEdit={actions.canEdit} canManage={actions.canManage} onView={() => actions.onOpen("view", employee.id)} onEdit={() => actions.onOpen("edit", employee.id)} onMore={() => actions.onMenu(`employees-${employee.id}`)} onToggleStatus={() => actions.onToggleStatus(employee.id)} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <Pagination total="12" />
-    </>
-  );
-}
-
-function ProductsTable({
-  records,
-  search,
-  activeFilters,
-  onSearch,
-  onToggleFilter,
-  ...actions
-}: {
-  records: ProductRecord[];
-  search: string;
-  activeFilters: string[];
-  onSearch: (value: string) => void;
-  onToggleFilter: (filter: string) => void;
-} & TableActions) {
-  const visible = records.filter((record) =>
-    `${record.name} ${record.code}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-  );
-  return (
-    <>
-      <SearchToolbar placeholder="Pesquisar por nome ou código..." filters={["Categoria", "Status", "Estoque"]} value={search} activeFilters={activeFilters} onChange={onSearch} onToggleFilter={onToggleFilter} />
-      <div className="management-table-scroll">
-        <table className="management-table">
-          <thead><tr><th>Produto</th><th>Categoria</th><th>Código</th><th>Preço</th><th>Estoque</th><th>Status</th><th>Ações</th></tr></thead>
-          <tbody>
-            {visible.map((product) => {
-              const displayStatus = product.status === "Inativo" ? "Inativo" : product.stock <= product.minimumStock ? "Estoque baixo" : "Disponível";
-              return (
-              <tr key={product.code} className={product.status === "Ativo" && product.stock <= product.minimumStock ? "low-stock-row" : ""}>
-                <td><PersonCell initials={product.initials} name={product.name} image={product.image} /></td>
-                <td>{product.category}</td><td>{product.code}</td><td><strong>{product.price}</strong></td>
-                <td><span className={product.stock <= 5 ? "stock-count low" : "stock-count"}>{product.stock} un.</span></td>
-                <td><StatusBadge value={displayStatus} /></td>
-                <td><RowActions name={product.name} inactive={product.status === "Inativo"} menuOpen={actions.menuId === `products-${product.id}`} canEdit={actions.canEdit} canManage={actions.canManage} onView={() => actions.onOpen("view", product.id)} onEdit={() => actions.onOpen("edit", product.id)} onMore={() => actions.onMenu(`products-${product.id}`)} onToggleStatus={() => actions.onToggleStatus(product.id)} /></td>
-              </tr>
-            )})}
-          </tbody>
-        </table>
-      </div>
-      <Pagination total="126" />
-    </>
-  );
-}
-
-const tabContent = {
-  clients: {
-    title: "Clientes",
-    description: "Gerencie os clientes cadastrados.",
-    action: "Novo cliente",
-  },
-  employees: {
-    title: "Funcionários",
-    description: "Gerencie os usuários e permissões da equipe.",
-    action: "Novo funcionário",
-  },
-  products: {
-    title: "Produtos",
-    description: "Gerencie os produtos disponíveis para venda.",
-    action: "Novo produto",
-  },
-};
-
-const emptyValues: Record<TabId, FormValues> = {
-  clients: { name: "", cpf: "", phone: "", email: "", cep: "", street: "", number: "", complement: "", district: "", city: "", state: "", notes: "", status: "Ativo" },
-  employees: { name: "", cpf: "", phone: "", email: "", username: "", password: "", confirmPassword: "", role: "", status: "Ativo" },
-  products: { name: "", code: "", category: "", description: "", price: "", stock: "0", minimumStock: "0", image: "", imageName: "", status: "Ativo" },
-};
-
-const modalCopy = {
-  clients: { singular: "cliente", create: "Novo cliente", description: "Cadastre os dados pessoais, contato e endereço do cliente." },
-  employees: { singular: "funcionário", create: "Novo funcionário", description: "Cadastre os dados e defina o acesso deste integrante da equipe." },
-  products: { singular: "produto", create: "Novo produto", description: "Cadastre as informações comerciais e de estoque do produto." },
-};
-
-const onlyDigits = (value: string) => value.replace(/\D/g, "");
-const maskCpf = (value: string) =>
-  onlyDigits(value).slice(0, 11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-const maskPhone = (value: string) => {
-  const digits = onlyDigits(value).slice(0, 11);
-  return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d{4})$/, "$1-$2").replace(/(\d{4})(\d{4})$/, "$1-$2");
-};
-const maskCep = (value: string) => onlyDigits(value).slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
-const maskCnpj = (value: string) =>
-  onlyDigits(value).slice(0, 14).replace(/^(\d{2})(\d)/, "$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1/$2").replace(/(\d{4})(\d)/, "$1-$2");
-const maskCurrency = (value: string) => {
-  const cents = onlyDigits(value);
-  if (!cents) return "";
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(cents) / 100);
-};
-
-function FormField({
-  label,
-  name,
-  required,
-  error,
-  wide,
-  children,
-}: {
-  label: string;
-  name: string;
-  required?: boolean;
-  error?: string;
-  wide?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div className={`modal-field${wide ? " wide" : ""}${error ? " has-error" : ""}`}>
-      <label htmlFor={`field-${name}`}>{label}{required && <span aria-hidden="true"> *</span>}</label>
-      {children}
-      {error && <small className="field-error">{error}</small>}
-    </div>
-  );
-}
-
-function StatusSelector({ value, disabled, onChange }: { value: string; disabled: boolean; onChange: (value: string) => void }) {
-  return (
-    <div className="status-selector" aria-label="Status">
-      {["Ativo", "Inativo"].map((status) => (
-        <button key={status} type="button" className={value === status ? "active" : ""} disabled={disabled} onClick={() => onChange(status)}>
-          <i />{status}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function RecordModal({
-  type,
-  mode,
-  initial,
-  onClose,
-  onEdit,
-  onSave,
-  canEdit = true,
-}: {
-  type: TabId;
-  mode: ModalMode;
-  initial: FormValues;
-  onClose: () => void;
-  onEdit: () => void;
-  onSave: (values: FormValues) => void;
-  canEdit?: boolean;
-}) {
-  const [values, setValues] = useState<FormValues>({ ...emptyValues[type], ...initial });
-  const [errors, setErrors] = useState<FormValues>({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [resetPassword, setResetPassword] = useState(false);
-  const readOnly = mode === "view";
-  const copy = modalCopy[type];
-  const title = mode === "create" ? copy.create : mode === "edit" ? `Editar ${copy.singular}` : `Detalhes do ${copy.singular}`;
-
-  useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => event.key === "Escape" && onClose();
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", handleKey);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", handleKey);
-    };
-  }, [onClose]);
-
-  const update = (name: string, value: string) => {
-    setValues((current) => ({ ...current, [name]: value }));
-    setErrors((current) => ({ ...current, [name]: "" }));
-  };
-
-  const validate = () => {
-    const next: FormValues = {};
-    const required = type === "clients"
-      ? ["name"]
-      : type === "employees"
-        ? ["name", "username", "role"]
-        : ["name", "code", "category", "price"];
-    required.forEach((field) => {
-      if (!values[field]?.trim()) next[field] = "Este campo é obrigatório.";
-    });
-    if (values.cpf && onlyDigits(values.cpf).length !== 11) next.cpf = "Informe um CPF válido.";
-    if (values.phone && ![10, 11].includes(onlyDigits(values.phone).length)) next.phone = "Informe um telefone válido.";
-    if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) next.email = "Informe um e-mail válido.";
-    const passwordRequired = type === "employees" && (mode === "create" || resetPassword);
-    if (passwordRequired && !values.password) next.password = "Informe uma senha.";
-    if (passwordRequired && values.password.length < 6) next.password = "Use pelo menos 6 caracteres.";
-    if (passwordRequired && values.password !== values.confirmPassword) next.confirmPassword = "As senhas não são iguais.";
-    if (type === "products" && Number(values.stock) < 0) next.stock = "O estoque não pode ser negativo.";
-    if (type === "products" && Number(values.minimumStock) < 0) next.minimumStock = "O estoque mínimo não pode ser negativo.";
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  };
-
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    if (readOnly || !validate()) return;
-    onSave(values);
-  };
-
-  const input = (name: string, placeholder = "", typeName = "text", mask?: (value: string) => string) => (
-    <input id={`field-${name}`} name={name} type={typeName} value={values[name] || ""} placeholder={placeholder} readOnly={readOnly} aria-invalid={Boolean(errors[name])} onChange={(event) => update(name, mask ? mask(event.target.value) : event.target.value)} />
-  );
-
-  const renderClient = () => (
-    <>
-      <fieldset className="form-section">
-        <legend>Dados pessoais</legend>
-        <div className="modal-form-grid">
-          <FormField label="Nome completo" name="name" required error={errors.name} wide>{input("name", "Ex.: João da Silva")}</FormField>
-          <FormField label="CPF" name="cpf" error={errors.cpf}>{input("cpf", "000.000.000-00", "text", maskCpf)}</FormField>
-          <FormField label="Status" name="status"><StatusSelector value={values.status} disabled={readOnly} onChange={(value) => update("status", value)} /></FormField>
-        </div>
-      </fieldset>
-      <fieldset className="form-section">
-        <legend>Contato</legend>
-        <div className="modal-form-grid">
-          <FormField label="Telefone" name="phone" error={errors.phone}>{input("phone", "(00) 00000-0000", "tel", maskPhone)}</FormField>
-          <FormField label="E-mail" name="email" error={errors.email}>{input("email", "cliente@email.com", "email")}</FormField>
-        </div>
-      </fieldset>
-      <fieldset className="form-section">
-        <legend>Endereço</legend>
-        <div className="modal-form-grid address-grid">
-          <FormField label="CEP" name="cep">{input("cep", "00000-000", "text", maskCep)}</FormField>
-          <FormField label="Rua" name="street" wide>{input("street", "Nome da rua")}</FormField>
-          <FormField label="Número" name="number">{input("number", "Nº")}</FormField>
-          <FormField label="Complemento" name="complement">{input("complement", "Apto., bloco...")}</FormField>
-          <FormField label="Bairro" name="district">{input("district", "Bairro")}</FormField>
-          <FormField label="Cidade" name="city">{input("city", "Cidade")}</FormField>
-          <FormField label="Estado" name="state">{input("state", "UF")}</FormField>
-          <FormField label="Observações" name="notes" wide>
-            <textarea id="field-notes" value={values.notes} placeholder="Informações adicionais sobre o cliente" readOnly={readOnly} onChange={(event) => update("notes", event.target.value)} />
-          </FormField>
-        </div>
-      </fieldset>
-    </>
-  );
-
-  const passwordFieldsVisible = mode === "create" || resetPassword;
-  const renderEmployee = () => (
-    <>
-      <fieldset className="form-section">
-        <legend>Dados pessoais</legend>
-        <div className="modal-form-grid">
-          <FormField label="Nome completo" name="name" required error={errors.name} wide>{input("name", "Ex.: Maria da Silva")}</FormField>
-          <FormField label="CPF" name="cpf" error={errors.cpf}>{input("cpf", "000.000.000-00", "text", maskCpf)}</FormField>
-          <FormField label="Telefone" name="phone" error={errors.phone}>{input("phone", "(00) 00000-0000", "tel", maskPhone)}</FormField>
-          <FormField label="E-mail" name="email" error={errors.email} wide>{input("email", "nome@pontoesabor.com", "email")}</FormField>
-        </div>
-      </fieldset>
-      <fieldset className="form-section">
-        <legend>Acesso ao sistema</legend>
-        <div className="modal-form-grid">
-          <FormField label="Nome de usuário" name="username" required error={errors.username}>{input("username", "nome.sobrenome")}</FormField>
-          <FormField label="Perfil de acesso" name="role" required error={errors.role}>
-            <select id="field-role" value={values.role} disabled={readOnly} onChange={(event) => update("role", event.target.value)}>
-              <option value="">Selecione um perfil</option>
-              <option>Dono</option><option>Gerente</option><option>Vendedor</option>
-            </select>
-          </FormField>
-          {mode === "edit" && !resetPassword && (
-            <div className="reset-password-card wide">
-              <span><Icon name="lock" /></span>
-              <p><strong>Senha de acesso</strong><small>A senha atual permanece protegida e não é exibida.</small></p>
-              <button type="button" onClick={() => setResetPassword(true)}>Redefinir senha</button>
-            </div>
-          )}
-          {passwordFieldsVisible && (
-            <>
-              <FormField label={mode === "create" ? "Senha" : "Nova senha"} name="password" required error={errors.password}>
-                <div className="modal-password">{input("password", "Mínimo de 6 caracteres", showPassword ? "text" : "password")}<button type="button" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} onClick={() => setShowPassword((value) => !value)}><Icon name="eye" /></button></div>
-              </FormField>
-              <FormField label="Confirmar senha" name="confirmPassword" required error={errors.confirmPassword}>
-                {input("confirmPassword", "Repita a senha", showPassword ? "text" : "password")}
-              </FormField>
-            </>
-          )}
-          <FormField label="Status" name="status" wide><StatusSelector value={values.status} disabled={readOnly} onChange={(value) => update("status", value)} /></FormField>
-        </div>
-        <p className="permission-note"><Icon name="shield" /> Apenas o Dono pode atribuir o perfil Dono e alterar permissões administrativas restritas.</p>
-      </fieldset>
-    </>
-  );
-
-  const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    update("image", URL.createObjectURL(file));
-    update("imageName", file.name);
-  };
-  const renderProduct = () => (
-    <>
-      <fieldset className="form-section">
-        <legend>Informações do produto</legend>
-        <div className="modal-form-grid">
-          <FormField label="Nome do produto" name="name" required error={errors.name}>{input("name", "Ex.: X-Bacon")}</FormField>
-          <FormField label="Código do produto" name="code" required error={errors.code}>{input("code", "Ex.: XBC001")}</FormField>
-          <FormField label="Categoria" name="category" required error={errors.category}>
-            <select id="field-category" value={values.category} disabled={readOnly} onChange={(event) => update("category", event.target.value)}>
-              <option value="">Selecione uma categoria</option>
-              {["Hambúrgueres", "Bebidas", "Acompanhamentos", "Combos", "Sobremesas", "Outros"].map((category) => <option key={category}>{category}</option>)}
-            </select>
-          </FormField>
-          <FormField label="Status" name="status"><StatusSelector value={values.status} disabled={readOnly} onChange={(value) => update("status", value)} /></FormField>
-          <FormField label="Descrição" name="description" wide>
-            <textarea id="field-description" value={values.description} placeholder="Ingredientes, tamanho ou outras informações" readOnly={readOnly} onChange={(event) => update("description", event.target.value)} />
-          </FormField>
-        </div>
-      </fieldset>
-      <fieldset className="form-section">
-        <legend>Preço e estoque</legend>
-        <div className="modal-form-grid three-columns">
-          <FormField label="Preço de venda" name="price" required error={errors.price}>{input("price", "R$ 0,00", "text", maskCurrency)}</FormField>
-          <FormField label="Quantidade em estoque" name="stock" error={errors.stock}>{input("stock", "0", "number")}</FormField>
-          <FormField label="Estoque mínimo" name="minimumStock" error={errors.minimumStock}>{input("minimumStock", "0", "number")}</FormField>
-        </div>
-      </fieldset>
-      <fieldset className="form-section">
-        <legend>Imagem</legend>
-        <div className="image-picker">
-          <div className={`image-preview${values.image ? " filled" : ""}`}>
-            {values.image ? <img src={values.image} alt="Prévia do produto" /> : <Icon name="products" />}
-          </div>
-          <div>
-            <strong>{values.imageName || (values.image ? "Imagem do produto" : "Adicione uma imagem do produto")}</strong>
-            <small>PNG ou JPG. A imagem será usada na identificação do produto.</small>
-            {!readOnly && <label className="upload-button" htmlFor="field-image"><Icon name="upload" />Selecionar imagem</label>}
-            <input className="sr-only" id="field-image" type="file" accept="image/png,image/jpeg" disabled={readOnly} onChange={handleImage} />
-          </div>
-        </div>
-      </fieldset>
-    </>
-  );
-
-  return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="record-modal" role="dialog" aria-modal="true" aria-labelledby="record-modal-title">
-        <header className="modal-header">
-          <div><span className="modal-kicker">{mode === "view" ? "Visualização" : mode === "edit" ? "Edição" : "Novo cadastro"}</span><h2 id="record-modal-title">{title}</h2><p>{copy.description}</p></div>
-          <button type="button" aria-label="Fechar formulário" onClick={onClose}><Icon name="close" /></button>
-        </header>
-        <form onSubmit={submit}>
-          <div className="modal-body">
-            {Object.keys(errors).length > 0 && <div className="form-alert" role="alert">Preencha os campos obrigatórios para continuar.</div>}
-            {type === "clients" ? renderClient() : type === "employees" ? renderEmployee() : renderProduct()}
-          </div>
-          <footer className="modal-footer">
-            <button className="secondary-modal-button" type="button" onClick={onClose}>{readOnly ? "Fechar" : "Cancelar"}</button>
-            {readOnly ? canEdit && <button className="primary-modal-button" type="button" onClick={onEdit}><Icon name="edit" />Editar</button> : <button className="primary-modal-button" type="submit">{mode === "edit" ? "Salvar alterações" : `Salvar ${copy.singular}`}</button>}
-          </footer>
-        </form>
-      </section>
-    </div>
-  );
-}
 
 type CartItem = {
   productId: number;
@@ -1082,9 +123,6 @@ type CartItem = {
 };
 
 const categories = ["Todos", "Hambúrgueres", "Bebidas", "Acompanhamentos", "Combos", "Sobremesas"];
-const parseCurrency = (value: string) => Number(value.replace(/[^\d]/g, "")) / 100;
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 const itemUnitPrice = (item: CartItem, product: ProductRecord) => item.unitPrice ?? parseCurrency(product.price);
 
 function SalesPage({
@@ -1257,7 +295,6 @@ function SalesPage({
   );
 }
 
-type PaymentMethod = "cash" | "credit" | "debit" | "pix";
 type OrderStatus = "Em preparo" | "Concluído" | "Cancelado";
 
 type PreparedOrder = {
@@ -1280,13 +317,6 @@ type SaleRecord = PreparedOrder & {
   status: OrderStatus;
   source: "real" | "demo";
   cancellationReason?: string;
-};
-
-const paymentLabels: Record<PaymentMethod, string> = {
-  cash: "Dinheiro",
-  credit: "Cartão de crédito",
-  debit: "Cartão de débito",
-  pix: "PIX",
 };
 
 const demoDate = (daysAgo: number, hour: number, minute: number) => {
@@ -1992,202 +1022,6 @@ function ReportsPage({
   );
 }
 
-type CompanySettings = {
-  tradeName: string;
-  legalName: string;
-  cnpj: string;
-  phone: string;
-  email: string;
-  cep: string;
-  address: string;
-  number: string;
-  district: string;
-  city: string;
-  state: string;
-  logo: string;
-};
-
-type SalesPreferences = {
-  stockControl: boolean;
-  blockWithoutStock: boolean;
-  lowStockThreshold: number;
-  confirmCancellation: boolean;
-  allowAnonymousCustomer: boolean;
-  initialOrderStatus: "Em preparo" | "Concluído";
-  paymentMethods: Record<PaymentMethod, boolean>;
-};
-
-const permissionRows: Array<{ feature: string; owner: boolean; manager: boolean; seller: boolean }> = [
-  { feature: "Dashboard gerencial", owner: true, manager: true, seller: false },
-  { feature: "Realizar vendas", owner: true, manager: true, seller: true },
-  { feature: "Consultar próprios pedidos", owner: true, manager: true, seller: true },
-  { feature: "Consultar todos os pedidos", owner: true, manager: true, seller: false },
-  { feature: "Cancelar pedidos", owner: true, manager: true, seller: false },
-  { feature: "Cadastrar clientes", owner: true, manager: true, seller: true },
-  { feature: "Editar clientes", owner: true, manager: true, seller: false },
-  { feature: "Gerenciar produtos", owner: true, manager: true, seller: false },
-  { feature: "Gerenciar funcionários", owner: true, manager: false, seller: false },
-  { feature: "Consultar relatórios", owner: true, manager: true, seller: false },
-  { feature: "Exportar relatórios", owner: true, manager: true, seller: false },
-  { feature: "Configurações gerais", owner: true, manager: false, seller: false },
-  { feature: "Alterar permissões", owner: true, manager: false, seller: false },
-];
-
-function SettingToggle({ checked, disabled, onChange }: { checked: boolean; disabled?: boolean; onChange: (checked: boolean) => void }) {
-  return <button type="button" className={`setting-toggle${checked ? " active" : ""}`} role="switch" aria-checked={checked} disabled={disabled} onClick={() => onChange(!checked)}><span /></button>;
-}
-
-function SettingsPage({
-  currentUser,
-  currentRole,
-  employees,
-  company,
-  preferences,
-  onSaveCompany,
-  onSaveAccount,
-  onPreferences,
-  onSessionChange,
-  onDenied,
-  onLogout,
-  onSuccess,
-}: {
-  currentUser: EmployeeRecord;
-  currentRole: UserRole;
-  employees: EmployeeRecord[];
-  company: CompanySettings;
-  preferences: SalesPreferences;
-  onSaveCompany: (settings: CompanySettings) => void;
-  onSaveAccount: (user: EmployeeRecord) => void;
-  onPreferences: (preferences: SalesPreferences) => void;
-  onSessionChange: (id: number) => void;
-  onDenied: () => void;
-  onLogout: () => void;
-  onSuccess: (message: string) => void;
-}) {
-  const [activeTab, setActiveTab] = useState<"business" | "permissions" | "sales" | "account">("business");
-  const [companyDraft, setCompanyDraft] = useState(company);
-  const [accountDraft, setAccountDraft] = useState(currentUser);
-  const [passwordModal, setPasswordModal] = useState(false);
-  const [passwords, setPasswords] = useState({ current: "", next: "", confirm: "" });
-  const [passwordError, setPasswordError] = useState("");
-  const isOwner = currentRole === "owner";
-
-  useEffect(() => {
-    setAccountDraft(currentUser);
-    if (!isOwner) setActiveTab("account");
-  }, [currentUser, isOwner]);
-
-  const tabsConfig = [
-    { id: "business" as const, label: "Dados da Lanchonete", icon: "registers" as IconName, restricted: !isOwner },
-    { id: "permissions" as const, label: "Usuários e Permissões", icon: "shield" as IconName, restricted: !isOwner },
-    { id: "sales" as const, label: "Preferências de Vendas", icon: "settings" as IconName, restricted: !isOwner },
-    { id: "account" as const, label: "Minha Conta", icon: "users" as IconName, restricted: false },
-  ];
-  const updateCompany = (field: keyof CompanySettings, value: string) => setCompanyDraft((current) => ({ ...current, [field]: value }));
-  const updatePreference = <K extends keyof SalesPreferences>(field: K, value: SalesPreferences[K]) => onPreferences({ ...preferences, [field]: value });
-  const handleLogo = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) updateCompany("logo", URL.createObjectURL(file));
-  };
-  const savePassword = () => {
-    if (!passwords.current || passwords.next.length < 6) {
-      setPasswordError("Informe a senha atual e uma nova senha com pelo menos 6 caracteres.");
-      return;
-    }
-    if (passwords.next !== passwords.confirm) {
-      setPasswordError("A confirmação da nova senha não confere.");
-      return;
-    }
-    setPasswordModal(false);
-    setPasswords({ current: "", next: "", confirm: "" });
-    setPasswordError("");
-    onSuccess("Senha demonstrativa atualizada com sucesso.");
-  };
-
-  return (
-    <div className="dashboard-content settings-content">
-      <div className="settings-tabs" role="tablist" aria-label="Configurações">
-        {tabsConfig.map((tab) => <button key={tab.id} type="button" role="tab" aria-selected={activeTab === tab.id} className={`${activeTab === tab.id ? "active" : ""}${tab.restricted ? " restricted" : ""}`} onClick={() => { if (tab.restricted) onDenied(); else setActiveTab(tab.id); }}><Icon name={tab.icon} />{tab.label}{tab.restricted && <Icon name="lock" />}</button>)}
-      </div>
-
-      {activeTab === "business" && isOwner && (
-        <section className="dashboard-card settings-panel">
-          <div className="settings-panel-heading"><div><span>Identidade do negócio</span><h2>Dados da Lanchonete</h2><p>Informações utilizadas na identificação do estabelecimento.</p></div></div>
-          <form onSubmit={(event) => { event.preventDefault(); onSaveCompany(companyDraft); }}>
-            <div className="settings-form-grid">
-              <label><span>Nome fantasia</span><input value={companyDraft.tradeName} onChange={(event) => updateCompany("tradeName", event.target.value)} required /></label>
-              <label><span>Razão social</span><input value={companyDraft.legalName} onChange={(event) => updateCompany("legalName", event.target.value)} placeholder="Razão social da empresa" /></label>
-              <label><span>CNPJ</span><input value={companyDraft.cnpj} onChange={(event) => updateCompany("cnpj", maskCnpj(event.target.value))} placeholder="00.000.000/0000-00" /></label>
-              <label><span>Telefone</span><input value={companyDraft.phone} onChange={(event) => updateCompany("phone", maskPhone(event.target.value))} placeholder="(00) 00000-0000" /></label>
-              <label className="wide"><span>E-mail</span><input type="email" value={companyDraft.email} onChange={(event) => updateCompany("email", event.target.value)} placeholder="contato@empresa.com" /></label>
-              <label><span>CEP</span><input value={companyDraft.cep} onChange={(event) => updateCompany("cep", maskCep(event.target.value))} placeholder="00000-000" /></label>
-              <label className="wide"><span>Endereço</span><input value={companyDraft.address} onChange={(event) => updateCompany("address", event.target.value)} placeholder="Rua ou avenida" /></label>
-              <label><span>Número</span><input value={companyDraft.number} onChange={(event) => updateCompany("number", event.target.value)} /></label>
-              <label><span>Bairro</span><input value={companyDraft.district} onChange={(event) => updateCompany("district", event.target.value)} /></label>
-              <label><span>Cidade</span><input value={companyDraft.city} onChange={(event) => updateCompany("city", event.target.value)} /></label>
-              <label><span>Estado</span><input value={companyDraft.state} maxLength={2} onChange={(event) => updateCompany("state", event.target.value.toUpperCase())} placeholder="UF" /></label>
-            </div>
-            <div className="business-logo-setting"><div className={companyDraft.logo ? "filled" : ""}>{companyDraft.logo ? <img src={companyDraft.logo} alt="Logo da lanchonete" /> : <BrandMark />}</div><p><strong>Logo da lanchonete</strong><small>PNG ou JPG. Utilizada para identificar o estabelecimento.</small></p><label htmlFor="business-logo"><Icon name="upload" />Selecionar imagem</label><input className="sr-only" id="business-logo" type="file" accept="image/png,image/jpeg" onChange={handleLogo} /></div>
-            <footer className="settings-form-footer"><button type="submit">Salvar alterações</button></footer>
-          </form>
-        </section>
-      )}
-
-      {activeTab === "permissions" && isOwner && (
-        <section className="dashboard-card settings-panel permissions-panel">
-          <div className="settings-panel-heading"><div><span>Controle de acesso</span><h2>Usuários e Permissões</h2><p>Permissões fixas aplicadas aos três perfis do sistema.</p></div><span className="owner-only-badge"><Icon name="shield" />Somente Dono</span></div>
-          <div className="role-cards">
-            <article><span className="owner"><Icon name="shield" /></span><p><strong>Dono</strong><small>Administrador geral, com acesso completo.</small></p></article>
-            <article><span className="manager"><Icon name="team" /></span><p><strong>Gerente</strong><small>Gestão operacional e acompanhamento das vendas.</small></p></article>
-            <article><span className="seller"><Icon name="users" /></span><p><strong>Vendedor</strong><small>Atendimento e registro de vendas.</small></p></article>
-          </div>
-          <div className="permissions-table-scroll"><table className="permissions-table"><thead><tr><th>Funcionalidade</th><th>Dono</th><th>Gerente</th><th>Vendedor</th></tr></thead><tbody>{permissionRows.map((row) => <tr key={row.feature}><td>{row.feature}</td>{(["owner", "manager", "seller"] as const).map((role) => <td key={role}><span className={row[role] ? "allowed" : "denied"}><Icon name={row[role] ? "check" : "close"} />{row[role] ? "Permitido" : "Restrito"}</span></td>)}</tr>)}</tbody></table></div>
-          <div className="fixed-permissions-note"><Icon name="lock" /><p><strong>Permissões fixas nesta versão</strong><small>Os perfis não podem ser personalizados individualmente no protótipo.</small></p></div>
-        </section>
-      )}
-
-      {activeTab === "sales" && isOwner && (
-        <section className="dashboard-card settings-panel preferences-panel">
-          <div className="settings-panel-heading"><div><span>Operação</span><h2>Preferências de Vendas</h2><p>Defina regras aplicadas ao PDV e à confirmação dos pedidos.</p></div></div>
-          <div className="preference-group"><div className="preference-group-title"><span><Icon name="products" /></span><div><h3>Estoque</h3><p>Controle de disponibilidade dos produtos.</p></div></div>
-            <div className="preference-row"><p><strong>Ativar controle de estoque</strong><small>Controla quantidades e realiza baixa após a confirmação.</small></p><SettingToggle checked={preferences.stockControl} onChange={(value) => updatePreference("stockControl", value)} /></div>
-            <div className="preference-row"><p><strong>Impedir venda sem estoque</strong><small>Bloqueia produtos cuja quantidade esteja zerada.</small></p><SettingToggle checked={preferences.blockWithoutStock} disabled={!preferences.stockControl} onChange={(value) => updatePreference("blockWithoutStock", value)} /></div>
-            <div className="preference-row"><p><strong>Alerta de estoque baixo</strong><small>Quantidade utilizada para sinalizar reposição.</small></p><input className="preference-number" type="number" min="0" value={preferences.lowStockThreshold} onChange={(event) => updatePreference("lowStockThreshold", Math.max(0, Number(event.target.value)))} /></div>
-          </div>
-          <div className="preference-group"><div className="preference-group-title"><span><Icon name="orders" /></span><div><h3>Pedidos</h3><p>Comportamento do pedido durante a operação.</p></div></div>
-            <div className="preference-row"><p><strong>Confirmar antes de cancelar</strong><small>Solicita confirmação e motivo para ações irreversíveis.</small></p><SettingToggle checked={preferences.confirmCancellation} onChange={(value) => updatePreference("confirmCancellation", value)} /></div>
-            <div className="preference-row"><p><strong>Permitir venda sem cliente identificado</strong><small>Autoriza vendas rápidas de balcão.</small></p><SettingToggle checked={preferences.allowAnonymousCustomer} onChange={(value) => updatePreference("allowAnonymousCustomer", value)} /></div>
-            <div className="preference-row"><p><strong>Status inicial após confirmação</strong><small>Aplicado automaticamente a novas vendas.</small></p><select value={preferences.initialOrderStatus} onChange={(event) => updatePreference("initialOrderStatus", event.target.value as SalesPreferences["initialOrderStatus"])}><option>Em preparo</option><option>Concluído</option></select></div>
-          </div>
-          <div className="preference-group"><div className="preference-group-title"><span><Icon name="credit-card" /></span><div><h3>Pagamentos</h3><p>Formas disponíveis na finalização da venda.</p></div></div>
-            {(Object.keys(paymentLabels) as PaymentMethod[]).map((method) => <div className="preference-row" key={method}><p><strong>{paymentLabels[method]}</strong><small>Disponibilizar esta forma na revisão do pedido.</small></p><SettingToggle checked={preferences.paymentMethods[method]} onChange={(value) => onPreferences({ ...preferences, paymentMethods: { ...preferences.paymentMethods, [method]: value } })} /></div>)}
-          </div>
-        </section>
-      )}
-
-      {activeTab === "account" && (
-        <section className="dashboard-card settings-panel account-panel">
-          <div className="settings-panel-heading"><div><span>Perfil pessoal</span><h2>Minha Conta</h2><p>Atualize seus dados de contato e acesso.</p></div><span className={`role-badge ${currentUser.role.toLowerCase()}`}>{currentUser.role}</span></div>
-          <div className="demo-session-panel"><span><Icon name="users" /></span><p><strong>Sessão demonstrativa</strong><small>Alterne entre funcionários para testar permissões. Dados não sensíveis permanecem apenas neste navegador; não representa autenticação segura.</small></p><select value={currentUser.id} onChange={(event) => onSessionChange(Number(event.target.value))}>{employees.filter((employee) => employee.status === "Ativo").map((employee) => <option key={employee.id} value={employee.id}>{employee.name} — {employee.role}</option>)}</select></div>
-          <form onSubmit={(event) => { event.preventDefault(); onSaveAccount({ ...accountDraft, initials: getInitials(accountDraft.name) }); }}>
-            <div className="account-identity"><span>{accountDraft.initials}</span><p><strong>{accountDraft.name}</strong><small>{accountDraft.email}</small></p></div>
-            <div className="settings-form-grid">
-              <label><span>Nome</span><input value={accountDraft.name} required onChange={(event) => setAccountDraft((current) => ({ ...current, name: event.target.value }))} /></label>
-              <label><span>E-mail</span><input type="email" value={accountDraft.email} onChange={(event) => setAccountDraft((current) => ({ ...current, email: event.target.value }))} /></label>
-              <label><span>Telefone</span><input value={accountDraft.phone} onChange={(event) => setAccountDraft((current) => ({ ...current, phone: maskPhone(event.target.value) }))} /></label>
-              <label><span>Nome de usuário</span><input value={accountDraft.username} onChange={(event) => setAccountDraft((current) => ({ ...current, username: event.target.value }))} /></label>
-              <label className="wide"><span>Perfil de acesso</span><input value={accountDraft.role} readOnly /></label>
-            </div>
-            <footer className="account-actions"><button type="button" onClick={() => setPasswordModal(true)}><Icon name="lock" />Alterar senha</button><button type="button" className="logout-button" onClick={onLogout}>Sair da conta</button><button type="submit">Salvar alterações</button></footer>
-          </form>
-        </section>
-      )}
-
-      {passwordModal && <div className="modal-backdrop" role="presentation"><section className="confirm-dialog password-dialog" role="dialog" aria-modal="true" aria-labelledby="password-title"><span className="confirm-icon"><Icon name="lock" /></span><h2 id="password-title">Alterar senha</h2><p>Nenhuma senha existente é exibida ou armazenada neste protótipo.</p><div className="password-fields"><label>Senha atual<input type="password" value={passwords.current} onChange={(event) => setPasswords((current) => ({ ...current, current: event.target.value }))} /></label><label>Nova senha<input type="password" value={passwords.next} onChange={(event) => setPasswords((current) => ({ ...current, next: event.target.value }))} /></label><label>Confirmar nova senha<input type="password" value={passwords.confirm} onChange={(event) => setPasswords((current) => ({ ...current, confirm: event.target.value }))} /></label></div>{passwordError && <small className="password-error">{passwordError}</small>}<div><button type="button" onClick={() => { setPasswordModal(false); setPasswordError(""); }}>Cancelar</button><button className="danger-button" type="button" onClick={savePassword}>Salvar senha</button></div></section></div>}
-    </div>
-  );
-}
-
 type PersistedPrototypeState = {
   clients: ClientRecord[];
   products: ProductRecord[];
@@ -2197,18 +1031,11 @@ type PersistedPrototypeState = {
 };
 
 const prototypeStorageKey = "ponto-e-sabor:prototype-data:v1";
-const rememberedSessionKey = "ponto-e-sabor:remembered-demo-session";
-const temporarySessionKey = "ponto-e-sabor:temporary-demo-session";
 
-const loadDemoSession = () => {
-  try {
-    const stored = window.localStorage.getItem(rememberedSessionKey) || window.sessionStorage.getItem(temporarySessionKey);
-    const id = stored ? Number(stored) : null;
-    return Number.isInteger(id) ? id : null;
-  } catch {
-    return null;
-  }
-};
+/** Funcionário exibido enquanto a sessão ainda não carregou (nunca aparece na tela). */
+const emptyUser: EmployeeRecord = { id: 0, initials: "", name: "", cpf: "", email: "", phone: "", username: "", role: "Vendedor", lastAccess: "", status: "Ativo" };
+
+const homePage = (user: Usuario) => user.perfil === "VENDEDOR" ? "sales" as const : "dashboard" as const;
 
 const loadPrototypeState = (): Partial<{
   clients: ClientRecord[];
@@ -2235,22 +1062,13 @@ const loadPrototypeState = (): Partial<{
 
 export default function App() {
   const persistedState = useRef(loadPrototypeState()).current;
-  const restoredSessionId = useRef(loadDemoSession()).current;
-  const restoredEmployee = initialEmployees.find((employee) => employee.id === restoredSessionId && employee.status === "Ativo");
-  const [authenticatedUserId, setAuthenticatedUserId] = useState<number | null>(restoredEmployee?.id || null);
-  const [activePage, setActivePage] = useState<"dashboard" | "sales" | "orders" | "reports" | "settings" | "registrations" | "review" | "success" | "details">(
-    restoredEmployee ? (roleKey(restoredEmployee.role) === "seller" ? "sales" : "dashboard") : "dashboard",
-  );
+  const [sessionUser, setSessionUser] = useState<Usuario | null>(null);
+  const [checkingSession, setCheckingSession] = useState(() => Boolean(tokenStorage.get()));
+  const [loginNotice, setLoginNotice] = useState("");
+  const [activePage, setActivePage] = useState<"dashboard" | "sales" | "orders" | "reports" | "settings" | "registrations" | "review" | "success" | "details">("dashboard");
   const [activeTab, setActiveTab] = useState<TabId>("clients");
-  const [clientRecords, setClientRecords] = useState<ClientRecord[]>(persistedState.clients || initialClients);
-  const [employeeRecords, setEmployeeRecords] = useState<EmployeeRecord[]>(initialEmployees);
-  const [currentUserId, setCurrentUserId] = useState(restoredEmployee?.id || 1);
+  const [clientRecords] = useState<ClientRecord[]>(persistedState.clients || initialClients);
   const [productRecords, setProductRecords] = useState<ProductRecord[]>(persistedState.products || initialProducts);
-  const [searches, setSearches] = useState<Record<TabId, string>>({ clients: "", employees: "", products: "" });
-  const [activeFilters, setActiveFilters] = useState<Record<TabId, string[]>>({ clients: [], employees: [], products: [] });
-  const [modal, setModal] = useState<{ type: TabId; mode: ModalMode; id?: number } | null>(null);
-  const [menuId, setMenuId] = useState<string | null>(null);
-  const [confirmation, setConfirmation] = useState<{ type: TabId; id: number; name: string; inactive: boolean } | null>(null);
   const [toast, setToast] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [productSearch, setProductSearch] = useState("");
@@ -2271,12 +1089,64 @@ export default function App() {
   const [reportStartDate, setReportStartDate] = useState("");
   const [reportEndDate, setReportEndDate] = useState("");
   const [reportSeller, setReportSeller] = useState("");
-  const [companySettings, setCompanySettings] = useState<CompanySettings>(persistedState.company || { tradeName: "Ponto & Sabor", legalName: "", cnpj: "", phone: "", email: "", cep: "", address: "", number: "", district: "", city: "", state: "", logo: "" });
-  const [salesPreferences, setSalesPreferences] = useState<SalesPreferences>(persistedState.preferences || { stockControl: true, blockWithoutStock: true, lowStockThreshold: 5, confirmCancellation: true, allowAnonymousCustomer: true, initialOrderStatus: "Em preparo", paymentMethods: { cash: true, credit: true, debit: true, pix: true } });
+  const [companySettings, setCompanySettings] = useState<CompanySettings>(persistedState.company || defaultCompany);
+  const [salesPreferences, setSalesPreferences] = useState<SalesPreferences>(persistedState.preferences || defaultPreferences);
   const confirmationLock = useRef(false);
-  const content = tabContent[activeTab];
-  const currentUser = employeeRecords.find((employee) => employee.id === currentUserId) || employeeRecords[0];
+  const currentUser = sessionUser ? toEmployeeRecord(sessionUser) : emptyUser;
   const currentRole = roleKey(currentUser.role);
+
+  const startSession = (user: Usuario) => {
+    setSessionUser(user);
+    setLoginNotice("");
+    setActiveTab("clients");
+    setActivePage(homePage(user));
+  };
+
+  const endSession = () => {
+    tokenStorage.clear();
+    setSessionUser(null);
+    setCart([]);
+    setPreparedOrder(null);
+    setPaymentMethod(null);
+    setCashReceived("");
+    setDiscount("R$ 0,00");
+    setSelectedClientId(null);
+    confirmationLock.current = false;
+  };
+
+  // 401 em qualquer chamada: o token expirou ou foi invalidado, então volta para o login.
+  useEffect(() => {
+    onUnauthorized(() => {
+      setSessionUser(null);
+      setLoginNotice("Sua sessão expirou. Entre novamente para continuar.");
+    });
+    return () => onUnauthorized(null);
+  }, []);
+
+  // Sessão salva ("Lembrar de mim" ou aba ainda aberta): confirma o token buscando a conta.
+  useEffect(() => {
+    if (!tokenStorage.get()) return;
+    contaApi.consultar()
+      .then(startSession)
+      // Um 401 já apaga o token (onUnauthorized); com a API fora do ar, o token é mantido.
+      .catch(() => undefined)
+      .finally(() => setCheckingSession(false));
+  }, []);
+
+  // Dados da lanchonete e preferências de vendas vêm da API a cada login.
+  const sessionUserId = sessionUser?.id;
+  useEffect(() => {
+    if (!sessionUserId) return;
+    let cancelled = false;
+    configuracoesApi.consultar()
+      .then((configuracao) => {
+        if (cancelled) return;
+        setCompanySettings(toCompanySettings(configuracao.empresa));
+        setSalesPreferences(toSalesPreferences(configuracao.preferenciasVenda));
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [sessionUserId]);
 
   useEffect(() => {
     if (!toast) return;
@@ -2298,147 +1168,6 @@ export default function App() {
       // The prototype continues in memory if browser storage is unavailable.
     }
   }, [clientRecords, productRecords, salesRecords, companySettings, salesPreferences]);
-
-  const getFormValues = (): FormValues => {
-    if (!modal?.id) return emptyValues[modal?.type || activeTab];
-    if (modal.type === "clients") {
-      const record = clientRecords.find((item) => item.id === modal.id);
-      return record ? {
-        name: record.name, cpf: record.cpf, phone: record.phone, email: record.email, cep: record.cep, street: record.street,
-        number: record.number, complement: record.complement, district: record.district, city: record.city, state: record.state,
-        notes: record.notes, status: record.status,
-      } : emptyValues.clients;
-    }
-    if (modal.type === "employees") {
-      const record = employeeRecords.find((item) => item.id === modal.id);
-      return record ? {
-        name: record.name, cpf: record.cpf, phone: record.phone, email: record.email, username: record.username,
-        role: record.role, status: record.status, password: "", confirmPassword: "",
-      } : emptyValues.employees;
-    }
-    const record = productRecords.find((item) => item.id === modal.id);
-    return record ? {
-      name: record.name, code: record.code, category: record.category, description: record.description, price: record.price,
-      stock: String(record.stock), minimumStock: String(record.minimumStock), image: record.image, imageName: "",
-      status: record.status,
-    } : emptyValues.products;
-  };
-
-  const saveRecord = (values: FormValues) => {
-    if (!modal) return;
-    const canManageType = currentRole === "owner" || (currentRole === "manager" && modal.type !== "employees") || (currentRole === "seller" && modal.type === "clients" && modal.mode === "create");
-    if (!canManageType) {
-      setToast("Você não possui permissão para acessar esta funcionalidade.");
-      setModal(null);
-      return;
-    }
-    const normalized = (value: string) => value.trim().toLocaleLowerCase();
-    const isDifferentRecord = (id: number) => modal.mode === "create" || id !== modal.id;
-    if (modal.type === "employees" && modal.mode === "edit" && modal.id === currentUserId) {
-      const currentRecord = employeeRecords.find((record) => record.id === currentUserId);
-      if (currentRecord && (values.role !== currentRecord.role || values.status !== "Ativo")) {
-        setToast("Não é possível alterar o perfil ou desativar o usuário da sessão atual.");
-        return;
-      }
-    }
-    if (modal.type === "clients" && values.cpf && clientRecords.some((record) => isDifferentRecord(record.id) && onlyDigits(record.cpf) === onlyDigits(values.cpf))) {
-      setToast("Já existe um cliente cadastrado com este CPF.");
-      return;
-    }
-    if (modal.type === "employees" && employeeRecords.some((record) =>
-      isDifferentRecord(record.id) && (
-        (values.cpf && onlyDigits(record.cpf) === onlyDigits(values.cpf)) ||
-        normalized(record.username) === normalized(values.username) ||
-        (values.email && normalized(record.email) === normalized(values.email))
-      ),
-    )) {
-      setToast("Já existe um funcionário com o mesmo CPF, usuário ou e-mail.");
-      return;
-    }
-    if (modal.type === "products" && productRecords.some((record) => isDifferentRecord(record.id) && normalized(record.code) === normalized(values.code))) {
-      setToast("Já existe um produto cadastrado com este código.");
-      return;
-    }
-    const isEdit = modal.mode === "edit" && modal.id;
-    if (modal.type === "clients") {
-      const next: ClientRecord = {
-        id: isEdit ? modal.id! : Date.now(), initials: getInitials(values.name), name: values.name, cpf: values.cpf,
-        phone: values.phone, email: values.email, date: isEdit ? clientRecords.find((item) => item.id === modal.id)?.date || "" : new Date().toLocaleDateString("pt-BR"),
-        status: values.status as ClientRecord["status"], cep: values.cep, street: values.street, number: values.number,
-        complement: values.complement, district: values.district, city: values.city, state: values.state, notes: values.notes,
-      };
-      setClientRecords((records) => isEdit ? records.map((record) => record.id === modal.id ? next : record) : [next, ...records]);
-    } else if (modal.type === "employees") {
-      const existing = employeeRecords.find((item) => item.id === modal.id);
-      const next: EmployeeRecord = {
-        id: isEdit ? modal.id! : Date.now(), initials: getInitials(values.name), name: values.name, cpf: values.cpf,
-        email: values.email, phone: values.phone, username: values.username, role: values.role as EmployeeRecord["role"],
-        lastAccess: existing?.lastAccess || "Ainda não acessou", status: values.status as EmployeeRecord["status"],
-      };
-      setEmployeeRecords((records) => isEdit ? records.map((record) => record.id === modal.id ? next : record) : [next, ...records]);
-    } else {
-      const next: ProductRecord = {
-        id: isEdit ? modal.id! : Date.now(), initials: getInitials(values.name), name: values.name, code: values.code,
-        category: values.category, description: values.description, price: values.price, stock: Number(values.stock || 0),
-        minimumStock: Number(values.minimumStock || 0), image: values.image, status: values.status as ProductRecord["status"],
-      };
-      setProductRecords((records) => isEdit ? records.map((record) => record.id === modal.id ? next : record) : [next, ...records]);
-    }
-    setModal(null);
-    setToast(`${modalCopy[modal.type].singular.charAt(0).toUpperCase()}${modalCopy[modal.type].singular.slice(1)} ${isEdit ? "atualizado" : "cadastrado"} com sucesso!`);
-  };
-
-  const requestToggleStatus = (id: number) => {
-    const allowed = currentRole === "owner" || (currentRole === "manager" && activeTab !== "employees");
-    if (!allowed) { setToast("Você não possui permissão para acessar esta funcionalidade."); return; }
-    if (activeTab === "employees" && id === currentUserId) {
-      setToast("Não é possível desativar o usuário da sessão atual.");
-      setMenuId(null);
-      return;
-    }
-    const records = activeTab === "clients" ? clientRecords : activeTab === "employees" ? employeeRecords : productRecords;
-    const record = records.find((item) => item.id === id);
-    if (!record) return;
-    setConfirmation({ type: activeTab, id, name: record.name, inactive: record.status === "Inativo" });
-    setMenuId(null);
-  };
-
-  const confirmToggleStatus = () => {
-    if (!confirmation) return;
-    const nextStatus = confirmation.inactive ? "Ativo" : "Inativo";
-    if (confirmation.type === "clients") setClientRecords((records) => records.map((record) => record.id === confirmation.id ? { ...record, status: nextStatus } : record));
-    if (confirmation.type === "employees") setEmployeeRecords((records) => records.map((record) => record.id === confirmation.id ? { ...record, status: nextStatus } : record));
-    if (confirmation.type === "products") setProductRecords((records) => records.map((record) => record.id === confirmation.id ? { ...record, status: nextStatus } : record));
-    setToast(`Registro ${confirmation.inactive ? "ativado" : "desativado"} com sucesso!`);
-    setConfirmation(null);
-  };
-
-  const toggleFilter = (filter: string) => setActiveFilters((current) => ({
-    ...current,
-    [activeTab]: current[activeTab].includes(filter)
-      ? current[activeTab].filter((item) => item !== filter)
-      : [...current[activeTab], filter],
-  }));
-
-  const tableActions: TableActions = {
-    menuId,
-    onOpen: (mode, id) => {
-      setMenuId(null);
-      setModal({ type: activeTab, mode, id });
-    },
-    onMenu: (id) => setMenuId((current) => current === id ? null : id),
-    onToggleStatus: requestToggleStatus,
-    canEdit: currentRole === "owner" || (currentRole === "manager" && activeTab !== "employees"),
-    canManage: currentRole === "owner" || (currentRole === "manager" && activeTab !== "employees"),
-  };
-
-  const table = activeTab === "clients"
-    ? <ClientsTable records={clientRecords} search={searches.clients} activeFilters={activeFilters.clients} onSearch={(value) => setSearches((current) => ({ ...current, clients: value }))} onToggleFilter={toggleFilter} {...tableActions} />
-    : activeTab === "employees"
-      ? <EmployeesTable records={employeeRecords} search={searches.employees} activeFilters={activeFilters.employees} onSearch={(value) => setSearches((current) => ({ ...current, employees: value }))} onToggleFilter={toggleFilter} {...tableActions} />
-      : <ProductsTable records={productRecords} search={searches.products} activeFilters={activeFilters.products} onSearch={(value) => setSearches((current) => ({ ...current, products: value }))} onToggleFilter={toggleFilter} {...tableActions} />;
-  const visibleRegistrationTabs = currentRole === "owner" ? tabs : currentRole === "manager" ? tabs.filter((tab) => tab.id !== "employees") : tabs.filter((tab) => tab.id === "clients");
-  const canCreateRegistration = currentRole === "owner" || (currentRole === "manager" && activeTab !== "employees") || (currentRole === "seller" && activeTab === "clients");
 
   const addToCart = (productId: number) => {
     const product = productRecords.find((record) => record.id === productId);
@@ -2574,39 +1303,6 @@ export default function App() {
     setActivePage("sales");
   };
 
-  const loginDemoUser = (userId: number, remember: boolean) => {
-    const employee = employeeRecords.find((record) => record.id === userId && record.status === "Ativo");
-    if (!employee) return;
-    try {
-      window.localStorage.removeItem(rememberedSessionKey);
-      window.sessionStorage.removeItem(temporarySessionKey);
-      (remember ? window.localStorage : window.sessionStorage).setItem(remember ? rememberedSessionKey : temporarySessionKey, String(userId));
-    } catch {
-      // Session remains available in memory when browser storage is unavailable.
-    }
-    setAuthenticatedUserId(userId);
-    setCurrentUserId(userId);
-    setActiveTab("clients");
-    setActivePage(roleKey(employee.role) === "seller" ? "sales" : "dashboard");
-  };
-
-  const logoutDemoUser = () => {
-    try {
-      window.localStorage.removeItem(rememberedSessionKey);
-      window.sessionStorage.removeItem(temporarySessionKey);
-    } catch {
-      // No persistent credential is required to finish the in-memory session.
-    }
-    setAuthenticatedUserId(null);
-    setCurrentUserId(1);
-    setCart([]);
-    setPreparedOrder(null);
-    setPaymentMethod(null);
-    setDiscount("R$ 0,00");
-    setSelectedClientId(null);
-    confirmationLock.current = false;
-  };
-
   const exportReport = () => {
     if (currentRole === "seller") {
       setToast("Você não possui permissão para acessar esta funcionalidade.");
@@ -2657,8 +1353,10 @@ export default function App() {
           ? { title: "Detalhes do pedido", description: "Consulte os dados da venda registrada." }
           : { title: "Venda concluída", description: "A venda foi registrada com sucesso." };
 
-  if (!authenticatedUserId) {
-    return <LoginPage employees={employeeRecords} businessName={companySettings.tradeName || "Ponto & Sabor"} businessLogo={companySettings.logo} onLogin={loginDemoUser} />;
+  if (checkingSession) return null;
+
+  if (!sessionUser) {
+    return <LoginPage key={loginNotice} businessName={companySettings.tradeName || "Ponto & Sabor"} businessLogo={companySettings.logo} notice={loginNotice} onLogin={startSession} />;
   }
 
   return (
@@ -2761,15 +1459,13 @@ export default function App() {
             key={currentUser.id}
             currentUser={currentUser}
             currentRole={currentRole}
-            employees={employeeRecords}
             company={companySettings}
             preferences={salesPreferences}
-            onSaveCompany={(settings) => { if (currentRole !== "owner") { setToast("Você não possui permissão para acessar esta funcionalidade."); return; } setCompanySettings(settings); setToast("Dados da lanchonete atualizados com sucesso."); }}
-            onSaveAccount={(user) => { setEmployeeRecords((records) => records.map((employee) => employee.id === currentUser.id ? { ...user, id: employee.id, role: employee.role, status: employee.status } : employee)); setToast("Dados da conta atualizados com sucesso."); }}
-            onPreferences={(preferences) => { if (currentRole !== "owner") { setToast("Você não possui permissão para acessar esta funcionalidade."); return; } setSalesPreferences(preferences); }}
-            onSessionChange={(id) => { const next = employeeRecords.find((employee) => employee.id === id); if (!next) return; setCart([]); setPreparedOrder(null); setPaymentMethod(null); setDiscount("R$ 0,00"); setSelectedClientId(null); confirmationLock.current = false; loginDemoUser(id, false); setToast(`Perfil demonstrativo alterado para ${next.role}.`); }}
+            onCompanySaved={setCompanySettings}
+            onPreferencesSaved={setSalesPreferences}
+            onAccountSaved={setSessionUser}
             onDenied={() => setToast("Você não possui permissão para acessar esta funcionalidade.")}
-            onLogout={logoutDemoUser}
+            onLogout={endSession}
             onSuccess={setToast}
           />
         ) : activePage === "review" && preparedOrder ? (
@@ -2798,58 +1494,10 @@ export default function App() {
             onBack={() => setActivePage("success")}
           />
         ) : (
-          <div className="dashboard-content registrations-content">
-          <div className="registration-tabs" role="tablist" aria-label="Tipos de cadastro">
-            {visibleRegistrationTabs.map((tab) => (
-              <button
-                key={tab.id}
-                id={`tab-${tab.id}`}
-                className={activeTab === tab.id ? "active" : ""}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                aria-controls={`panel-${tab.id}`}
-                onClick={() => { setActiveTab(tab.id); setMenuId(null); }}
-              >
-                <Icon name={tab.icon} />
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <section
-            className="dashboard-card management-card"
-            id={`panel-${activeTab}`}
-            role="tabpanel"
-            aria-labelledby={`tab-${activeTab}`}
-          >
-            <div className="management-heading">
-              <div>
-                <h2>{content.title}</h2>
-                <p>{content.description}</p>
-              </div>
-              {canCreateRegistration && <button className="new-record-button" type="button" onClick={() => setModal({ type: activeTab, mode: "create" })}>
-                <Icon name="plus" />
-                {content.action}
-              </button>}
-            </div>
-            {table}
-          </section>
-          </div>
+          <RegistrationsPage activeTab={activeTab} currentRole={currentRole} onTabChange={setActiveTab} onToast={setToast} />
         )}
       </main>
-      {modal && <RecordModal key={`${modal.type}-${modal.mode}-${modal.id || "new"}`} type={modal.type} mode={modal.mode} initial={getFormValues()} canEdit={currentRole === "owner" || (currentRole === "manager" && modal.type !== "employees")} onClose={() => setModal(null)} onEdit={() => setModal({ ...modal, mode: "edit" })} onSave={saveRecord} />}
       {selectedOrder && <OrderDetailsModal order={selectedOrder} products={productRecords} client={clientRecords.find((record) => record.id === selectedOrder.clientId)} onClose={() => setSelectedOrder(null)} />}
-      {confirmation && (
-        <div className="confirm-backdrop" role="presentation">
-          <section className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
-            <span className="confirm-icon"><Icon name="power" /></span>
-            <h2 id="confirm-title">{confirmation.inactive ? "Ativar registro?" : "Desativar registro?"}</h2>
-            <p>{confirmation.inactive ? `${confirmation.name} voltará a aparecer como ativo no sistema.` : `${confirmation.name} ficará indisponível para novas operações.`}</p>
-            <div><button type="button" onClick={() => setConfirmation(null)}>Cancelar</button><button className="danger-button" type="button" onClick={confirmToggleStatus}>{confirmation.inactive ? "Ativar" : "Desativar"}</button></div>
-          </section>
-        </div>
-      )}
       {clearOrderConfirmation && (
         <div className="confirm-backdrop" role="presentation">
           <section className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="clear-order-title">
