@@ -14,7 +14,10 @@ e estão sendo ligadas à API do backend aos poucos, sem mudar o visual:
 | Login | API (`POST /api/auth/login`, token JWT) |
 | Cadastros (Clientes, Funcionários, Produtos) | API |
 | Configurações (Dados da Lanchonete, Preferências de Vendas, Minha Conta) | API |
-| Dashboard, Vendas, Pedidos, Relatórios | Ainda do protótipo (memória e `localStorage` do navegador) |
+| Vendas (PDV, revisão e confirmação) | API (`/api/vendas`) |
+| Pedidos (filtros, concluir, cancelar com motivo) | API (`/api/vendas`) |
+| Dashboard | API (`/api/dashboard`) |
+| Relatórios e **Picos de venda** (semana, mês, semestre e ano) | API (`/api/relatorios`) |
 
 ## Estrutura
 
@@ -23,11 +26,14 @@ e estão sendo ligadas à API do backend aos poucos, sem mudar o visual:
 | `src/api/` | Cliente HTTP (`fetch`) com o token, tratamento de erros da API e os endpoints usados |
 | `src/pages/LoginPage.tsx` | Tela de login |
 | `src/pages/cadastros/` | Tela Cadastros: tabelas, formulário (modal) e conversão API ↔ tela |
+| `src/pages/vendas/` | Tela Pedidos, detalhes do pedido e conversão dos pedidos da API |
+| `src/pages/dashboard/` | Tela Dashboard |
+| `src/pages/relatorios/` | Tela Relatórios, seção Picos de venda e exportação em CSV |
 | `src/pages/settings/` | Tela Configurações |
 | `src/components/` | Ícones, logo e elementos de tabela compartilhados |
 | `src/utils/format.ts` | Máscaras (CPF, telefone, CEP, CNPJ, moeda) e formatação de datas |
 | `src/types.ts` | Tipos usados pelas telas |
-| `src/App.tsx` | Sessão, navegação e as telas que ainda usam os dados do protótipo |
+| `src/App.tsx` | Sessão, navegação e o fluxo de venda (PDV, revisão e confirmação) |
 | `src/styles/app.css` | Estilos das telas |
 
 ### Login e sessão

@@ -151,3 +151,122 @@ export type Configuracao = {
   preferenciasVenda: PreferenciasVenda;
   atualizadoEm: string | null;
 };
+
+// ===== Vendas e Pedidos =====
+
+export type ItemVendaRequest = { produtoId: number; quantidade: number };
+
+export type VendaRequest = {
+  clienteId: number | null;
+  itens: ItemVendaRequest[];
+  desconto: number;
+  formaPagamento: FormaPagamento;
+  valorRecebido: number | null;
+  observacao?: string | null;
+};
+
+export type PessoaResumo = { id: number; nome: string };
+
+export type ItemVenda = {
+  produtoId: number;
+  codigo: string;
+  nome: string;
+  quantidade: number;
+  precoUnitario: number;
+  subtotal: number;
+};
+
+export type Venda = {
+  id: number;
+  numero: string;
+  status: StatusVenda;
+  dataHora: string;
+  confirmadaEm: string | null;
+  cliente: PessoaResumo | null;
+  vendedor: PessoaResumo;
+  formaPagamento: FormaPagamento;
+  itens: ItemVenda[];
+  quantidadeItens: number;
+  subtotal: number;
+  desconto: number;
+  total: number;
+  valorRecebido: number | null;
+  troco: number | null;
+  observacao: string | null;
+  canceladaEm: string | null;
+  motivoCancelamento: string | null;
+};
+
+export type VendaListagemParams = {
+  termo?: string;
+  status?: StatusVenda;
+  vendedorId?: number;
+  clienteId?: number;
+  formaPagamento?: FormaPagamento;
+  /** aaaa-mm-dd */
+  inicio?: string;
+  /** aaaa-mm-dd */
+  fim?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+};
+
+// ===== Dashboard e Relatórios =====
+
+export type Indicadores = { faturamento: number; pedidos: number; ticketMedio: number };
+
+/** Ponto de um gráfico: `chave` estável (dia, mês, hora ou dia da semana) e `rotulo` para exibir. */
+export type Ponto = { chave: string; rotulo: string; pedidos: number; faturamento: number };
+
+export type Granularidade = "HORA" | "DIA" | "MES";
+export type PeriodoPico = "SEMANA" | "MES" | "SEMESTRE" | "ANO";
+
+export type Dashboard = {
+  hoje: Indicadores;
+  produtos: { cadastrados: number; ativos: number; estoqueBaixo: number };
+  ultimos7Dias: Ponto[];
+  resumo7Dias: Indicadores;
+  pedidosRecentes: Venda[];
+};
+
+export type ProdutoVendido = { produtoId: number; codigo: string; nome: string; quantidade: number; faturamento: number };
+export type DesempenhoVendedor = {
+  vendedorId: number;
+  nome: string;
+  vendas: number;
+  faturamento: number;
+  ticketMedio: number;
+  participacao: number;
+};
+export type TotalFormaPagamento = { formaPagamento: FormaPagamento; pedidos: number; valor: number; percentual: number };
+
+export type Relatorio = {
+  inicio: string;
+  fim: string;
+  vendedorId: number | null;
+  indicadores: Indicadores;
+  produtosVendidos: number;
+  granularidade: Granularidade;
+  evolucao: Ponto[];
+  maisVendidos: ProdutoVendido[];
+  vendedores: DesempenhoVendedor[];
+  formasPagamento: TotalFormaPagamento[];
+};
+
+export type Picos = {
+  periodo: PeriodoPico;
+  inicio: string;
+  fim: string;
+  indicadores: Indicadores;
+  periodoAnterior: Indicadores;
+  /** Variação % do faturamento em relação ao período anterior; nula se o anterior não teve vendas. */
+  variacaoFaturamento: number | null;
+  granularidade: Granularidade;
+  serie: Ponto[];
+  pico: Ponto | null;
+  porDiaDaSemana: Ponto[];
+  diaDaSemanaPico: Ponto | null;
+  porHora: Ponto[];
+  horaPico: Ponto | null;
+};

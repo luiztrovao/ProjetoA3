@@ -6979,3 +6979,163 @@ td strong {
     width: 100%;
   }
 }
+
+/* ===== Relatórios: picos de venda (semana, mês, semestre e ano) ===== */
+.peaks-card {
+  margin-top: 18px;
+  padding: 22px 24px;
+}
+
+.peaks-toolbar {
+  color: var(--muted);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 10px;
+  display: flex;
+}
+
+.peaks-toolbar label {
+  flex-direction: column;
+  gap: 6px;
+  display: flex;
+}
+
+.peaks-toolbar label span {
+  color: #59615c;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.peaks-toolbar input {
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: #fff;
+  border-radius: 9px;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 10px;
+}
+
+.peaks-toolbar p {
+  margin: 0;
+}
+
+.peaks-toolbar strong {
+  color: var(--ink);
+}
+
+.peaks-highlights {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+  display: grid;
+}
+
+.peaks-highlights article {
+  background: #fbfaf6;
+  border: 1px solid #ebe8e1;
+  border-radius: 12px;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 14px 16px;
+  display: flex;
+}
+
+.peaks-highlights article:first-child {
+  color: #fff;
+  background: linear-gradient(145deg, #ffffff0a, #0000 45%), #415c4d;
+  border-color: #415c4d;
+}
+
+.peaks-highlights small {
+  color: var(--muted);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.peaks-highlights article:first-child small,
+.peaks-highlights article:first-child span {
+  color: #ffffffb3;
+}
+
+.peaks-highlights strong {
+  letter-spacing: -.03em;
+  overflow-wrap: anywhere;
+  font-family: Manrope, sans-serif;
+  font-size: 19px;
+}
+
+.peaks-highlights span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.peaks-highlights span.up {
+  color: #afd0b9;
+  font-weight: 700;
+}
+
+.peaks-highlights span.down {
+  color: #f2b7a6;
+  font-weight: 700;
+}
+
+.peaks-charts {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+  display: grid;
+}
+
+.peaks-charts > div {
+  border: 1px solid #efede7;
+  border-radius: 12px;
+  min-width: 0;
+  padding: 14px 6px 22px;
+}
+
+.peaks-charts > div.wide {
+  grid-column: 1 / -1;
+}
+
+.peaks-charts h3 {
+  color: var(--ink);
+  margin: 0 12px;
+  font-family: Manrope, sans-serif;
+  font-size: 12px;
+}
+
+.peaks-charts .revenue-bars {
+  height: 200px;
+}
+
+.revenue-bar-column > span.peak {
+  background: linear-gradient(to top, #344c3f, var(--accent));
+  box-shadow: 0 0 0 3px #516d5e2e;
+}
+
+@media (max-width: 900px) {
+  .peaks-highlights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .peaks-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .peaks-card {
+    padding: 19px 17px;
+  }
+
+  .peaks-highlights {
+    grid-template-columns: 1fr;
+  }
+}
