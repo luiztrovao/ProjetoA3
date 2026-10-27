@@ -3228,7 +3228,7 @@ td strong {
   color: #789083;
   background: radial-gradient(circle at 80% 20%, #516d5e17, #0000 35%), #edf1ee;
   place-items: center;
-  height: 102px;
+  aspect-ratio: 16 / 10;
   display: grid;
   position: relative;
   overflow: hidden;
@@ -3241,6 +3241,7 @@ td strong {
 
 .sale-product-image.filled img {
   object-fit: cover;
+  object-position: center;
   width: 100%;
   height: 100%;
 }
@@ -3796,9 +3797,6 @@ td strong {
     grid-template-columns: 1fr;
   }
 
-  .sale-product-image {
-    height: 120px;
-  }
 
   .order-buttons {
     grid-template-columns: 1fr;
