@@ -2,13 +2,17 @@ package com.pontoesabor.lanchonete.config;
 
 import com.pontoesabor.lanchonete.model.Categoria;
 import com.pontoesabor.lanchonete.model.Cliente;
+import com.pontoesabor.lanchonete.model.Imagem;
 import com.pontoesabor.lanchonete.model.Perfil;
 import com.pontoesabor.lanchonete.model.Produto;
 import com.pontoesabor.lanchonete.model.Usuario;
 import com.pontoesabor.lanchonete.repository.CategoriaRepository;
 import com.pontoesabor.lanchonete.repository.ClienteRepository;
+import com.pontoesabor.lanchonete.repository.ImagemRepository;
 import com.pontoesabor.lanchonete.repository.ProdutoRepository;
 import com.pontoesabor.lanchonete.repository.UsuarioRepository;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -23,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +50,7 @@ public class DadosIniciais implements ApplicationRunner {
     private final ClienteRepository clienteRepository;
     private final ProdutoRepository produtoRepository;
     private final CategoriaRepository categoriaRepository;
+    private final ImagemRepository imagemRepository;
     private final PasswordEncoder passwordEncoder;
     private final GeradorVendasDemo geradorVendas;
     private final Clock relogio;
@@ -59,6 +65,7 @@ public class DadosIniciais implements ApplicationRunner {
             ClienteRepository clienteRepository,
             ProdutoRepository produtoRepository,
             CategoriaRepository categoriaRepository,
+            ImagemRepository imagemRepository,
             PasswordEncoder passwordEncoder,
             GeradorVendasDemo geradorVendas,
             Clock relogio,
@@ -71,6 +78,7 @@ public class DadosIniciais implements ApplicationRunner {
         this.clienteRepository = clienteRepository;
         this.produtoRepository = produtoRepository;
         this.categoriaRepository = categoriaRepository;
+        this.imagemRepository = imagemRepository;
         this.passwordEncoder = passwordEncoder;
         this.geradorVendas = geradorVendas;
         this.relogio = relogio;
@@ -138,6 +146,7 @@ public class DadosIniciais implements ApplicationRunner {
             Produto produto = new Produto(item.codigo(), item.nome(), categorias.get(item.categoria()),
                     new BigDecimal(item.preco()), item.estoque(), 6);
             produto.setDescricao(item.descricao());
+            produto.setImagemId(fotoDoProduto(item.codigo()));
             produtos.add(produtoRepository.save(produto));
             popularidade.add(item.popularidade());
         }
@@ -156,6 +165,23 @@ public class DadosIniciais implements ApplicationRunner {
         log.info("Dados de demonstração criados: {} funcionários, {} clientes, {} produtos e {} vendas desde {}.",
                 equipe.size(), clientes.size(), produtos.size(), vendas, inicio);
         log.info("Usuários: matheus (Dono), carlos (Gerente), fernanda, julia e bruno (Vendedores).");
+    }
+
+    /**
+     * Foto ilustrativa do produto ({@code demo/produtos/CODIGO.jpg}); as fontes em SVG ficam em docs/design/produtos.
+     * Sem o arquivo, o produto fica sem foto.
+     */
+    private Long fotoDoProduto(String codigo) {
+        ClassPathResource arquivo = new ClassPathResource("demo/produtos/" + codigo + ".jpg");
+        if (!arquivo.exists()) {
+            return null;
+        }
+        try (InputStream entrada = arquivo.getInputStream()) {
+            return imagemRepository.save(new Imagem(entrada.readAllBytes(), "image/jpeg")).getId();
+        } catch (IOException e) {
+            log.warn("Não foi possível carregar a foto de demonstração {}.", codigo, e);
+            return null;
+        }
     }
 
     /** Item do cardápio de demonstração; {@code popularidade} é o peso usado na geração das vendas. */

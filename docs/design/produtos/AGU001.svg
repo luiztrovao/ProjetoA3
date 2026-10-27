@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360"><defs>
+  <radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#fbf7f0"/><stop offset="1" stop-color="#f1e9dc"/></radialGradient>
+  <linearGradient id="brilho" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="480" height="360" fill="url(#bg)"/>
+<circle cx="240" cy="178" r="140" fill="#dcebf3"/>
+<circle cx="70" cy="62" r="5" fill="#e4d6c1"/><circle cx="420" cy="300" r="7" fill="#e4d6c1"/><circle cx="402" cy="70" r="4" fill="#e4d6c1"/><circle cx="88" cy="292" r="4" fill="#e4d6c1"/><ellipse cx="240" cy="300" rx="130" ry="14" fill="#3b2a1a" opacity=".14"/><rect x="222" y="54" width="36" height="22" rx="5" fill="#2b6cb0"/>
+<path d="M226 76 h28 q30 30 30 70 v136 q0 12 -12 12 h-64 q-12 0 -12 -12 v-136 q0 -40 30 -70z" fill="#bfe3f8"/>
+<path d="M200 168 h80 v60 h-80z" fill="#516d5e"/>
+<text x="240" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="17" fill="#fff">ÁGUA</text>
+<path d="M200 250 q40 -10 80 0 v32 q0 12 -12 12 h-56 q-12 0 -12 -12z" fill="#9fd3f2"/>
+<rect x="208" y="96" width="10" height="186" rx="5" fill="#fff" opacity=".55"/></svg>
