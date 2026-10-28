@@ -1,0 +1,32 @@
+# Blueprint do Render: publica a API (backend) a partir da branch main.
+# Passo a passo em docs/publicacao.md. Os valores marcados com "sync: false" são preenchidos
+# no painel do Render na hora de criar o serviço e nunca ficam no repositório.
+services:
+  - type: web
+    name: ponto-e-sabor-api
+    runtime: docker
+    plan: free
+    branch: main
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/publico/identidade
+    envVars:
+      # Banco PostgreSQL do Neon (formato JDBC: jdbc:postgresql://<host>/<banco>?sslmode=require)
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # Segredo que assina os tokens de login; o Render gera um valor aleatório.
+      - key: JWT_SECRET
+        generateValue: true
+      # Endereço do frontend publicado no GitHub Pages
+      - key: CORS_ORIGENS
+        value: https://luiztrovao.github.io
+      # Dados de demonstração para a apresentação (criados só com o banco vazio)
+      - key: APP_DADOS_DEMO_HABILITADO
+        value: "true"
+      - key: APP_DADOS_DEMO_SENHA
+        sync: false

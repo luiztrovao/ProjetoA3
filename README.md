@@ -16,7 +16,10 @@ Sistema web para gerenciamento de lanchonete, desenvolvido para a disciplina de 
 |---|---|---|
 | Backend | Java 21 + Spring Boot (API REST) | Render |
 | Banco de dados | PostgreSQL + Spring Data JPA | Neon |
-| Frontend | React + Vite + TypeScript + Tailwind + Recharts | Vercel |
+| Frontend | React + Vite + TypeScript + Tailwind | GitHub Pages |
+
+Tudo nos planos gratuitos. O passo a passo da publicação (e de como abrir o banco num SGBD) está em
+[docs/publicacao.md](docs/publicacao.md).
 
 ## Estrutura do repositório
 
