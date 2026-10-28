@@ -53,6 +53,10 @@ public class Usuario {
     @Column(name = "ultimo_acesso")
     private LocalDateTime ultimoAcesso;
 
+    /** Avisos com data até este momento já foram vistos (botão "Marcar todas como lidas"). */
+    @Column(name = "notificacoes_lidas_em")
+    private LocalDateTime notificacoesLidasEm;
+
     @CreationTimestamp
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
@@ -145,6 +149,14 @@ public class Usuario {
 
     public void registrarAcesso(LocalDateTime momento) {
         this.ultimoAcesso = momento;
+    }
+
+    public LocalDateTime getNotificacoesLidasEm() {
+        return notificacoesLidasEm;
+    }
+
+    public void marcarNotificacoesComoLidas(LocalDateTime momento) {
+        this.notificacoesLidasEm = momento;
     }
 
     public LocalDateTime getCriadoEm() {

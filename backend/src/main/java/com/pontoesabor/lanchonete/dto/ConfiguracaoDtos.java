@@ -7,6 +7,8 @@ import com.pontoesabor.lanchonete.model.StatusVenda;
 import com.pontoesabor.lanchonete.util.Textos;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -106,12 +108,17 @@ public final class ConfiguracaoDtos {
             StatusVenda statusInicialVenda,
 
             @NotEmpty(message = "Pelo menos uma forma de pagamento deve estar habilitada.")
-            Set<FormaPagamento> formasPagamento) {
+            Set<FormaPagamento> formasPagamento,
+
+            /** Opcional: minutos "em preparo" até o pedido virar notificação de atraso (5 a 240; padrão 20). */
+            @Min(value = 5, message = "O alerta de pedido atrasado deve ser de pelo menos 5 minutos.")
+            @Max(value = 240, message = "O alerta de pedido atrasado deve ser de no máximo 240 minutos.")
+            Integer minutosAlertaPreparo) {
 
         public static PreferenciasVendaDto de(Configuracao c) {
             return new PreferenciasVendaDto(c.isControleEstoque(), c.isBloquearSemEstoque(), c.getAlertaEstoqueBaixo(),
                     c.isConfirmarCancelamento(), c.isPermitirVendaSemCliente(), c.getStatusInicialVenda(),
-                    c.getFormasPagamentoAceitas());
+                    c.getFormasPagamentoAceitas(), c.getMinutosAlertaPreparo());
         }
     }
 

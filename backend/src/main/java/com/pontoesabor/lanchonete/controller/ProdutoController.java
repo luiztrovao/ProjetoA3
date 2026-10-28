@@ -46,8 +46,10 @@ public class ProdutoController {
             @RequestParam(required = false) Long categoriaId,
             @Parameter(description = "true = ativos, false = inativos, vazio = todos")
             @RequestParam(required = false) Boolean ativo,
+            @Parameter(description = "true = só produtos com estoque igual ou abaixo do mínimo")
+            @RequestParam(required = false) Boolean estoqueBaixo,
             @ParameterObject @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
-        return produtoService.listar(termo, categoriaId, ativo, pageable);
+        return produtoService.listar(termo, categoriaId, ativo, estoqueBaixo, pageable);
     }
 
     @GetMapping("/{id}")

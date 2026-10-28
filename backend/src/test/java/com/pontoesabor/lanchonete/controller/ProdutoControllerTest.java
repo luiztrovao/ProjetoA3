@@ -171,6 +171,16 @@ class ProdutoControllerTest {
     }
 
     @Test
+    void filtraEstoqueBaixo() throws Exception {
+        mockMvc.perform(post("/api/produtos").contentType(MediaType.APPLICATION_JSON).content(produtoJson("Pouco Estoque", "5.00", 2, 5)));
+        mockMvc.perform(post("/api/produtos").contentType(MediaType.APPLICATION_JSON).content(produtoJson("Muito Estoque", "5.00", 50, 5)));
+
+        mockMvc.perform(get("/api/produtos").param("termo", "estoque").param("estoqueBaixo", "true"))
+                .andExpect(jsonPath("$.totalElementos").value(1))
+                .andExpect(jsonPath("$.conteudo[0].nome").value("Pouco Estoque"));
+    }
+
+    @Test
     void produtoInexistenteDevolve404() throws Exception {
         mockMvc.perform(get("/api/produtos/9999"))
                 .andExpect(status().isNotFound())

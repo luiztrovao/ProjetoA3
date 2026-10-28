@@ -1,6 +1,7 @@
 package com.pontoesabor.lanchonete.service;
 
 import static com.pontoesabor.lanchonete.repository.ProdutoRepository.Filtros.comAtivo;
+import static com.pontoesabor.lanchonete.repository.ProdutoRepository.Filtros.comEstoqueBaixo;
 import static com.pontoesabor.lanchonete.repository.ProdutoRepository.Filtros.daCategoria;
 import static com.pontoesabor.lanchonete.repository.ProdutoRepository.Filtros.nomeOuCodigoContem;
 
@@ -40,9 +41,11 @@ public class ProdutoService {
         this.imagemService = imagemService;
     }
 
-    public PaginaResponse<ProdutoResponse> listar(String termo, Long categoriaId, Boolean ativo, Pageable pageable) {
+    public PaginaResponse<ProdutoResponse> listar(
+            String termo, Long categoriaId, Boolean ativo, Boolean estoqueBaixo, Pageable pageable) {
         Specification<Produto> filtro = Specification.allOf(List.of(
-                nomeOuCodigoContem(Textos.limpar(termo)), daCategoria(categoriaId), comAtivo(ativo)));
+                nomeOuCodigoContem(Textos.limpar(termo)), daCategoria(categoriaId), comAtivo(ativo),
+                comEstoqueBaixo(estoqueBaixo)));
         return PaginaResponse.de(produtoRepository.findAll(filtro, pageable).map(ProdutoResponse::de));
     }
 

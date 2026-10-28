@@ -30,11 +30,20 @@ e estão sendo ligadas à API do backend aos poucos, sem mudar o visual:
 | `src/pages/dashboard/` | Tela Dashboard |
 | `src/pages/relatorios/` | Tela Relatórios, seção Picos de venda e exportação em CSV |
 | `src/pages/settings/` | Tela Configurações |
-| `src/components/` | Ícones, logo e elementos de tabela compartilhados |
+| `src/components/` | Ícones, logo, elementos de tabela e os menus do topo (sino de notificações e menu da conta) |
 | `src/utils/format.ts` | Máscaras (CPF, telefone, CEP, CNPJ, moeda) e formatação de datas |
 | `src/types.ts` | Tipos usados pelas telas |
 | `src/App.tsx` | Sessão, navegação e o fluxo de venda (PDV, revisão e confirmação) |
 | `src/styles/app.css` | Estilos das telas |
+
+### Topo e navegação
+
+- **Sino**: mostra quantos avisos não lidos existem (consulta a API a cada minuto). Clicar em estoque baixo abre
+  Cadastros › Produtos já filtrado; clicar num pedido abre Pedidos com a busca pelo número.
+- **Menu da conta** (seta ao lado do nome e "⋯" da barra lateral): Minha conta, Alterar senha, Dados da lanchonete (Dono) e Sair.
+- **Celular**: o botão ☰ abre a barra lateral por cima da tela.
+- **Configurações › Preferências de Vendas**: "Alerta de pedido atrasado" define os minutos do aviso;
+  com "Confirmar antes de cancelar" desligado, o pedido é cancelado sem a janela de motivo.
 
 ### Login e sessão
 

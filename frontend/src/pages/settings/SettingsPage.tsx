@@ -40,6 +40,8 @@ function SettingToggle({ checked, disabled, onChange }: { checked: boolean; disa
 
 const FieldError = ({ message }: { message?: string }) => message ? <small className="field-error">{message}</small> : null;
 
+export type SettingsTab = "business" | "permissions" | "sales" | "account";
+
 export function SettingsPage({
   currentUser,
   currentRole,
@@ -51,6 +53,8 @@ export function SettingsPage({
   onDenied,
   onLogout,
   onSuccess,
+  initialTab,
+  openPassword = false,
 }: {
   currentUser: EmployeeRecord;
   currentRole: UserRole;
@@ -62,8 +66,12 @@ export function SettingsPage({
   onDenied: () => void;
   onLogout: () => void;
   onSuccess: (message: string) => void;
+  /** Aba aberta ao entrar (o menu do usuário abre direto em "Minha conta"). */
+  initialTab?: SettingsTab;
+  /** Já abre o modal de troca de senha (atalho do menu do usuário). */
+  openPassword?: boolean;
 }) {
-  const [activeTab, setActiveTab] = useState<"business" | "permissions" | "sales" | "account">("business");
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab ?? (currentRole === "owner" ? "business" : "account"));
   const [companyDraft, setCompanyDraft] = useState(company);
   const [companyErrors, setCompanyErrors] = useState<Record<string, string>>({});
   const [companyError, setCompanyError] = useState("");
@@ -73,7 +81,7 @@ export function SettingsPage({
   const [accountErrors, setAccountErrors] = useState<Record<string, string>>({});
   const [accountError, setAccountError] = useState("");
   const [savingAccount, setSavingAccount] = useState(false);
-  const [passwordModal, setPasswordModal] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(openPassword);
   const [passwords, setPasswords] = useState({ current: "", next: "", confirm: "" });
   const [passwordError, setPasswordError] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
@@ -259,6 +267,7 @@ export function SettingsPage({
             <div className="preference-row"><p><strong>Alerta de estoque baixo</strong><small>Quantidade utilizada para sinalizar reposição.</small></p><input className="preference-number" type="number" min="0" value={preferences.lowStockThreshold} onChange={(event) => updatePreference("lowStockThreshold", Math.max(0, Number(event.target.value)))} /></div>
           </div>
           <div className="preference-group"><div className="preference-group-title"><span><Icon name="orders" /></span><div><h3>Pedidos</h3><p>Comportamento do pedido durante a operação.</p></div></div>
+            <div className="preference-row"><p><strong>Alerta de pedido atrasado</strong><small>Minutos em preparo até o pedido aparecer nas notificações (5 a 240).</small></p><input className="preference-number" type="number" min="5" max="240" key={preferences.delayAlertMinutes} defaultValue={preferences.delayAlertMinutes} onBlur={(event) => { const minutes = Math.min(240, Math.max(5, Math.round(Number(event.target.value)) || 20)); event.target.value = String(minutes); if (minutes !== preferences.delayAlertMinutes) updatePreference("delayAlertMinutes", minutes); }} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} /></div>
             <div className="preference-row"><p><strong>Confirmar antes de cancelar</strong><small>Solicita confirmação e motivo para ações irreversíveis.</small></p><SettingToggle checked={preferences.confirmCancellation} onChange={(value) => updatePreference("confirmCancellation", value)} /></div>
             <div className="preference-row"><p><strong>Permitir venda sem cliente identificado</strong><small>Autoriza vendas rápidas de balcão.</small></p><SettingToggle checked={preferences.allowAnonymousCustomer} onChange={(value) => updatePreference("allowAnonymousCustomer", value)} /></div>
             <div className="preference-row"><p><strong>Status inicial após confirmação</strong><small>Aplicado automaticamente a novas vendas.</small></p><select value={preferences.initialOrderStatus} onChange={(event) => updatePreference("initialOrderStatus", event.target.value as SalesPreferences["initialOrderStatus"])}><option>Em preparo</option><option>Concluído</option></select></div>

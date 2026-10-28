@@ -27,11 +27,12 @@ export type SalesPreferences = {
   allowAnonymousCustomer: boolean;
   initialOrderStatus: "Em preparo" | "Concluído";
   paymentMethods: Record<PaymentMethod, boolean>;
+  delayAlertMinutes: number;
 };
 
 export const defaultCompany: CompanySettings = { tradeName: "Ponto & Sabor", legalName: "", cnpj: "", phone: "", email: "", cep: "", address: "", number: "", district: "", city: "", state: "", logo: "" };
 
-export const defaultPreferences: SalesPreferences = { stockControl: true, blockWithoutStock: true, lowStockThreshold: 5, confirmCancellation: true, allowAnonymousCustomer: true, initialOrderStatus: "Em preparo", paymentMethods: { cash: true, credit: true, debit: true, pix: true } };
+export const defaultPreferences: SalesPreferences = { stockControl: true, blockWithoutStock: true, lowStockThreshold: 5, confirmCancellation: true, allowAnonymousCustomer: true, initialOrderStatus: "Em preparo", paymentMethods: { cash: true, credit: true, debit: true, pix: true }, delayAlertMinutes: 20 };
 
 export const toCompanySettings = (empresa: Empresa): CompanySettings => ({
   tradeName: empresa.nomeFantasia || "",
@@ -80,6 +81,7 @@ export const toSalesPreferences = (preferencias: PreferenciasVenda): SalesPrefer
     debit: preferencias.formasPagamento.includes("DEBITO"),
     pix: preferencias.formasPagamento.includes("PIX"),
   },
+  delayAlertMinutes: preferencias.minutosAlertaPreparo ?? 20,
 });
 
 export const toPreferenciasVenda = (preferences: SalesPreferences): PreferenciasVenda => ({
@@ -92,6 +94,7 @@ export const toPreferenciasVenda = (preferences: SalesPreferences): Preferencias
   formasPagamento: (Object.keys(paymentCodes) as PaymentMethod[])
     .filter((method) => preferences.paymentMethods[method])
     .map((method) => paymentCodes[method]),
+  minutosAlertaPreparo: preferences.delayAlertMinutes,
 });
 
 export const toContaRequest = (account: EmployeeRecord): ContaRequest => ({
