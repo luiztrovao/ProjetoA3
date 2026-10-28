@@ -12,6 +12,7 @@ import type {
   Identidade,
   ListagemParams,
   LoginResponse,
+  Notificacoes,
   Pagina,
   PeriodoPico,
   Picos,
@@ -99,4 +100,10 @@ export const relatoriosApi = {
     request<Relatorio>("/api/relatorios/resumo", { query: params }),
   picos: (params: { periodo: PeriodoPico; referencia?: string; vendedorId?: number }) =>
     request<Picos>("/api/relatorios/picos", { query: params }),
+};
+
+/** Sino do topo: avisos calculados na hora para o usuário logado. */
+export const notificacoesApi = {
+  listar: () => request<Notificacoes>("/api/notificacoes"),
+  marcarLidas: () => request<void>("/api/notificacoes/lidas", { method: "POST" }),
 };

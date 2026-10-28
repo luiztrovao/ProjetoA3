@@ -82,9 +82,24 @@ export function OrderDetailsModal({ order, onClose }: { order: SaleRecord; onClo
 
 type Metrics = { total: number; preparing: number; completed: number; cancelled: number };
 
-export function OrdersPage({ currentRole, onToast }: { currentRole: UserRole; onToast: (message: string) => void }) {
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+/** Motivo gravado quando a preferência "Confirmar antes de cancelar" está desligada. */
+const MOTIVO_SEM_CONFIRMACAO = "Não informado (confirmação desativada nas configurações)";
+
+export function OrdersPage({
+  currentRole,
+  confirmCancellation = true,
+  initialSearch = "",
+  onToast,
+}: {
+  currentRole: UserRole;
+  /** Preferência de vendas: pede confirmação e motivo antes de cancelar. */
+  confirmCancellation?: boolean;
+  /** Busca já preenchida (ex.: número do pedido vindo de uma notificação). */
+  initialSearch?: string;
+  onToast: (message: string) => void;
+}) {
+  const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("");
@@ -167,22 +182,33 @@ export function OrdersPage({ currentRole, onToast }: { currentRole: UserRole; on
     }
   };
 
+  const startCancellation = (order: SaleRecord) => {
+    if (confirmCancellation) setCancelOrder(order);
+    else void cancel(order, MOTIVO_SEM_CONFIRMACAO);
+  };
+
   const submitCancellation = async () => {
-    if (!cancelOrder || working) return;
+    if (!cancelOrder) return;
     if (!cancelReason.trim()) {
       setCancelError("Informe o motivo do cancelamento.");
       return;
     }
+    await cancel(cancelOrder, cancelReason.trim());
+  };
+
+  const cancel = async (order: SaleRecord, reason: string) => {
+    if (working) return;
     setWorking(true);
     try {
-      await vendasApi.cancelar(cancelOrder.apiId, cancelReason.trim());
+      await vendasApi.cancelar(order.apiId, reason);
       onToast("Pedido cancelado e mantido no histórico.");
       setCancelOrder(null);
       setCancelReason("");
       setCancelError("");
       reload();
     } catch (error) {
-      setCancelError(errorMessage(error));
+      if (cancelOrder) setCancelError(errorMessage(error));
+      else onToast(errorMessage(error));
     } finally {
       setWorking(false);
     }
@@ -223,7 +249,7 @@ export function OrdersPage({ currentRole, onToast }: { currentRole: UserRole; on
                     <td><div className="order-number-cell"><strong>{order.id}</strong></div></td>
                     <td><span className="order-date">{order.confirmedAt.toLocaleDateString("pt-BR")}<small>{order.confirmedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</small></span></td>
                     <td>{order.clientName}</td><td>{order.seller}</td><td>{itemCount} un.</td><td><strong>{formatCurrency(order.total)}</strong></td><td>{paymentLabels[order.paymentMethod]}</td><td><OrderStatusBadge status={order.status} /></td>
-                    <td><div className="order-row-actions"><button type="button" title="Visualizar" aria-label={`Visualizar ${order.id}`} onClick={() => setViewing(order)}><Icon name="eye" /></button>{canManage && order.status === "Em preparo" && <><button type="button" title="Mais opções" aria-label={`Mais opções para ${order.id}`} aria-expanded={menuId === order.apiId} onClick={() => setMenuId((current) => current === order.apiId ? null : order.apiId)}><Icon name="more" /></button>{menuId === order.apiId && <div className="order-actions-menu"><button type="button" onClick={() => { setCompleteConfirmation(order); setMenuId(null); }}><Icon name="check" />Marcar como concluído</button><button type="button" className="cancel" onClick={() => { setCancelOrder(order); setMenuId(null); }}><Icon name="close" />Cancelar pedido</button></div>}</>}</div></td>
+                    <td><div className="order-row-actions"><button type="button" title="Visualizar" aria-label={`Visualizar ${order.id}`} onClick={() => setViewing(order)}><Icon name="eye" /></button>{canManage && order.status === "Em preparo" && <><button type="button" title="Mais opções" aria-label={`Mais opções para ${order.id}`} aria-expanded={menuId === order.apiId} onClick={() => setMenuId((current) => current === order.apiId ? null : order.apiId)}><Icon name="more" /></button>{menuId === order.apiId && <div className="order-actions-menu"><button type="button" onClick={() => { setCompleteConfirmation(order); setMenuId(null); }}><Icon name="check" />Marcar como concluído</button><button type="button" className="cancel" onClick={() => { startCancellation(order); setMenuId(null); }}><Icon name="close" />Cancelar pedido</button></div>}</>}</div></td>
                   </tr>
                 );
               })}</tbody>

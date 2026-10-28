@@ -15,6 +15,18 @@ public interface VendaRepository extends JpaRepository<Venda, Long>, JpaSpecific
 
     List<Venda> findByStatusAndDataHoraBetween(StatusVenda status, LocalDateTime inicio, LocalDateTime fim);
 
+    // ===== Notificações =====
+
+    /** Pedidos ainda no status informado desde antes de {@code limite} (ex.: em preparo há muito tempo). */
+    List<Venda> findTop20ByStatusAndDataHoraBeforeOrderByDataHoraAsc(StatusVenda status, LocalDateTime limite);
+
+    List<Venda> findTop20ByStatusAndUsuarioIdAndDataHoraBeforeOrderByDataHoraAsc(
+            StatusVenda status, Long usuarioId, LocalDateTime limite);
+
+    /** Pedidos de um vendedor cancelados depois de {@code desde}. */
+    List<Venda> findTop20ByStatusAndUsuarioIdAndCanceladaEmAfterOrderByCanceladaEmDesc(
+            StatusVenda status, Long usuarioId, LocalDateTime desde);
+
     /** Filtros da tela Pedidos. Parâmetros nulos são ignorados. */
     final class Filtros {
 

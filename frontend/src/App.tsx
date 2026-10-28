@@ -11,8 +11,10 @@ import {
   publicoApi,
   tokenStorage,
   vendasApi,
+  type Notificacao,
   type Usuario,
 } from "./api";
+import { AccountMenu, NotificationBell, type AccountAction } from "./components/HeaderMenus";
 import { BrandMark, Icon, type IconName } from "./components/Icon";
 import { PersonCell, StatusBadge } from "./components/ui";
 import { RegistrationsPage } from "./pages/cadastros/RegistrationsPage";
@@ -21,7 +23,7 @@ import { DashboardPage } from "./pages/dashboard/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
 import { exportReportCsv, reportRange, ReportsPage, type ReportPeriod } from "./pages/relatorios/ReportsPage";
 import { defaultCompany, defaultPreferences, toCompanySettings, toSalesPreferences, type CompanySettings, type SalesPreferences } from "./pages/settings/mappers";
-import { SettingsPage } from "./pages/settings/SettingsPage";
+import { SettingsPage, type SettingsTab } from "./pages/settings/SettingsPage";
 import { toSaleRecord } from "./pages/vendas/mappers";
 import { OrdersPage } from "./pages/vendas/OrdersPage";
 import {
@@ -75,6 +77,9 @@ function Sidebar({
   currentUser,
   businessName,
   businessLogo,
+  open,
+  onClose,
+  onAccountAction,
 }: {
   activePage: "dashboard" | "sales" | "orders" | "reports" | "registrations" | "settings";
   onNavigate: (page: "dashboard" | "sales" | "orders" | "reports" | "registrations" | "settings") => void;
@@ -82,13 +87,20 @@ function Sidebar({
   currentUser: EmployeeRecord;
   businessName: string;
   businessLogo: string;
+  /** Telas pequenas: a barra lateral abre por cima do conteúdo pelo botão ☰. */
+  open: boolean;
+  onClose: () => void;
+  onAccountAction: (action: AccountAction) => void;
 }) {
   const visibleItems = navigation.filter((item) =>
     item.allowedRoles.includes(currentRole),
   );
 
   return (
-    <aside className="sidebar">
+    <>
+    {open && <div className="sidebar-backdrop" role="presentation" onClick={onClose} />}
+    <aside className={`sidebar${open ? " open" : ""}`} id="main-sidebar">
+      <button className="icon-button sidebar-close" type="button" aria-label="Fechar menu" onClick={onClose}><Icon name="close" /></button>
       <div className="sidebar-brand">
         <BrandMark src={businessLogo} />
         <div className="brand-text">
@@ -119,11 +131,12 @@ function Sidebar({
       </nav>
       <div className="sidebar-user">
         <UserIdentity compact user={currentUser} />
-        <button className="icon-button sidebar-more" type="button" aria-label="Abrir menu da conta">
+        <AccountMenu buttonClassName="icon-button sidebar-more" label="Abrir menu da conta" placement="up" isOwner={currentRole === "owner"} onAction={onAccountAction}>
           <Icon name="more" />
-        </button>
+        </AccountMenu>
       </div>
     </aside>
+    </>
   );
 }
 
@@ -552,6 +565,13 @@ export default function App() {
   // Dados da lanchonete vêm sempre da API (nunca do armazenamento local do protótipo).
   const [companySettings, setCompanySettings] = useState<CompanySettings>(defaultCompany);
   const [salesPreferences, setSalesPreferences] = useState<SalesPreferences>(defaultPreferences);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  /** Como a tela Configurações abre: o menu da conta escolhe a aba e pode já abrir a troca de senha. */
+  const [settingsEntry, setSettingsEntry] = useState<{ key: number; tab?: SettingsTab; password?: boolean }>({ key: 0 });
+  /** Busca já aplicada ao abrir Pedidos a partir de uma notificação. */
+  const [ordersEntry, setOrdersEntry] = useState({ key: 0, search: "" });
+  /** Cadastros aberto por uma notificação de estoque baixo já vem com esse filtro ligado. */
+  const [registrationsEntry, setRegistrationsEntry] = useState({ key: 0, lowStock: false });
   const confirmationLock = useRef(false);
   const currentUser = sessionUser ? toEmployeeRecord(sessionUser) : emptyUser;
   const currentRole = roleKey(currentUser.role);
@@ -792,6 +812,28 @@ export default function App() {
       .catch((error) => setToast(errorMessage(error, "Não foi possível exportar o relatório.")));
   };
 
+  const handleAccountAction = (action: AccountAction) => {
+    setSidebarOpen(false);
+    if (action === "logout") {
+      endSession();
+      return;
+    }
+    setSettingsEntry((current) => ({ key: current.key + 1, tab: action === "business" ? "business" : "account", password: action === "password" }));
+    setActivePage("settings");
+  };
+
+  /** Clique numa notificação: estoque baixo abre os produtos; pedidos abrem a lista já filtrada pelo número. */
+  const openNotification = (notification: Notificacao) => {
+    if (notification.tipo === "ESTOQUE_BAIXO") {
+      setRegistrationsEntry((current) => ({ key: current.key + 1, lowStock: true }));
+      setActiveTab("products");
+      setActivePage("registrations");
+      return;
+    }
+    setOrdersEntry((current) => ({ key: current.key + 1, search: notification.referencia }));
+    setActivePage("orders");
+  };
+
   const pageCopy = activePage === "registrations"
     ? { title: "Cadastros", description: "Gerencie clientes, funcionários e produtos da sua lanchonete." }
     : activePage === "dashboard"
@@ -824,11 +866,17 @@ export default function App() {
         currentUser={currentUser}
         businessName={companySettings.tradeName || "Ponto & Sabor"}
         businessLogo={companySettings.logo}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onAccountAction={handleAccountAction}
         onNavigate={(page) => {
+          setSidebarOpen(false);
           if ((page === "reports" || page === "dashboard") && currentRole === "seller") {
             setToast("Você não possui permissão para acessar esta funcionalidade.");
             return;
           }
+          if (page === "settings") setSettingsEntry((current) => ({ key: current.key + 1 }));
+          if (page === "orders") setOrdersEntry((current) => ({ key: current.key + 1, search: "" }));
           if (page === "sales" && ((activePage === "success" || activePage === "details") || confirmationLock.current)) startNewSale();
           else setActivePage(page);
         }}
@@ -836,7 +884,7 @@ export default function App() {
       <main className="dashboard-main">
         <header className="topbar">
           <div className="mobile-dashboard-brand">
-            <button className="icon-button" type="button" aria-label="Abrir menu"><Icon name="menu" /></button>
+            <button className="icon-button" type="button" aria-label="Abrir menu" aria-controls="main-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(true)}><Icon name="menu" /></button>
             <BrandMark src={companySettings.logo} />
           </div>
           <div className="welcome-copy">
@@ -845,12 +893,10 @@ export default function App() {
           </div>
           <div className="topbar-actions">
             {activePage === "reports" && currentRole !== "seller" && <button className="reports-export-button" type="button" onClick={exportReport}><Icon name="download" />Exportar relatório</button>}
-            <button className="icon-button notification-button" type="button" aria-label="Notificações">
-              <Icon name="bell" /><span aria-hidden="true" />
-            </button>
-            <button className="user-menu" type="button" aria-label="Abrir menu do usuário">
+            <NotificationBell key={currentUser.id} onSelect={openNotification} />
+            <AccountMenu buttonClassName="user-menu" label="Abrir menu do usuário" isOwner={currentRole === "owner"} onAction={handleAccountAction}>
               <UserIdentity user={currentUser} /><Icon name="chevron" />
-            </button>
+            </AccountMenu>
           </div>
         </header>
 
@@ -882,7 +928,7 @@ export default function App() {
             onReview={prepareOrder}
           />
         ) : activePage === "orders" ? (
-          <OrdersPage currentRole={currentRole} onToast={setToast} />
+          <OrdersPage key={ordersEntry.key} currentRole={currentRole} confirmCancellation={salesPreferences.confirmCancellation} initialSearch={ordersEntry.search} onToast={setToast} />
         ) : activePage === "reports" ? (
           <ReportsPage
             period={reportPeriod}
@@ -896,7 +942,9 @@ export default function App() {
           />
         ) : activePage === "settings" ? (
           <SettingsPage
-            key={currentUser.id}
+            key={`${currentUser.id}-${settingsEntry.key}`}
+            initialTab={settingsEntry.tab}
+            openPassword={settingsEntry.password}
             currentUser={currentUser}
             currentRole={currentRole}
             company={companySettings}
@@ -933,7 +981,7 @@ export default function App() {
             onBack={() => setActivePage("success")}
           />
         ) : (
-          <RegistrationsPage activeTab={activeTab} currentRole={currentRole} onTabChange={setActiveTab} onToast={setToast} />
+          <RegistrationsPage key={registrationsEntry.key} initialLowStock={registrationsEntry.lowStock} activeTab={activeTab} currentRole={currentRole} onTabChange={setActiveTab} onToast={setToast} />
         )}
       </main>
       {clearOrderConfirmation && (

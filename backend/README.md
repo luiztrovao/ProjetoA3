@@ -79,6 +79,7 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | Usuários | `GET /api/usuarios` · `GET /api/usuarios/{id}` · `POST /api/usuarios` · `PUT /api/usuarios/{id}` · `DELETE /api/usuarios/{id}` · `PATCH /api/usuarios/{id}/ativar` |
 | Vendas e Pedidos | `GET /api/vendas` · `GET /api/vendas/{id}` · `POST /api/vendas` · `PATCH /api/vendas/{id}/concluir` · `PATCH /api/vendas/{id}/cancelar` |
 | Dashboard e Relatórios | `GET /api/dashboard` · `GET /api/relatorios/resumo` · `GET /api/relatorios/picos` |
+| Notificações (sino) | `GET /api/notificacoes` · `POST /api/notificacoes/lidas` |
 | Configurações | `GET /api/configuracoes` · `PUT /api/configuracoes/empresa` · `PUT /api/configuracoes/vendas` · `PUT /api/configuracoes/logo` · `DELETE /api/configuracoes/logo` |
 | Público (sem login) | `GET /api/publico/identidade` (nome e logo para a tela de login) · `GET /api/imagens/{id}` |
 
@@ -98,12 +99,13 @@ A documentação completa e interativa fica no Swagger. Resumo:
 | Concluir e cancelar pedidos | ✅ | ✅ | ❌ |
 | Dashboard e Relatórios | ✅ | ✅ | ❌ |
 | Minha Conta | ✅ | ✅ | ✅ |
+| Notificações | estoque baixo e pedidos atrasados | estoque baixo e pedidos atrasados | os próprios pedidos atrasados e cancelados |
 
 **Convenções:**
 
 - `DELETE` faz **exclusão lógica** (marca como inativo); `PATCH .../ativar` desfaz.
 - Listagens aceitam `termo`, `ativo` (`true`/`false`), `page` (começa em 0), `size` e `sort` (ex.: `sort=preco,desc`), e devolvem `{conteudo, pagina, tamanho, totalElementos, totalPaginas}`.
-- Filtros extras: `categoriaId` em produtos e `perfil` em usuários. O `termo` busca:
+- Filtros extras: `categoriaId` e `estoqueBaixo=true` em produtos e `perfil` em usuários. O `termo` busca:
   - produtos: nome ou código;
   - clientes: nome, CPF, telefone ou e-mail;
   - usuários: nome, nome de usuário, e-mail ou CPF.
@@ -124,6 +126,11 @@ A documentação completa e interativa fica no Swagger. Resumo:
     vendas por **dia da semana** e por **hora** com os respectivos picos, e comparação com o período anterior (`variacaoFaturamento` em %).
 - Pedidos aceitam os filtros `termo` (número, cliente ou vendedor), `status`, `vendedorId`, `clienteId`, `formaPagamento`,
   `inicio` e `fim` (`aaaa-mm-dd`); ordem padrão: mais recentes primeiro. Cancelar exige `{"motivo": "..."}` e devolve ao estoque o que foi retirado.
+- **Notificações** (`GET /api/notificacoes`) são calculadas na hora, sem tabela própria: produtos ativos com estoque
+  igual ou abaixo do mínimo (Dono e Gerente), pedidos **em preparo** há mais que o tempo de `minutosAlertaPreparo`
+  das Preferências de Vendas (padrão 20, de 5 a 240; o Vendedor só vê os próprios) e, para o Vendedor, os próprios
+  pedidos cancelados nos últimos 7 dias. A resposta é `{naoLidas, itens[]}` (até 30, mais recentes primeiro);
+  `POST /api/notificacoes/lidas` marca tudo o que existe até agora como lido.
 - **Imagens** (logo e foto de produto): envio em `multipart/form-data` no campo `arquivo`, só **PNG ou JPG de até 1 MB**
   (o formato é conferido pelo conteúdo do arquivo). Ficam guardadas no banco e as respostas trazem `logoUrl`/`imagemUrl`
   como caminho relativo (ex.: `/api/imagens/5`). Trocar a imagem apaga a anterior.

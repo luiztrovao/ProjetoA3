@@ -5,12 +5,17 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long>, JpaSpecificationExecutor<Produto> {
 
     List<Produto> findByAtivoTrueOrderByNome();
 
     boolean existsByCodigo(String codigo);
+
+    /** Produtos ativos com estoque igual ou abaixo do mínimo (notificação de estoque baixo). */
+    @Query("select p from Produto p where p.ativo = true and p.estoqueAtual <= p.estoqueMinimo order by p.estoqueAtual, p.nome")
+    List<Produto> comEstoqueBaixo();
 
     boolean existsByCodigoAndIdNot(String codigo, Long id);
 
@@ -35,6 +40,13 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long>, JpaSpec
             return (root, query, cb) -> categoriaId == null
                     ? null
                     : cb.equal(root.get("categoria").get("id"), categoriaId);
+        }
+
+        /** {@code true}: só produtos com estoque igual ou abaixo do mínimo. */
+        public static Specification<Produto> comEstoqueBaixo(Boolean estoqueBaixo) {
+            return (root, query, cb) -> !Boolean.TRUE.equals(estoqueBaixo)
+                    ? null
+                    : cb.le(root.<Integer>get("estoqueAtual"), root.<Integer>get("estoqueMinimo"));
         }
 
         public static Specification<Produto> comAtivo(Boolean ativo) {

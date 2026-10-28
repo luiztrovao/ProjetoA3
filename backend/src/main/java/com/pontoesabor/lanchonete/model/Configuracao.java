@@ -77,6 +77,10 @@ public class Configuracao {
     @Column(name = "alerta_estoque_baixo", nullable = false)
     private int alertaEstoqueBaixo = 5;
 
+    /** Depois de quantos minutos "em preparo" o pedido aparece como atrasado nas notificações. */
+    @Column(name = "minutos_alerta_preparo", nullable = false)
+    private int minutosAlertaPreparo = 20;
+
     @Column(name = "confirmar_cancelamento", nullable = false)
     private boolean confirmarCancelamento = true;
 
@@ -269,6 +273,17 @@ public class Configuracao {
 
     public boolean isBloquearSemEstoque() {
         return bloquearSemEstoque;
+    }
+
+    public int getMinutosAlertaPreparo() {
+        return minutosAlertaPreparo;
+    }
+
+    public void definirMinutosAlertaPreparo(int minutos) {
+        if (minutos < 5 || minutos > 240) {
+            throw new RegraNegocioException("O alerta de pedido atrasado deve ficar entre 5 e 240 minutos.");
+        }
+        this.minutosAlertaPreparo = minutos;
     }
 
     public int getAlertaEstoqueBaixo() {

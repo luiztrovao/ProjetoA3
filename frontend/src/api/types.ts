@@ -15,6 +15,12 @@ export type Pagina<T> = {
 export type ListagemParams = {
   termo?: string;
   ativo?: boolean;
+  /** Usuários: filtra por perfil. */
+  perfil?: Perfil;
+  /** Produtos: filtra por categoria. */
+  categoriaId?: number;
+  /** Produtos: só os com estoque igual ou abaixo do mínimo. */
+  estoqueBaixo?: boolean;
   page?: number;
   size?: number;
   sort?: string;
@@ -144,6 +150,8 @@ export type PreferenciasVenda = {
   permitirVendaSemCliente: boolean;
   statusInicialVenda: StatusVenda;
   formasPagamento: FormaPagamento[];
+  /** Minutos em preparo até o pedido aparecer como atrasado no sino (5 a 240). */
+  minutosAlertaPreparo: number;
 };
 
 export type Configuracao = {
@@ -270,3 +278,22 @@ export type Picos = {
   porHora: Ponto[];
   horaPico: Ponto | null;
 };
+
+// ===== Notificações =====
+
+export type TipoNotificacao = "ESTOQUE_BAIXO" | "PEDIDO_ATRASADO" | "PEDIDO_CANCELADO";
+
+export type Notificacao = {
+  id: string;
+  tipo: TipoNotificacao;
+  titulo: string;
+  mensagem: string;
+  data: string | null;
+  lida: boolean;
+  /** Id do produto ou da venda. */
+  referenciaId: number;
+  /** Código do produto ou número do pedido (ex.: #PV-000123). */
+  referencia: string;
+};
+
+export type Notificacoes = { naoLidas: number; itens: Notificacao[] };

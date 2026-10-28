@@ -1,6 +1,6 @@
 // Tela Cadastros: Clientes, Funcionários e Produtos, com dados da API.
 import { useCallback, useEffect, useState } from "react";
-import { categoriasApi, clientesApi, errorMessage, produtosApi, usuariosApi, type Categoria } from "../../api";
+import { categoriasApi, clientesApi, errorMessage, produtosApi, usuariosApi, type Categoria, type Perfil } from "../../api";
 import { Icon } from "../../components/Icon";
 import type { ClientRecord, EmployeeRecord, FormValues, ModalMode, ProductRecord, TabId, UserRole } from "../../types";
 import {
@@ -15,7 +15,7 @@ import {
   toProductRecord,
 } from "./mappers";
 import { emptyValues, modalCopy, RecordModal } from "./RecordModal";
-import { ClientsTable, EmployeesTable, ProductsTable, tabs, type TableActions } from "./tables";
+import { ClientsTable, EmployeesTable, ProductsTable, tabs, type FilterDef, type FilterValues, type TableActions } from "./tables";
 
 const PAGE_SIZE = 10;
 const SEARCH_DELAY_MS = 300;
@@ -55,13 +55,28 @@ const statusApi = {
 
 const perTab = <T,>(value: T): Record<TabId, T> => ({ clients: value, employees: value, products: value });
 
+const statusFilter: FilterDef = { id: "status", label: "Status", options: [{ value: "true", label: "Ativos" }, { value: "false", label: "Inativos" }] };
+const profileFilter: FilterDef = { id: "perfil", label: "Perfil", options: [{ value: "DONO", label: "Dono" }, { value: "GERENTE", label: "Gerente" }, { value: "VENDEDOR", label: "Vendedor" }] };
+const stockFilter: FilterDef = { id: "estoque", label: "Estoque", options: [{ value: "baixo", label: "Estoque baixo" }] };
+
+/** Converte os filtros escolhidos nos parâmetros da listagem da API. */
+const filterParams = (values: FilterValues) => ({
+  ativo: values.status ? values.status === "true" : undefined,
+  perfil: (values.perfil || undefined) as Perfil | undefined,
+  categoriaId: values.categoria ? Number(values.categoria) : undefined,
+  estoqueBaixo: values.estoque === "baixo" ? true : undefined,
+});
+
 export function RegistrationsPage({
   activeTab: requestedTab,
   currentRole,
+  initialLowStock = false,
   onTabChange,
   onToast,
 }: {
   activeTab: TabId;
+  /** Abre Produtos já filtrado por estoque baixo (notificação do sino). */
+  initialLowStock?: boolean;
   currentRole: UserRole;
   onTabChange: (tab: TabId) => void;
   onToast: (message: string) => void;
@@ -73,7 +88,7 @@ export function RegistrationsPage({
   const [searches, setSearches] = useState<Record<TabId, string>>(perTab(""));
   const [terms, setTerms] = useState<Record<TabId, string>>(perTab(""));
   const [pages, setPages] = useState<Record<TabId, number>>(perTab(0));
-  const [activeFilters, setActiveFilters] = useState<Record<TabId, string[]>>(perTab<string[]>([]));
+  const [filterValues, setFilterValues] = useState<Record<TabId, FilterValues>>({ ...perTab<FilterValues>({}), products: initialLowStock ? { estoque: "baixo" } : {} });
   const [listing, setListing] = useState<Listing>({ clients: [], employees: [], products: [] });
   const [pageInfo, setPageInfo] = useState<Record<TabId, PageInfo>>(perTab({ page: 0, total: 0, totalPages: 0 }));
   const [loading, setLoading] = useState(true);
@@ -105,9 +120,10 @@ export function RegistrationsPage({
 
   const page = pages[activeTab];
   const term = terms[activeTab];
+  const filtersKey = JSON.stringify(filterValues[activeTab]);
   useEffect(() => {
     let cancelled = false;
-    const params = { termo: term || undefined, page, size: PAGE_SIZE };
+    const params = { termo: term || undefined, ...filterParams(JSON.parse(filtersKey) as FilterValues), page, size: PAGE_SIZE };
     setLoading(true);
     setLoadError("");
     const load = async () => {
@@ -139,7 +155,7 @@ export function RegistrationsPage({
     return () => {
       cancelled = true;
     };
-  }, [activeTab, page, term, reloadKey]);
+  }, [activeTab, page, term, filtersKey, reloadKey]);
 
   const canManageTab = (type: TabId) => currentRole === "owner" || (currentRole === "manager" && type !== "employees");
   const canCreateRegistration = canManageTab(activeTab) || (currentRole === "seller" && activeTab === "clients");
@@ -229,12 +245,19 @@ export function RegistrationsPage({
     }
   };
 
-  const toggleFilter = (filter: string) => setActiveFilters((current) => ({
-    ...current,
-    [activeTab]: current[activeTab].includes(filter)
-      ? current[activeTab].filter((item) => item !== filter)
-      : [...current[activeTab], filter],
-  }));
+  const changeFilter = (id: string, value: string) => {
+    setFilterValues((current) => ({ ...current, [activeTab]: { ...current[activeTab], [id]: value } }));
+    setPages((current) => ({ ...current, [activeTab]: 0 }));
+  };
+  const filtersByTab: Record<TabId, FilterDef[]> = {
+    clients: [statusFilter],
+    employees: [profileFilter, statusFilter],
+    products: [
+      { id: "categoria", label: "Categoria", options: categories.map((categoria) => ({ value: String(categoria.id), label: categoria.nome })) },
+      statusFilter,
+      stockFilter,
+    ],
+  };
 
   const tableActions: TableActions = {
     menuId,
@@ -258,7 +281,7 @@ export function RegistrationsPage({
   };
   const emptyMessage = loading ? "Carregando registros..." : loadError || "Nenhum registro encontrado.";
   const onSearch = (value: string) => setSearches((current) => ({ ...current, [activeTab]: value }));
-  const tableProps = { search, activeFilters: activeFilters[activeTab], onSearch, onToggleFilter: toggleFilter, pagination, emptyMessage, ...tableActions };
+  const tableProps = { search, filters: filtersByTab[activeTab], filterValues: filterValues[activeTab], onSearch, onFilter: changeFilter, pagination, emptyMessage, ...tableActions };
 
   const table = activeTab === "clients"
     ? <ClientsTable records={listing.clients} {...tableProps} />

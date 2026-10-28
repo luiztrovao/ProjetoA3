@@ -80,6 +80,9 @@ public class ConfiguracaoService {
                 dados.permitirVendaSemCliente(),
                 dados.statusInicialVenda(),
                 dados.formasPagamento());
+        if (dados.minutosAlertaPreparo() != null) {
+            configuracao.definirMinutosAlertaPreparo(dados.minutosAlertaPreparo());
+        }
         return ConfiguracaoResponse.de(configuracaoRepository.saveAndFlush(configuracao));
     }
 

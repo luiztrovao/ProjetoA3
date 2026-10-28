@@ -85,20 +85,24 @@ function Pagination({ page, size, total, totalPages, onPage }: PaginationProps) 
   );
 }
 
+/** Filtro da barra de busca: um select com as opções e "todos" como valor vazio. */
+export type FilterDef = { id: string; label: string; options: Array<{ value: string; label: string }> };
+export type FilterValues = Record<string, string>;
+
 function SearchToolbar({
   placeholder,
   filters,
   value,
-  activeFilters,
+  filterValues,
   onChange,
-  onToggleFilter,
+  onFilter,
 }: {
   placeholder: string;
-  filters: string[];
+  filters: FilterDef[];
   value: string;
-  activeFilters: string[];
+  filterValues: FilterValues;
   onChange: (value: string) => void;
-  onToggleFilter: (filter: string) => void;
+  onFilter: (id: string, value: string) => void;
 }) {
   return (
     <div className="management-toolbar">
@@ -109,11 +113,14 @@ function SearchToolbar({
       </label>
       <div className="filter-controls">
         {filters.map((filter) => (
-          <button key={filter} className={`filter-button${activeFilters.includes(filter) ? " active" : ""}`} type="button" onClick={() => onToggleFilter(filter)}>
-            {filters.length === 1 && <Icon name="filter" />}
-            {filter}
-            {filters.length > 1 && <Icon name="chevron" />}
-          </button>
+          <label key={filter.id} className={`filter-button filter-select${filterValues[filter.id] ? " active" : ""}`}>
+            <span className="sr-only">{filter.label}</span>
+            <select value={filterValues[filter.id] ?? ""} onChange={(event) => onFilter(filter.id, event.target.value)}>
+              <option value="">{filter.label}: todos</option>
+              {filter.options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+            <Icon name="chevron" />
+          </label>
         ))}
       </div>
     </div>
@@ -136,24 +143,26 @@ export type TableActions = {
 export function ClientsTable({
   records,
   search,
-  activeFilters,
+  filters,
+  filterValues,
   onSearch,
-  onToggleFilter,
+  onFilter,
   pagination,
   emptyMessage,
   ...actions
 }: {
   records: ClientRecord[];
   search: string;
-  activeFilters: string[];
+  filters: FilterDef[];
+  filterValues: FilterValues;
   onSearch: (value: string) => void;
-  onToggleFilter: (filter: string) => void;
+  onFilter: (id: string, value: string) => void;
   pagination: PaginationProps;
   emptyMessage: string;
 } & TableActions) {
   return (
     <>
-      <SearchToolbar placeholder="Pesquisar por nome, CPF ou telefone..." filters={["Filtros"]} value={search} activeFilters={activeFilters} onChange={onSearch} onToggleFilter={onToggleFilter} />
+      <SearchToolbar placeholder="Pesquisar por nome, CPF ou telefone..." filters={filters} value={search} filterValues={filterValues} onChange={onSearch} onFilter={onFilter} />
       <div className="management-table-scroll">
         <table className="management-table">
           <thead><tr><th>Cliente</th><th>CPF</th><th>Telefone</th><th>E-mail</th><th>Cadastro</th><th>Status</th><th>Ações</th></tr></thead>
@@ -178,18 +187,20 @@ export function ClientsTable({
 export function EmployeesTable({
   records,
   search,
-  activeFilters,
+  filters,
+  filterValues,
   onSearch,
-  onToggleFilter,
+  onFilter,
   pagination,
   emptyMessage,
   ...actions
 }: {
   records: EmployeeRecord[];
   search: string;
-  activeFilters: string[];
+  filters: FilterDef[];
+  filterValues: FilterValues;
   onSearch: (value: string) => void;
-  onToggleFilter: (filter: string) => void;
+  onFilter: (id: string, value: string) => void;
   pagination: PaginationProps;
   emptyMessage: string;
 } & TableActions) {
@@ -199,7 +210,7 @@ export function EmployeesTable({
         <span><Icon name="shield" /></span>
         <p><strong>Níveis de acesso</strong>Dono possui acesso total, Gerente acesso administrativo e Vendedor acesso focado em vendas.</p>
       </div>
-      <SearchToolbar placeholder="Pesquisar por nome, CPF ou e-mail..." filters={["Perfil", "Status"]} value={search} activeFilters={activeFilters} onChange={onSearch} onToggleFilter={onToggleFilter} />
+      <SearchToolbar placeholder="Pesquisar por nome, CPF ou e-mail..." filters={filters} value={search} filterValues={filterValues} onChange={onSearch} onFilter={onFilter} />
       <div className="management-table-scroll">
         <table className="management-table">
           <thead><tr><th>Funcionário</th><th>Contato</th><th>Perfil</th><th>Último acesso</th><th>Status</th><th>Ações</th></tr></thead>
@@ -225,24 +236,26 @@ export function EmployeesTable({
 export function ProductsTable({
   records,
   search,
-  activeFilters,
+  filters,
+  filterValues,
   onSearch,
-  onToggleFilter,
+  onFilter,
   pagination,
   emptyMessage,
   ...actions
 }: {
   records: ProductRecord[];
   search: string;
-  activeFilters: string[];
+  filters: FilterDef[];
+  filterValues: FilterValues;
   onSearch: (value: string) => void;
-  onToggleFilter: (filter: string) => void;
+  onFilter: (id: string, value: string) => void;
   pagination: PaginationProps;
   emptyMessage: string;
 } & TableActions) {
   return (
     <>
-      <SearchToolbar placeholder="Pesquisar por nome ou código..." filters={["Categoria", "Status", "Estoque"]} value={search} activeFilters={activeFilters} onChange={onSearch} onToggleFilter={onToggleFilter} />
+      <SearchToolbar placeholder="Pesquisar por nome ou código..." filters={filters} value={search} filterValues={filterValues} onChange={onSearch} onFilter={onFilter} />
       <div className="management-table-scroll">
         <table className="management-table">
           <thead><tr><th>Produto</th><th>Categoria</th><th>Código</th><th>Preço</th><th>Estoque</th><th>Status</th><th>Ações</th></tr></thead>
