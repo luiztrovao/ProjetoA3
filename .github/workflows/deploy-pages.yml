@@ -1,0 +1,58 @@
+name: Publicar frontend (GitHub Pages)
+
+# Publica a cada atualização da main; também pode ser disparado à mão na aba Actions.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build do frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Confere o endereço da API
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          if [ -z "$VITE_API_URL" ]; then
+            echo "::error::Crie a variável VITE_API_URL em Settings > Secrets and variables > Actions > Variables (ex.: https://ponto-e-sabor-api.onrender.com)."
+            exit 1
+          fi
+      - name: Instala dependências
+        run: npm install --no-audit --no-fund
+      - name: Build
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_BASE: /${{ github.event.repository.name }}/
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    name: Publicação
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
