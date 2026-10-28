@@ -176,4 +176,76 @@ class UsuarioServiceTest {
 
         assertThat(gerente.getNome()).isEqualTo("Carlos Lima");
     }
+
+    @Test
+    void atualizarComEmailDeOutroUsuarioLancaExcecao() {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(new Usuario("Matheus", "matheus", "hash", Perfil.VENDEDOR)));
+        when(usuarioRepository.existsByEmailAndIdNot("carlos@pontoesabor.com", 1L)).thenReturn(true);
+        UsuarioAtualizacaoRequest request = new UsuarioAtualizacaoRequest(
+                "Matheus", "matheus", "carlos@pontoesabor.com", null, null, null, Perfil.VENDEDOR);
+
+        assertThatThrownBy(() -> usuarioService.atualizar(1L, request, ID_LOGADO))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessage("Já existe um funcionário com o mesmo CPF, usuário ou e-mail.");
+        verify(usuarioRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void atualizarComCpfDeOutroUsuarioLancaExcecao() {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(new Usuario("Matheus", "matheus", "hash", Perfil.VENDEDOR)));
+        when(usuarioRepository.existsByCpfAndIdNot("52998224725", 1L)).thenReturn(true);
+        UsuarioAtualizacaoRequest request = new UsuarioAtualizacaoRequest(
+                "Matheus", "matheus", null, "529.982.247-25", null, null, Perfil.VENDEDOR);
+
+        assertThatThrownBy(() -> usuarioService.atualizar(1L, request, ID_LOGADO))
+                .isInstanceOf(RegraNegocioException.class);
+        verify(usuarioRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void atualizarComNovaSenhaGuardaONovoHash() {
+        Usuario usuario = new Usuario("Matheus", "matheus", "hashAntigo", Perfil.VENDEDOR);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.saveAndFlush(usuario)).thenReturn(usuario);
+        when(passwordEncoder.encode("novaSenha")).thenReturn("hashNovo");
+
+        usuarioService.atualizar(1L, atualizacao("Matheus", "novaSenha", Perfil.VENDEDOR), ID_LOGADO);
+
+        assertThat(usuario.getSenhaHash()).isEqualTo("hashNovo");
+    }
+
+    @Test
+    void promoverParaDonoNaoConsultaQuantidadeDeDonos() {
+        Usuario vendedor = new Usuario("Fernanda", "matheus", "hash", Perfil.VENDEDOR);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(vendedor));
+        when(usuarioRepository.saveAndFlush(vendedor)).thenReturn(vendedor);
+
+        usuarioService.atualizar(1L, atualizacao("Fernanda", null, Perfil.DONO), ID_LOGADO);
+
+        assertThat(vendedor.getPerfil()).isEqualTo(Perfil.DONO);
+        verify(usuarioRepository, never()).countByPerfilAndAtivoTrue(any());
+    }
+
+    @Test
+    void inativarDonoJaInativoNaoConsultaQuantidadeDeDonos() {
+        Usuario dono = new Usuario("Rafael", "rafael", "hash", Perfil.DONO);
+        dono.setAtivo(false);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(dono));
+
+        usuarioService.inativar(1L, ID_LOGADO);
+
+        assertThat(dono.isAtivo()).isFalse();
+        verify(usuarioRepository, never()).countByPerfilAndAtivoTrue(any());
+    }
+
+    @Test
+    void ativarReativaUsuario() {
+        Usuario usuario = new Usuario("Rafael", "rafael", "hash", Perfil.VENDEDOR);
+        usuario.setAtivo(false);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+        usuarioService.ativar(1L);
+
+        assertThat(usuario.isAtivo()).isTrue();
+    }
 }
