@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:relatorio": "eslint . -f json -o eslint-report.json",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -14,12 +16,17 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.1",
     "@tailwindcss/vite": "4.2.2",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "@vitejs/plugin-react": "5.2.0",
+    "eslint": "9.39.1",
+    "eslint-plugin-react-hooks": "7.0.1",
+    "globals": "16.5.0",
     "tailwindcss": "4.2.2",
     "typescript": "5.9.3",
+    "typescript-eslint": "8.46.4",
     "vite": "7.3.7"
   }
 }

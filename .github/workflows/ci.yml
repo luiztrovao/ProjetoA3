@@ -20,7 +20,7 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - name: Build, testes e cobertura
+      - name: Build, testes, cobertura e análise estática (PMD, CPD, SpotBugs)
         run: ./mvnw -B verify
       - name: Publica relatório de cobertura (JaCoCo)
         if: always()
@@ -28,6 +28,18 @@ jobs:
         with:
           name: cobertura-backend
           path: backend/target/site/jacoco/
+          if-no-files-found: ignore
+      - name: Publica relatórios dos testes e da análise estática
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorios-backend
+          path: |
+            backend/target/surefire-reports/
+            backend/target/pmd.xml
+            backend/target/cpd.xml
+            backend/target/spotbugsXml.xml
+            backend/target/reports/
           if-no-files-found: ignore
 
   frontend:
@@ -45,6 +57,20 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Verifica tipos (TypeScript)
         run: npm run typecheck
+      - name: Análise estática (ESLint)
+        # Por enquanto só relata; tire o continue-on-error para reprovar o build com problemas
+        continue-on-error: true
+        run: npm run lint
+      - name: Gera relatório do ESLint
+        if: always()
+        run: npm run lint:relatorio || true
+      - name: Publica relatório do ESLint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-eslint
+          path: frontend/eslint-report.json
+          if-no-files-found: ignore
       - name: Build
         run: npm run build
       - name: Publica o build do frontend
@@ -52,6 +78,38 @@ jobs:
         with:
           name: frontend-dist
           path: frontend/dist/
+
+  sonarcloud:
+    name: SonarCloud (backend)
+    runs-on: ubuntu-latest
+    # Só roda depois que o segredo SONAR_TOKEN for criado no repositório (veja docs/analise-estatica.md)
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Análise no SonarCloud
+        if: env.SONAR_TOKEN != ''
+        run: >
+          ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=luiztrovao
+          -Dsonar.projectKey=luiztrovao_ProjetoA3
+      - name: SonarCloud não configurado
+        if: env.SONAR_TOKEN == ''
+        working-directory: .
+        run: echo "Segredo SONAR_TOKEN ausente; análise no SonarCloud ignorada."
 
   docker:
     name: Imagem Docker da API (Render)

@@ -34,3 +34,6 @@ application-local.yml
 # ===== Sistema operacional =====
 .DS_Store
 Thumbs.db
+
+# ===== Relatórios de análise estática =====
+eslint-report.json
