@@ -7140,16 +7140,23 @@ td strong {
 
 /* ===== Menus do topo: notificações e conta ===== */
 
+/* O topo fica acima do conteúdo para os menus suspensos não ficarem por baixo dos cards. */
+.topbar {
+  z-index: 30;
+  position: relative;
+}
+
 .header-menu {
   position: relative;
 }
 
-.notification-count {
+.notification-button > .notification-count {
   color: #fff;
   background: var(--primary);
   border: 2px solid #fffefa;
   border-radius: 999px;
   place-items: center;
+  width: auto;
   min-width: 20px;
   height: 20px;
   padding: 0 4px;
@@ -7416,14 +7423,19 @@ td strong {
   }
 
   .sidebar.open {
+    z-index: 50;
     width: min(280px, 84vw);
     padding: 28px 20px 22px;
     animation: sidebar-in .18s ease-out;
     display: flex;
   }
 
-  .sidebar.open .brand-text, .sidebar.open .nav-label, .sidebar.open .nav-item > span, .sidebar.open .sidebar-user .user-copy, .sidebar.open .sidebar-more {
-    display: initial;
+  .sidebar.open .brand-text, .sidebar.open .nav-label, .sidebar.open .nav-item > span {
+    display: block;
+  }
+
+  .sidebar.open .sidebar-user .user-copy {
+    display: flex;
   }
 
   .sidebar.open .sidebar-brand {
@@ -7459,7 +7471,7 @@ td strong {
   }
 
   .sidebar-backdrop {
-    z-index: 19;
+    z-index: 45;
     background: #1d26214d;
     display: block;
     position: fixed;
