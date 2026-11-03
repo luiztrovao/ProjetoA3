@@ -24,15 +24,15 @@ Só a análise, sem os testes:
 
 Frontend (na pasta `frontend/`): `npm run lint` mostra os problemas; `npm run lint:relatorio` gera o JSON.
 
-## Por enquanto a análise só relata
+## A análise reprova o build
 
-Para registrar o **antes** do ciclo de melhoria, os problemas aparecem no log mas **não reprovam** o build:
+Desde 03/11/2026, depois das correções, **qualquer problema novo reprova o build** (localmente e no PR):
 
-- backend: propriedade `analise.falhar` no `pom.xml` (`false`);
-- frontend: `continue-on-error: true` no passo do ESLint em `.github/workflows/ci.yml`.
+- backend: propriedade `analise.falhar` no `pom.xml` (`true`);
+- frontend: o passo do ESLint em `.github/workflows/ci.yml` não tem mais `continue-on-error`.
 
-Depois das correções, troque `analise.falhar` para `true` e remova o `continue-on-error` para que novos
-problemas reprovem o PR.
+Os falsos positivos do SpotBugs que foram analisados ficam em `backend/spotbugs-exclude.xml`, com a justificativa
+de cada grupo (veja abaixo). A exclusão vale só para o par alerta + classe/campo listado.
 
 ## Ativando o SonarCloud
 
@@ -53,4 +53,41 @@ A cobertura do JaCoCo (`target/site/jacoco/jacoco.xml`) é enviada junto.
 | PMD | 1 | `TooManyStaticImports` em `VendaService` (prioridade 3) |
 | CPD | 1 duplicação, 43 linhas | Getters/setters de telefone, e-mail e endereço repetidos em `Cliente` e `Configuracao` |
 | SpotBugs | 53 | 52 `EI_EXPOSE_REP`/`EI_EXPOSE_REP2` (listas e serviços guardados ou devolvidos sem cópia) e 1 `CT_CONSTRUCTOR_THROW` em `ItemVenda` |
-| ESLint | a medir | Primeira execução no CI |
+| ESLint | 1 erro | `no-irregular-whitespace` no BOM do CSV de relatórios (`ReportsPage.tsx`) |
+
+## Correções e resultado final (depois), 03/11/2026
+
+| Ferramenta | Antes | Depois | O que foi feito |
+|---|---|---|---|
+| PMD | 1 | **0** | `VendaService` usa `Filtros.buscaGeral(...)` em vez de 6 imports estáticos |
+| CPD | 1 duplicação (43 linhas) | **0** | Telefone, e-mail e endereço viraram o `@Embeddable` `Contato` (record imutável), usado por `Cliente` e `Configuracao`. As colunas no banco não mudaram |
+| SpotBugs | 53 | **0** | 33 corrigidos no código e 20 falsos positivos documentados (detalhe abaixo) |
+| ESLint | 1 erro | **0** | BOM do CSV de relatórios escrito como escape (`no-irregular-whitespace`), no PR #17 |
+
+**SpotBugs, corrigidos no código (33):**
+
+- **30 `EI_EXPOSE_REP`/`EI_EXPOSE_REP2` em 13 records de DTO** (respostas de páginas, erros, notificações, Dashboard, Relatórios,
+  Picos e vendas): os records guardam uma **cópia imutável** das listas (`List.copyOf`). Nas requisições
+  (`VendaRequest.itens` e `PreferenciasVendaDto.formasPagamento`), a cópia aceita `null`, para que o campo ausente
+  continue chegando à validação com a mensagem amigável.
+- **2 em `Imagem`**: o arquivo (`byte[]`) é copiado ao criar e ao ler a imagem.
+- **1 `CT_CONSTRUCTOR_THROW` em `ItemVenda`**: a validação da quantidade saiu do construtor para a fábrica
+  `ItemVenda.criar(...)`. Um construtor que lança exceção deixa um objeto meio criado exposto a subclasses.
+
+**SpotBugs, falsos positivos documentados (20):**
+
+- **11 de injeção de dependência**: controllers e serviços guardam os outros beans que o Spring entrega no construtor
+  (serviços, `EntityManager`, `JsonMapper`). Eles são compartilhados de propósito, e copiá-los não faria sentido.
+- **9 de associações JPA**: `Produto → Categoria`, `Venda → Cliente/Usuário` e `ItemVenda → Venda/Produto` precisam
+  apontar para a mesma instância gerenciada pelo Hibernate; uma cópia deixaria de ser a entidade do banco.
+
+**Regressão:** a refatoração do `Contato` quebrou a busca de clientes por e-mail e telefone, que procurava os campos
+direto na entidade. O teste `ClienteControllerTest.buscaPorNomeCpfOuTelefone` falhou e a busca foi corrigida para
+`contato.email`/`contato.telefone`. O teste novo `CopiasDefensivasTest` garante que as cópias continuam funcionando.
+
+| Indicador (backend) | Antes (28/10) | Depois (03/11) |
+|---|---|---|
+| Problemas estáticos (PMD + CPD + SpotBugs) | 55 | 0 |
+| Testes automatizados | 240 | 246 (0 falhas) |
+| Cobertura de instruções | 90,2% | 90,2% |
+| Cobertura de branches | 85,8% | 85,9% |

@@ -9,6 +9,7 @@ import com.pontoesabor.lanchonete.dto.PaginaResponse;
 import com.pontoesabor.lanchonete.exception.RecursoNaoEncontradoException;
 import com.pontoesabor.lanchonete.exception.RegraNegocioException;
 import com.pontoesabor.lanchonete.model.Cliente;
+import com.pontoesabor.lanchonete.model.Contato;
 import com.pontoesabor.lanchonete.repository.ClienteRepository;
 import com.pontoesabor.lanchonete.util.Textos;
 import java.util.List;
@@ -70,15 +71,9 @@ public class ClienteService {
 
     private static void preencher(Cliente cliente, ClienteRequest request) {
         cliente.setCpf(request.cpf());
-        cliente.setTelefone(request.telefone());
-        cliente.setEmail(request.email());
-        cliente.setCep(request.cep());
-        cliente.setLogradouro(request.logradouro());
-        cliente.setNumero(request.numero());
+        cliente.setContato(new Contato(request.telefone(), request.email(), request.cep(), request.logradouro(),
+                request.numero(), request.bairro(), request.cidade(), request.uf()));
         cliente.setComplemento(request.complemento());
-        cliente.setBairro(request.bairro());
-        cliente.setCidade(request.cidade());
-        cliente.setUf(request.uf());
         cliente.setObservacoes(request.observacoes());
     }
 

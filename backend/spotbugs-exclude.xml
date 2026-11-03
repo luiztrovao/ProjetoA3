@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Falsos positivos do SpotBugs, analisados um a um (ver docs/analise-estatica.md).
+  Cada exclusão vale só para o par alerta + classe/campo listado; qualquer caso novo continua aparecendo.
+-->
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/3.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/master/spotbugs/etc/findbugsfilter.xsd">
+
+    <!--
+      Injeção de dependência: o Spring entrega ao construtor os outros beans (serviços, EntityManager,
+      JsonMapper), que são compartilhados de propósito. Copiar um serviço não faz sentido.
+    -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Or>
+            <And><Class name="com.pontoesabor.lanchonete.controller.ConfiguracaoController"/><Field name="configuracaoService"/></And>
+            <And><Class name="com.pontoesabor.lanchonete.controller.ProdutoController"/><Field name="produtoService"/></And>
+            <And><Class name="com.pontoesabor.lanchonete.controller.PublicoController"/><Or><Field name="configuracaoService"/><Field name="imagemService"/></Or></And>
+            <And><Class name="com.pontoesabor.lanchonete.service.ConfiguracaoService"/><Field name="imagemService"/></And>
+            <And><Class name="com.pontoesabor.lanchonete.service.NotificacaoService"/><Field name="configuracaoService"/></And>
+            <And><Class name="com.pontoesabor.lanchonete.service.ProdutoService"/><Or><Field name="configuracaoService"/><Field name="imagemService"/></Or></And>
+            <And><Class name="com.pontoesabor.lanchonete.service.VendaService"/><Field name="configuracaoService"/></And>
+            <And><Class name="com.pontoesabor.lanchonete.config.GeradorVendasDemo"/><Field name="entityManager"/></And>
+            <And><Class name="com.pontoesabor.lanchonete.security.RespostasSeguranca"/><Field name="jsonMapper"/></And>
+        </Or>
+    </Match>
+
+    <!--
+      Associações JPA: produto → categoria, venda → cliente/vendedor e item → venda/produto apontam para
+      outras entidades gerenciadas pelo Hibernate. Guardar e devolver a mesma instância é o que o mapeamento
+      exige (uma cópia deixaria de ser a entidade do banco).
+    -->
+    <Match>
+        <Or>
+            <Bug pattern="EI_EXPOSE_REP"/>
+            <Bug pattern="EI_EXPOSE_REP2"/>
+        </Or>
+        <Or>
+            <And><Class name="com.pontoesabor.lanchonete.model.Produto"/><Field name="categoria"/></And>
+            <And><Class name="com.pontoesabor.lanchonete.model.Venda"/><Or><Field name="cliente"/><Field name="usuario"/></Or></And>
+            <And><Class name="com.pontoesabor.lanchonete.model.ItemVenda"/><Or><Field name="venda"/><Field name="produto"/></Or></And>
+        </Or>
+    </Match>
+</FindBugsFilter>

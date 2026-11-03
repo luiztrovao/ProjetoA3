@@ -16,6 +16,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /** DTOs das telas Vendas (PDV) e Pedidos. */
@@ -47,6 +49,8 @@ public final class VendaDtos {
             String observacao) {
 
         public VendaRequest {
+            // Cópia que aceita null: a lista ausente ou com item vazio chega à validação, que dá a mensagem certa
+            itens = itens == null ? null : Collections.unmodifiableList(new ArrayList<>(itens));
             desconto = desconto == null ? BigDecimal.ZERO : desconto;
             observacao = Textos.limpar(observacao);
         }
@@ -100,6 +104,10 @@ public final class VendaDtos {
             String observacao,
             LocalDateTime canceladaEm,
             String motivoCancelamento) {
+
+        public VendaResponse {
+            itens = List.copyOf(itens);
+        }
 
         public static VendaResponse de(Venda venda) {
             var cliente = venda.getCliente() == null

@@ -31,5 +31,9 @@ public final class NotificacaoDtos {
     }
 
     public record NotificacoesResponse(long naoLidas, List<Notificacao> itens) {
+
+        public NotificacoesResponse {
+            itens = List.copyOf(itens);
+        }
     }
 }

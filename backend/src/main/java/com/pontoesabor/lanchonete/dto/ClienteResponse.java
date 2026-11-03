@@ -1,6 +1,7 @@
 package com.pontoesabor.lanchonete.dto;
 
 import com.pontoesabor.lanchonete.model.Cliente;
+import com.pontoesabor.lanchonete.model.Contato;
 import java.time.LocalDateTime;
 
 public record ClienteResponse(
@@ -22,19 +23,20 @@ public record ClienteResponse(
         LocalDateTime atualizadoEm) {
 
     public static ClienteResponse de(Cliente cliente) {
+        Contato contato = cliente.getContato();
         return new ClienteResponse(
                 cliente.getId(),
                 cliente.getNome(),
                 cliente.getCpf(),
-                cliente.getTelefone(),
-                cliente.getEmail(),
-                cliente.getCep(),
-                cliente.getLogradouro(),
-                cliente.getNumero(),
+                contato.telefone(),
+                contato.email(),
+                contato.cep(),
+                contato.logradouro(),
+                contato.numero(),
                 cliente.getComplemento(),
-                cliente.getBairro(),
-                cliente.getCidade(),
-                cliente.getUf(),
+                contato.bairro(),
+                contato.cidade(),
+                contato.uf(),
                 cliente.getObservacoes(),
                 cliente.isAtivo(),
                 cliente.getCriadoEm(),
