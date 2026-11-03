@@ -48,15 +48,20 @@ public class ItemVenda {
     protected ItemVenda() {
     }
 
-    ItemVenda(Venda venda, Produto produto, int quantidade) {
-        if (quantidade <= 0) {
-            throw new RegraNegocioException("A quantidade do item deve ser maior que zero.");
-        }
+    private ItemVenda(Venda venda, Produto produto, int quantidade) {
         this.venda = venda;
         this.produto = produto;
         this.quantidade = quantidade;
         this.precoUnitario = produto.getPreco();
         this.subtotal = precoUnitario.multiply(BigDecimal.valueOf(quantidade));
+    }
+
+    /** Valida a quantidade antes de criar o item (o construtor não lança exceção, regra CT_CONSTRUCTOR_THROW). */
+    static ItemVenda criar(Venda venda, Produto produto, int quantidade) {
+        if (quantidade <= 0) {
+            throw new RegraNegocioException("A quantidade do item deve ser maior que zero.");
+        }
+        return new ItemVenda(venda, produto, quantidade);
     }
 
     public Long getId() {

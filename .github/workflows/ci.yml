@@ -58,8 +58,7 @@ jobs:
       - name: Verifica tipos (TypeScript)
         run: npm run typecheck
       - name: Análise estática (ESLint)
-        # Por enquanto só relata; tire o continue-on-error para reprovar o build com problemas
-        continue-on-error: true
+        # Reprova o build com qualquer problema novo (desde 03/11/2026, depois das correções)
         run: npm run lint
       - name: Gera relatório do ESLint
         if: always()

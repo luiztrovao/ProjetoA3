@@ -1,6 +1,7 @@
 package com.pontoesabor.lanchonete.dto;
 
 import com.pontoesabor.lanchonete.model.Configuracao;
+import com.pontoesabor.lanchonete.model.Contato;
 import com.pontoesabor.lanchonete.model.FormaPagamento;
 import com.pontoesabor.lanchonete.model.Imagem;
 import com.pontoesabor.lanchonete.model.StatusVenda;
@@ -16,6 +17,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import org.hibernate.validator.constraints.br.CNPJ;
 
@@ -80,9 +83,10 @@ public final class ConfiguracaoDtos {
         }
 
         public static EmpresaDto de(Configuracao c) {
-            return new EmpresaDto(c.getNomeFantasia(), c.getRazaoSocial(), c.getCnpj(), c.getTelefone(), c.getEmail(),
-                    c.getCep(), c.getLogradouro(), c.getNumero(), c.getBairro(), c.getCidade(), c.getUf(),
-                    Imagem.url(c.getLogoId()));
+            Contato contato = c.getContato();
+            return new EmpresaDto(c.getNomeFantasia(), c.getRazaoSocial(), c.getCnpj(), contato.telefone(),
+                    contato.email(), contato.cep(), contato.logradouro(), contato.numero(), contato.bairro(),
+                    contato.cidade(), contato.uf(), Imagem.url(c.getLogoId()));
         }
     }
 
@@ -114,6 +118,13 @@ public final class ConfiguracaoDtos {
             @Min(value = 5, message = "O alerta de pedido atrasado deve ser de pelo menos 5 minutos.")
             @Max(value = 240, message = "O alerta de pedido atrasado deve ser de no máximo 240 minutos.")
             Integer minutosAlertaPreparo) {
+
+        public PreferenciasVendaDto {
+            // Cópia que aceita null: o campo ausente chega à validação, que dá a mensagem certa
+            formasPagamento = formasPagamento == null
+                    ? null
+                    : Collections.unmodifiableSet(new LinkedHashSet<>(formasPagamento));
+        }
 
         public static PreferenciasVendaDto de(Configuracao c) {
             return new PreferenciasVendaDto(c.isControleEstoque(), c.isBloquearSemEstoque(), c.getAlertaEstoqueBaixo(),

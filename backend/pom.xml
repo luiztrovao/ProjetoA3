@@ -22,8 +22,8 @@
         <jacoco.version>0.8.15</jacoco.version>
         <pmd-plugin.version>3.28.0</pmd-plugin.version>
         <spotbugs-plugin.version>4.10.5.0</spotbugs-plugin.version>
-        <!-- Por enquanto a análise só relata; mude para true para reprovar o build com problemas -->
-        <analise.falhar>false</analise.falhar>
+        <!-- Depois das correções (03/11/2026) a análise reprova o build com qualquer problema novo -->
+        <analise.falhar>true</analise.falhar>
     </properties>
 
     <dependencies>
@@ -176,6 +176,8 @@
                     <effort>Max</effort>
                     <threshold>Medium</threshold>
                     <xmlOutput>true</xmlOutput>
+                    <!-- Falsos positivos analisados (injeção do Spring e associações JPA) -->
+                    <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
                     <failOnError>${analise.falhar}</failOnError>
                 </configuration>
                 <executions>

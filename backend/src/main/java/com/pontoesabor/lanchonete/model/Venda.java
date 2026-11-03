@@ -107,7 +107,7 @@ public class Venda {
         if (!produto.isAtivo()) {
             throw new RegraNegocioException("O produto \"" + produto.getNome() + "\" está inativo.");
         }
-        itens.add(new ItemVenda(this, produto, quantidade));
+        itens.add(ItemVenda.criar(this, produto, quantidade));
         recalcularTotais();
     }
 

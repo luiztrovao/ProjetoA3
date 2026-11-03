@@ -5,6 +5,7 @@ import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.EmpresaDto;
 import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.IdentidadeResponse;
 import com.pontoesabor.lanchonete.dto.ConfiguracaoDtos.PreferenciasVendaDto;
 import com.pontoesabor.lanchonete.model.Configuracao;
+import com.pontoesabor.lanchonete.model.Contato;
 import com.pontoesabor.lanchonete.model.Imagem;
 import com.pontoesabor.lanchonete.repository.ConfiguracaoRepository;
 import org.springframework.stereotype.Service;
@@ -58,14 +59,8 @@ public class ConfiguracaoService {
         configuracao.setNomeFantasia(dados.nomeFantasia());
         configuracao.setRazaoSocial(dados.razaoSocial());
         configuracao.setCnpj(dados.cnpj());
-        configuracao.setTelefone(dados.telefone());
-        configuracao.setEmail(dados.email());
-        configuracao.setCep(dados.cep());
-        configuracao.setLogradouro(dados.logradouro());
-        configuracao.setNumero(dados.numero());
-        configuracao.setBairro(dados.bairro());
-        configuracao.setCidade(dados.cidade());
-        configuracao.setUf(dados.uf());
+        configuracao.setContato(new Contato(dados.telefone(), dados.email(), dados.cep(), dados.logradouro(),
+                dados.numero(), dados.bairro(), dados.cidade(), dados.uf()));
         return ConfiguracaoResponse.de(configuracaoRepository.saveAndFlush(configuracao));
     }
 

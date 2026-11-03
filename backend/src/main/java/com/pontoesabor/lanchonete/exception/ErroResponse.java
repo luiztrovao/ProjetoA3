@@ -12,6 +12,10 @@ public record ErroResponse(
         String caminho,
         List<CampoInvalido> campos) {
 
+    public ErroResponse {
+        campos = List.copyOf(campos);
+    }
+
     public record CampoInvalido(String campo, String mensagem) {
     }
 }

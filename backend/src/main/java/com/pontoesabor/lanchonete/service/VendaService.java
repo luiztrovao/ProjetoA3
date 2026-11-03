@@ -1,12 +1,5 @@
 package com.pontoesabor.lanchonete.service;
 
-import static com.pontoesabor.lanchonete.repository.VendaRepository.Filtros.buscaGeral;
-import static com.pontoesabor.lanchonete.repository.VendaRepository.Filtros.comFormaPagamento;
-import static com.pontoesabor.lanchonete.repository.VendaRepository.Filtros.comStatus;
-import static com.pontoesabor.lanchonete.repository.VendaRepository.Filtros.doCliente;
-import static com.pontoesabor.lanchonete.repository.VendaRepository.Filtros.doVendedor;
-import static com.pontoesabor.lanchonete.repository.VendaRepository.Filtros.noPeriodo;
-
 import com.pontoesabor.lanchonete.dto.PaginaResponse;
 import com.pontoesabor.lanchonete.dto.VendaDtos.ItemRequest;
 import com.pontoesabor.lanchonete.dto.VendaDtos.VendaRequest;
@@ -25,6 +18,7 @@ import com.pontoesabor.lanchonete.repository.ClienteRepository;
 import com.pontoesabor.lanchonete.repository.ProdutoRepository;
 import com.pontoesabor.lanchonete.repository.UsuarioRepository;
 import com.pontoesabor.lanchonete.repository.VendaRepository;
+import com.pontoesabor.lanchonete.repository.VendaRepository.Filtros;
 import com.pontoesabor.lanchonete.security.RespostasSeguranca;
 import com.pontoesabor.lanchonete.util.Textos;
 import java.time.Clock;
@@ -81,12 +75,12 @@ public class VendaService {
         Usuario logado = buscarUsuario(idUsuarioLogado);
         Long vendedorId = logado.getPerfil() == Perfil.VENDEDOR ? logado.getId() : filtro.vendedorId();
         Specification<Venda> especificacao = Specification.allOf(List.of(
-                buscaGeral(Textos.limpar(filtro.termo())),
-                comStatus(filtro.status()),
-                doVendedor(vendedorId),
-                doCliente(filtro.clienteId()),
-                comFormaPagamento(filtro.formaPagamento()),
-                noPeriodo(filtro.inicio(), filtro.fim())));
+                Filtros.buscaGeral(Textos.limpar(filtro.termo())),
+                Filtros.comStatus(filtro.status()),
+                Filtros.doVendedor(vendedorId),
+                Filtros.doCliente(filtro.clienteId()),
+                Filtros.comFormaPagamento(filtro.formaPagamento()),
+                Filtros.noPeriodo(filtro.inicio(), filtro.fim())));
         return PaginaResponse.de(vendaRepository.findAll(especificacao, pageable).map(VendaResponse::de));
     }
 

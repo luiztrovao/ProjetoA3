@@ -46,8 +46,9 @@ public class Imagem {
     protected Imagem() {
     }
 
+    /** Guarda uma cópia do arquivo: quem enviou não consegue alterá-lo depois. */
     public Imagem(byte[] conteudo, String tipoConteudo) {
-        this.conteudo = conteudo;
+        this.conteudo = conteudo.clone();
         this.tipoConteudo = tipoConteudo;
         this.tamanho = conteudo.length;
     }
@@ -56,8 +57,9 @@ public class Imagem {
         return id;
     }
 
+    /** Devolve uma cópia (até 1 MB), para que ninguém altere a imagem guardada. */
     public byte[] getConteudo() {
-        return conteudo;
+        return conteudo.clone();
     }
 
     public String getTipoConteudo() {

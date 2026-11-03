@@ -27,7 +27,7 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long>, JpaSpec
                 String digitos = termo.replaceAll("\\D", "");
                 var nomeOuEmail = cb.or(
                         cb.like(cb.lower(root.get("nome")), padrao),
-                        cb.like(cb.lower(root.get("email")), padrao));
+                        cb.like(cb.lower(root.get("contato").get("email")), padrao));
                 if (digitos.isEmpty()) {
                     return nomeOuEmail;
                 }
@@ -35,7 +35,7 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long>, JpaSpec
                 return cb.or(
                         nomeOuEmail,
                         cb.like(root.get("cpf"), padraoDigitos),
-                        cb.like(root.get("telefone"), padraoDigitos));
+                        cb.like(root.get("contato").get("telefone"), padraoDigitos));
             };
         }
 

@@ -2,6 +2,7 @@ package com.pontoesabor.lanchonete.config;
 
 import com.pontoesabor.lanchonete.model.Categoria;
 import com.pontoesabor.lanchonete.model.Cliente;
+import com.pontoesabor.lanchonete.model.Contato;
 import com.pontoesabor.lanchonete.model.Imagem;
 import com.pontoesabor.lanchonete.model.Perfil;
 import com.pontoesabor.lanchonete.model.Produto;
@@ -216,10 +217,7 @@ public class DadosIniciais implements ApplicationRunner {
 
     private static Cliente cliente(String nome, String telefone, String email, String cidade, String observacoes) {
         Cliente cliente = new Cliente(nome);
-        cliente.setTelefone(telefone);
-        cliente.setEmail(email);
-        cliente.setCidade(cidade);
-        cliente.setUf("PE");
+        cliente.setContato(new Contato(telefone, email, null, null, null, null, cidade, "PE"));
         cliente.setObservacoes(observacoes);
         return cliente;
     }

@@ -2,6 +2,7 @@ package com.pontoesabor.lanchonete.model;
 
 import com.pontoesabor.lanchonete.exception.RegraNegocioException;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,29 +38,9 @@ public class Configuracao {
     @Column(length = 14)
     private String cnpj;
 
-    @Column(length = 11)
-    private String telefone;
-
-    @Column(length = 150)
-    private String email;
-
-    @Column(length = 8)
-    private String cep;
-
-    @Column(length = 150)
-    private String logradouro;
-
-    @Column(length = 20)
-    private String numero;
-
-    @Column(length = 80)
-    private String bairro;
-
-    @Column(length = 80)
-    private String cidade;
-
-    @Column(length = 2)
-    private String uf;
+    /** Telefone, e-mail e endereço da lanchonete. */
+    @Embedded
+    private Contato contato;
 
     /** Logo da lanchonete (tabela imagem); só o id. */
     @Column(name = "logo_id")
@@ -195,68 +176,13 @@ public class Configuracao {
         this.cnpj = cnpj;
     }
 
-    public String getTelefone() {
-        return telefone;
+    /** Nunca nulo: sem dados de contato, devolve {@link Contato#VAZIO}. */
+    public Contato getContato() {
+        return contato != null ? contato : Contato.VAZIO;
     }
 
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getCep() {
-        return cep;
-    }
-
-    public void setCep(String cep) {
-        this.cep = cep;
-    }
-
-    public String getLogradouro() {
-        return logradouro;
-    }
-
-    public void setLogradouro(String logradouro) {
-        this.logradouro = logradouro;
-    }
-
-    public String getNumero() {
-        return numero;
-    }
-
-    public void setNumero(String numero) {
-        this.numero = numero;
-    }
-
-    public String getBairro() {
-        return bairro;
-    }
-
-    public void setBairro(String bairro) {
-        this.bairro = bairro;
-    }
-
-    public String getCidade() {
-        return cidade;
-    }
-
-    public void setCidade(String cidade) {
-        this.cidade = cidade;
-    }
-
-    public String getUf() {
-        return uf;
-    }
-
-    public void setUf(String uf) {
-        this.uf = uf;
+    public void setContato(Contato contato) {
+        this.contato = contato;
     }
 
     public Long getLogoId() {

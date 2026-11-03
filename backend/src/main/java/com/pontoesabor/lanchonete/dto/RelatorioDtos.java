@@ -74,6 +74,11 @@ public final class RelatorioDtos {
             List<Ponto> ultimos7Dias,
             Indicadores resumo7Dias,
             List<VendaResponse> pedidosRecentes) {
+
+        public DashboardResponse {
+            ultimos7Dias = List.copyOf(ultimos7Dias);
+            pedidosRecentes = List.copyOf(pedidosRecentes);
+        }
     }
 
     /** GET /api/relatorios/resumo: a tela Relatórios para um período livre. */
@@ -88,6 +93,13 @@ public final class RelatorioDtos {
             List<ProdutoVendido> maisVendidos,
             List<DesempenhoVendedor> vendedores,
             List<TotalFormaPagamento> formasPagamento) {
+
+        public RelatorioResponse {
+            evolucao = List.copyOf(evolucao);
+            maisVendidos = List.copyOf(maisVendidos);
+            vendedores = List.copyOf(vendedores);
+            formasPagamento = List.copyOf(formasPagamento);
+        }
     }
 
     /**
@@ -109,5 +121,11 @@ public final class RelatorioDtos {
             Ponto diaDaSemanaPico,
             List<Ponto> porHora,
             Ponto horaPico) {
+
+        public PicosResponse {
+            serie = List.copyOf(serie);
+            porDiaDaSemana = List.copyOf(porDiaDaSemana);
+            porHora = List.copyOf(porHora);
+        }
     }
 }
