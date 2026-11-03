@@ -82,3 +82,31 @@ e altere `VITE_API_URL`.
 | `npm run build` | Gera a versão de produção em `dist/` |
 | `npm run typecheck` | Verifica os tipos do TypeScript |
 | `npm run preview` | Serve a versão de produção localmente |
+| `npm run lint` | Análise estática (ESLint) |
+| `npm test` | Testes unitários e de componente (Vitest) |
+| `npm run test:cobertura` | Os mesmos testes com relatório de cobertura em `coverage/` |
+| `npm run test:e2e` | Testes de sistema e aceitação no navegador (Playwright) |
+
+## Testes
+
+Os testes ficam fora do código, em `tests/`, e rodam a cada push e PR no GitHub Actions (jobs **Frontend** e
+**Testes de sistema (Playwright)**), com os relatórios nos artefatos `cobertura-frontend` e `relatorio-playwright`.
+
+| Nível | Ferramenta | Arquivos | O que cobrem |
+|---|---|---|---|
+| Unitário | Vitest | `tests/unit/format.test.ts` | Máscaras de CPF, telefone, CEP, CNPJ e moeda, com valores-limite (10, 11 e 12 dígitos etc.) e datas |
+| Unitário | Vitest | `tests/unit/mappers.test.ts` | Conversão API ↔ tela de clientes, funcionários, produtos, preferências e pedidos |
+| Unitário | Vitest | `tests/unit/client.test.ts` | Cliente HTTP: token, query, erros com campos, 401 (sessão expirada), 403 e servidor fora do ar |
+| Unitário | Vitest | `tests/unit/periodos.test.ts` | Períodos dos Relatórios e "há X min" das notificações, nas fronteiras de minutos, horas e dias |
+| Componente | Vitest + Testing Library | `tests/unit/LoginPage.test.tsx` | Login: campos vazios, sucesso, senha errada, mostrar senha e "Esqueci minha senha" |
+| Componente | Vitest + Testing Library | `tests/unit/HeaderMenus.test.tsx` | Sino (contador, 9+, marcar como lidas, erro) e menu da conta por perfil |
+| Sistema / aceitação | Playwright | `tests/e2e/*.spec.ts` | Com a API e o banco reais: login e permissões por perfil, venda completa até aparecer em Pedidos, aviso de estoque baixo levando aos produtos filtrados |
+
+Nos testes unitários e de componente a API é simulada (`tests/unit/api.ts` troca o `fetch`). Os testes de sistema
+sobem a API de verdade (perfil `h2`, com os dados de demonstração) e o frontend compilado. Para rodá-los localmente:
+
+```bash
+cd ../backend && ./mvnw -DskipTests package && cd ../frontend
+npx playwright install chromium
+npm run test:e2e
+```

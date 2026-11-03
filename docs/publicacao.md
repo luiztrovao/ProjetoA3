@@ -18,7 +18,7 @@ As contas e os segredos ficam com a equipe: **nenhuma senha vai para o repositó
 
 1. Crie a conta em <https://neon.tech> (pode entrar com o GitHub) e um projeto chamado `ponto-e-sabor`.
    - Versão do PostgreSQL: a padrão.
-   - Região: a mesma do Render. Por exemplo, **AWS US East (Ohio)** com o Render em **Ohio**.
+   - Região: a mesma do Render: **AWS US East 1 (N. Virginia)** no Neon e **Virginia (US East)** no Render (já definida no `render.yaml`).
 2. Em **Connect**, desligue a opção **Connection pooling** e copie os dados da conexão direta. A string vem assim:
    ```
    postgresql://neondb_owner:SENHA@ep-xxxx-xxxx.us-east-2.aws.neon.tech/neondb?sslmode=require
