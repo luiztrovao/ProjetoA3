@@ -54,7 +54,7 @@ jobs:
         with:
           node-version: "22"
       - name: Instala dependências
-        run: npm install --no-audit --no-fund || (grep -B2 -A40 "edgesOut\|verbose stack" ~/.npm/_logs/*-debug-0.log | tail -120; exit 1)
+        run: npm install --no-audit --no-fund
       - name: Verifica tipos (TypeScript)
         run: npm run typecheck
       - name: Análise estática (ESLint)
