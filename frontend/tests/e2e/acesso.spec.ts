@@ -28,7 +28,7 @@ test("Dono entra no Dashboard e sai pelo menu da conta", async ({ page }) => {
   await entrar(page, "matheus");
 
   await expect(page.getByRole("heading", { name: /Olá, Matheus/ })).toBeVisible();
-  await expect(page.getByText("Vendas de hoje")).toBeVisible();
+  await expect(page.getByText("Vendas de hoje", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Abrir menu do usuário" }).click();
   await expect(page.getByRole("menuitem", { name: "Dados da lanchonete" })).toBeVisible();
