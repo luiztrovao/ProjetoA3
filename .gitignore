@@ -37,3 +37,7 @@ Thumbs.db
 
 # ===== Relatórios de análise estática =====
 eslint-report.json
+
+# ===== Testes do frontend (Playwright) =====
+frontend/playwright-report/
+frontend/test-results/

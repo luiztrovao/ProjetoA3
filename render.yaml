@@ -6,6 +6,7 @@ services:
     name: ponto-e-sabor-api
     runtime: docker
     plan: free
+    region: virginia
     branch: main
     rootDir: backend
     dockerfilePath: ./Dockerfile
