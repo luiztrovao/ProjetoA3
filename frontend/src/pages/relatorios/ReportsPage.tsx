@@ -278,7 +278,7 @@ export async function exportReportCsv(inicio: string, fim: string, vendedorId?: 
     order.total.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     order.status,
   ].map(escapeCsv).join(";"));
-  const csv = `﻿${header.map(escapeCsv).join(";")}\n${lines.join("\n")}`;
+  const csv = `\uFEFF${header.map(escapeCsv).join(";")}\n${lines.join("\n")}`;
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
   const link = document.createElement("a");
   link.href = url;

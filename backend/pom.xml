@@ -20,6 +20,10 @@
         <java.version>21</java.version>
         <springdoc.version>3.1.1</springdoc.version>
         <jacoco.version>0.8.15</jacoco.version>
+        <pmd-plugin.version>3.28.0</pmd-plugin.version>
+        <spotbugs-plugin.version>4.10.5.0</spotbugs-plugin.version>
+        <!-- Por enquanto a análise só relata; mude para true para reprovar o build com problemas -->
+        <analise.falhar>false</analise.falhar>
     </properties>
 
     <dependencies>
@@ -136,6 +140,49 @@
                         <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Análise estática (PMD + CPD): target/pmd.xml, target/cpd.xml e target/reports/ -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${pmd-plugin.version}</version>
+                <configuration>
+                    <targetJdk>${java.version}</targetJdk>
+                    <minimumTokens>100</minimumTokens>
+                    <printFailingErrors>true</printFailingErrors>
+                    <failOnViolation>${analise.falhar}</failOnViolation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                            <goal>cpd-check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Análise estática de bytecode (SpotBugs): target/spotbugsXml.xml -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs-plugin.version}</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Medium</threshold>
+                    <xmlOutput>true</xmlOutput>
+                    <failOnError>${analise.falhar}</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>

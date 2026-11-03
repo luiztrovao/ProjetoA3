@@ -167,6 +167,7 @@ A documentação completa e interativa fica no Swagger. Resumo:
 
 - Roda os testes unitários e de integração (JUnit 5 + AssertJ).
 - Gera o relatório de cobertura do **JaCoCo** em `target/site/jacoco/index.html`.
+- Roda a análise estática (**PMD**, **CPD** e **SpotBugs**); detalhes em [docs/analise-estatica.md](../docs/analise-estatica.md).
 
 ## Estrutura
 
