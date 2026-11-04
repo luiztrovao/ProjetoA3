@@ -170,7 +170,7 @@ jobs:
   sonarcloud:
     name: SonarCloud (backend)
     runs-on: ubuntu-latest
-    # Só roda depois que o segredo SONAR_TOKEN for criado no repositório (veja docs/analise-estatica.md)
+    # Só roda depois que o segredo SONAR_TOKEN for criado no repositório (veja docs/06-relatorio-de-analise-estatica.md)
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     defaults:

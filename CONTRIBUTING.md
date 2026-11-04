@@ -24,7 +24,7 @@
 |---|---|---|
 | `feature/` | Nova funcionalidade | `feature/dashboard-vendas` |
 | `fix/` | Correção de bug | `fix/calculo-total-venda` |
-| `docs/` | Documentação | `docs/plano-de-testes` |
+| `docs/` | Documentação | `docs/03-plano-de-testes.md` |
 | `test/` | Apenas testes | `test/produto-service` |
 | `refactor/` | Melhoria de código sem mudar comportamento | `refactor/cliente-controller` |
 
