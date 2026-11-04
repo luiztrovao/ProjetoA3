@@ -120,6 +120,7 @@ export function AccountMenu({
   label,
   placement = "down",
   isOwner,
+  onlyLogout = false,
   onAction,
   children,
 }: {
@@ -127,6 +128,8 @@ export function AccountMenu({
   label: string;
   placement?: "down" | "up";
   isOwner: boolean;
+  /** Conta compartilhada do Visitante: só "Sair" (não troca dados nem senha). */
+  onlyLogout?: boolean;
   onAction: (action: AccountAction) => void;
   children: ReactNode;
 }) {
@@ -135,7 +138,7 @@ export function AccountMenu({
   const close = useCallback(() => setOpen(false), []);
   useDismiss(ref, open, close);
 
-  const items: Array<{ action: AccountAction; icon: IconName; label: string }> = [
+  const items: Array<{ action: AccountAction; icon: IconName; label: string }> = onlyLogout ? [] : [
     { action: "account", icon: "users", label: "Minha conta" },
     { action: "password", icon: "lock", label: "Alterar senha" },
     ...(isOwner ? [{ action: "business" as const, icon: "settings" as const, label: "Dados da lanchonete" }] : []),
@@ -152,7 +155,7 @@ export function AccountMenu({
           {items.map((item) => (
             <button key={item.action} type="button" role="menuitem" onClick={() => choose(item.action)}><Icon name={item.icon} />{item.label}</button>
           ))}
-          <hr />
+          {items.length > 0 && <hr />}
           <button type="button" role="menuitem" className="logout" onClick={() => choose("logout")}><Icon name="power" />Sair</button>
         </div>
       )}

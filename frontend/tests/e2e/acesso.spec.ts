@@ -35,3 +35,14 @@ test("Dono entra no Dashboard e sai pelo menu da conta", async ({ page }) => {
   await page.getByRole("menuitem", { name: "Sair" }).click();
   await expect(page.getByRole("heading", { name: "Acesse sua conta" })).toBeVisible();
 });
+
+test("Visitante (alunos na apresentação) vê só os Relatórios e não altera a conta", async ({ page }) => {
+  await entrar(page, "visitante");
+
+  await expect(page.getByRole("heading", { name: "Relatórios Gerenciais" })).toBeVisible();
+  await expect(menu(page).getByRole("link")).toHaveText(["Relatórios"]);
+  await expect(page.getByRole("button", { name: /Notificações/ })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Abrir menu do usuário" }).click();
+  await expect(page.getByRole("menuitem")).toHaveText(["Sair"]);
+});

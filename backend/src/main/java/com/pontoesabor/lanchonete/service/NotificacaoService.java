@@ -58,7 +58,7 @@ public class NotificacaoService {
     public NotificacoesResponse listar(Long idUsuario) {
         Usuario usuario = buscarUsuario(idUsuario);
         LocalDateTime agora = LocalDateTime.now(relogio);
-        boolean gestao = usuario.getPerfil() != Perfil.VENDEDOR;
+        boolean gestao = usuario.getPerfil() == Perfil.DONO || usuario.getPerfil() == Perfil.GERENTE;
         List<Notificacao> avisos = new ArrayList<>();
 
         if (gestao) {

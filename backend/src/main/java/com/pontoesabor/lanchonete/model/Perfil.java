@@ -4,5 +4,7 @@ package com.pontoesabor.lanchonete.model;
 public enum Perfil {
     DONO,
     GERENTE,
-    VENDEDOR
+    VENDEDOR,
+    /** Acesso só de leitura à tela Relatórios (ex.: alunos na apresentação do projeto). */
+    VISITANTE
 }

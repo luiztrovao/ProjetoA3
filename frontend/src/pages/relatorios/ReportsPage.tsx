@@ -146,6 +146,7 @@ export function ReportsPage({
   onCustomStart,
   onCustomEnd,
   onSeller,
+  canFilterBySeller = true,
 }: {
   period: ReportPeriod;
   customStart: string;
@@ -155,6 +156,8 @@ export function ReportsPage({
   onCustomStart: (value: string) => void;
   onCustomEnd: (value: string) => void;
   onSeller: (value: string) => void;
+  /** O Visitante não consulta a lista de funcionários: o filtro por vendedor fica escondido. */
+  canFilterBySeller?: boolean;
 }) {
   const [sellerSort, setSellerSort] = useState<"revenue" | "sales">("revenue");
   const [historySort, setHistorySort] = useState<"date" | "value">("date");
@@ -168,8 +171,9 @@ export function ReportsPage({
   const vendedorId = sellerId ? Number(sellerId) : undefined;
 
   useEffect(() => {
+    if (!canFilterBySeller) return;
     usuariosApi.listar({ size: 200, sort: "nome" }).then((pagina) => setSellers(pagina.conteudo)).catch(() => undefined);
-  }, []);
+  }, [canFilterBySeller]);
 
   useEffect(() => {
     let cancelled = false;
@@ -213,7 +217,7 @@ export function ReportsPage({
         <div className="period-options">{periodOptions.map((option) => <button key={option.id} type="button" className={period === option.id ? "active" : ""} onClick={() => { onPeriod(option.id); setHistoryPage(1); }}>{option.label}</button>)}</div>
         <div className="report-filter-fields">
           {period === "custom" && <><label><span>Data inicial</span><input type="date" value={customStart} onChange={(event) => { onCustomStart(event.target.value); setHistoryPage(1); }} /></label><label><span>Data final</span><input type="date" value={customEnd} onChange={(event) => { onCustomEnd(event.target.value); setHistoryPage(1); }} /></label></>}
-          <label className="report-seller-filter"><span>Vendedor</span><select value={sellerId} onChange={(event) => { onSeller(event.target.value); setHistoryPage(1); }}><option value="">Todos os vendedores</option>{sellers.map((seller) => <option key={seller.id} value={seller.id}>{seller.nome}</option>)}</select></label>
+          {canFilterBySeller && <label className="report-seller-filter"><span>Vendedor</span><select value={sellerId} onChange={(event) => { onSeller(event.target.value); setHistoryPage(1); }}><option value="">Todos os vendedores</option>{sellers.map((seller) => <option key={seller.id} value={seller.id}>{seller.nome}</option>)}</select></label>}
         </div>
       </section>
 

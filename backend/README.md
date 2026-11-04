@@ -27,7 +27,7 @@ Por padrão a API sobe com um **banco H2 em memória** (perfil `h2`), sem instal
 ### Login
 
 Quase todas as rotas exigem login. No perfil `h2` a API já sobe com os **funcionários de demonstração
-do protótipo**: `matheus` (Dono), `carlos` (Gerente) e `fernanda` (Vendedor). A senha de todos está em
+do protótipo**: `matheus` (Dono), `carlos` (Gerente), `fernanda` (Vendedor) e `visitante` (Visitante, só Relatórios). A senha de todos está em
 `app.dados-demo.senha`, no arquivo `src/main/resources/application-h2.properties`.
 
 1. `POST /api/auth/login` com `{"login": "matheus", "senha": "..."}` (o login aceita nome de usuário ou e-mail).
@@ -39,7 +39,7 @@ do protótipo**: `matheus` (Dono), `carlos` (Gerente) e `fernanda` (Vendedor). A
 
 No perfil `h2`, ao subir com o banco vazio, a API cria uma lanchonete fictícia completa:
 
-- **Equipe:** `matheus` (Dono), `carlos` (Gerente), `fernanda`, `julia` e `bruno` (Vendedores) e `rafael` (desligado)
+- **Equipe:** `matheus` (Dono), `carlos` (Gerente), `fernanda`, `julia` e `bruno` (Vendedores) e `rafael` (desligado), além de `visitante` (só Relatórios, para os alunos na apresentação)
 - **Cardápio** com 16 itens (hambúrgueres, bebidas, acompanhamentos, combos e sobremesas) e **20 clientes**
 - **Cerca de 13 mil vendas nos últimos 18 meses**, com padrões realistas para os dashboards: picos no **almoço (12h)**
   e no **jantar (19h–20h)**, **sexta e sábado** mais fortes, **julho e dezembro** em alta, crescimento leve mês a mês,
@@ -85,21 +85,21 @@ A documentação completa e interativa fica no Swagger. Resumo:
 
 **Permissões por perfil** (tabela do protótipo; detalhes em [modelo-de-dados.md](../docs/modelagem/modelo-de-dados.md#permissões-por-perfil)):
 
-| Rota | Dono | Gerente | Vendedor |
-|---|:---:|:---:|:---:|
-| Consultar clientes, produtos, categorias e configurações; cadastrar cliente | ✅ | ✅ | ✅ |
-| Editar, desativar e reativar clientes | ✅ | ✅ | ❌ |
-| Cadastrar, editar, desativar e reativar produtos | ✅ | ✅ | ❌ |
-| Consultar funcionários | ✅ | ✅ | ❌ |
-| Cadastrar, editar, desativar e reativar funcionários | ✅ | ❌ | ❌ |
-| Alterar configurações | ✅ | ❌ | ❌ |
-| Confirmar vendas (sem desconto) | ✅ | ✅ | ✅ |
-| Dar desconto na venda | ✅ | ✅ | ❌ |
-| Consultar pedidos | todos | todos | só os próprios |
-| Concluir e cancelar pedidos | ✅ | ✅ | ❌ |
-| Dashboard e Relatórios | ✅ | ✅ | ❌ |
-| Minha Conta | ✅ | ✅ | ✅ |
-| Notificações | estoque baixo e pedidos atrasados | estoque baixo e pedidos atrasados | os próprios pedidos atrasados e cancelados |
+| Rota | Dono | Gerente | Vendedor | Visitante |
+|---|:---:|:---:|:---:|:---:|
+| Consultar clientes, produtos, categorias e configurações; cadastrar cliente | ✅ | ✅ | ✅ | só configurações (nome e logo) |
+| Editar, desativar e reativar clientes | ✅ | ✅ | ❌ | ❌ |
+| Cadastrar, editar, desativar e reativar produtos | ✅ | ✅ | ❌ | ❌ |
+| Consultar funcionários | ✅ | ✅ | ❌ | ❌ |
+| Cadastrar, editar, desativar e reativar funcionários | ✅ | ❌ | ❌ | ❌ |
+| Alterar configurações | ✅ | ❌ | ❌ | ❌ |
+| Confirmar vendas (sem desconto) | ✅ | ✅ | ✅ | ❌ |
+| Dar desconto na venda | ✅ | ✅ | ❌ | ❌ |
+| Consultar pedidos | todos | todos | só os próprios | só leitura (na tela Relatórios) |
+| Concluir e cancelar pedidos | ✅ | ✅ | ❌ | ❌ |
+| Dashboard e Relatórios | ✅ | ✅ | ❌ | só Relatórios |
+| Minha Conta | ✅ | ✅ | ✅ | só consulta |
+| Notificações | estoque baixo e pedidos atrasados | estoque baixo e pedidos atrasados | os próprios pedidos atrasados e cancelados | ❌ |
 
 **Convenções:**
 

@@ -9,6 +9,9 @@ public final class Permissoes {
     /** Dono e Gerente: editar clientes, gerenciar produtos, consultar funcionários. */
     public static final String GESTAO = "hasAnyRole('DONO', 'GERENTE')";
 
+    /** Relatórios e picos de venda: Dono, Gerente e Visitante (somente leitura). */
+    public static final String RELATORIOS = "hasAnyRole('DONO', 'GERENTE', 'VISITANTE')";
+
     /** Somente Dono: gerenciar funcionários e alterar configurações gerais. */
     public static final String DONO = "hasRole('DONO')";
 

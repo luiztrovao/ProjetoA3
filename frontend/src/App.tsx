@@ -46,13 +46,13 @@ const navigation: Array<{
   label: string;
   icon: IconName;
   href: string;
-  allowedRoles: Array<"owner" | "manager" | "seller">;
+  allowedRoles: UserRole[];
 }> = [
   { label: "Dashboard", icon: "dashboard", href: "#dashboard", allowedRoles: ["owner", "manager"] },
   { label: "Vendas", icon: "sales", href: "#vendas", allowedRoles: ["owner", "manager", "seller"] },
   { label: "Pedidos", icon: "orders", href: "#pedidos", allowedRoles: ["owner", "manager", "seller"] },
   { label: "Cadastros", icon: "registers", href: "#cadastros", allowedRoles: ["owner", "manager", "seller"] },
-  { label: "Relatórios", icon: "reports", href: "#relatorios", allowedRoles: ["owner", "manager"] },
+  { label: "Relatórios", icon: "reports", href: "#relatorios", allowedRoles: ["owner", "manager", "visitor"] },
   { label: "Configurações", icon: "settings", href: "#configuracoes", allowedRoles: ["owner", "manager", "seller"] },
 ];
 
@@ -131,7 +131,7 @@ function Sidebar({
       </nav>
       <div className="sidebar-user">
         <UserIdentity compact user={currentUser} />
-        <AccountMenu buttonClassName="icon-button sidebar-more" label="Abrir menu da conta" placement="up" isOwner={currentRole === "owner"} onAction={onAccountAction}>
+        <AccountMenu buttonClassName="icon-button sidebar-more" label="Abrir menu da conta" placement="up" isOwner={currentRole === "owner"} onlyLogout={currentRole === "visitor"} onAction={onAccountAction}>
           <Icon name="more" />
         </AccountMenu>
       </div>
@@ -531,7 +531,8 @@ function SaleSuccessPage({
 /** Funcionário exibido enquanto a sessão ainda não carregou (nunca aparece na tela). */
 const emptyUser: EmployeeRecord = { id: 0, initials: "", name: "", cpf: "", email: "", phone: "", username: "", role: "Vendedor", lastAccess: "", status: "Ativo" };
 
-const homePage = (user: Usuario) => user.perfil === "VENDEDOR" ? "sales" as const : "dashboard" as const;
+const homePage = (user: Usuario) =>
+  user.perfil === "VENDEDOR" ? "sales" as const : user.perfil === "VISITANTE" ? "reports" as const : "dashboard" as const;
 
 export default function App() {
   const [sessionUser, setSessionUser] = useState<Usuario | null>(null);
@@ -575,6 +576,8 @@ export default function App() {
   const confirmationLock = useRef(false);
   const currentUser = sessionUser ? toEmployeeRecord(sessionUser) : emptyUser;
   const currentRole = roleKey(currentUser.role);
+  /** Visitante (alunos na apresentação): só a tela Relatórios, sem cadastros, vendas nem notificações. */
+  const isVisitor = currentRole === "visitor";
 
   const startSession = (user: Usuario) => {
     setSessionUser(user);
@@ -655,7 +658,7 @@ export default function App() {
 
   // Catálogo de Vendas: recarregado ao entrar na tela e depois de cada venda (estoque atualizado).
   useEffect(() => {
-    if (!sessionUserId) return;
+    if (!sessionUserId || isVisitor) return;
     let cancelled = false;
     Promise.all([
       produtosApi.listar({ ativo: true, size: 500, sort: "nome" }),
@@ -670,7 +673,7 @@ export default function App() {
       })
       .catch((error) => { if (!cancelled) setToast(errorMessage(error, "Não foi possível carregar produtos e clientes.")); });
     return () => { cancelled = true; };
-  }, [sessionUserId, catalogKey]);
+  }, [sessionUserId, isVisitor, catalogKey]);
 
   const addToCart = (productId: number) => {
     const product = productRecords.find((record) => record.id === productId);
@@ -871,7 +874,7 @@ export default function App() {
         onAccountAction={handleAccountAction}
         onNavigate={(page) => {
           setSidebarOpen(false);
-          if ((page === "reports" || page === "dashboard") && currentRole === "seller") {
+          if (((page === "reports" || page === "dashboard") && currentRole === "seller") || (isVisitor && page !== "reports")) {
             setToast("Você não possui permissão para acessar esta funcionalidade.");
             return;
           }
@@ -893,8 +896,8 @@ export default function App() {
           </div>
           <div className="topbar-actions">
             {activePage === "reports" && currentRole !== "seller" && <button className="reports-export-button" type="button" onClick={exportReport}><Icon name="download" />Exportar relatório</button>}
-            <NotificationBell key={currentUser.id} onSelect={openNotification} />
-            <AccountMenu buttonClassName="user-menu" label="Abrir menu do usuário" isOwner={currentRole === "owner"} onAction={handleAccountAction}>
+            {!isVisitor && <NotificationBell key={currentUser.id} onSelect={openNotification} />}
+            <AccountMenu buttonClassName="user-menu" label="Abrir menu do usuário" isOwner={currentRole === "owner"} onlyLogout={isVisitor} onAction={handleAccountAction}>
               <UserIdentity user={currentUser} /><Icon name="chevron" />
             </AccountMenu>
           </div>
@@ -935,6 +938,7 @@ export default function App() {
             customStart={reportStartDate}
             customEnd={reportEndDate}
             sellerId={reportSeller}
+            canFilterBySeller={!isVisitor}
             onPeriod={setReportPeriod}
             onCustomStart={setReportStartDate}
             onCustomEnd={setReportEndDate}

@@ -199,7 +199,7 @@ export function RecordModal({
           <FormField label="Perfil de acesso" name="role" required error={errors.role}>
             <select id="field-role" value={values.role} disabled={readOnly} onChange={(event) => update("role", event.target.value)}>
               <option value="">Selecione um perfil</option>
-              <option>Dono</option><option>Gerente</option><option>Vendedor</option>
+              <option>Dono</option><option>Gerente</option><option>Vendedor</option><option>Visitante</option>
             </select>
           </FormField>
           {mode === "edit" && !resetPassword && (

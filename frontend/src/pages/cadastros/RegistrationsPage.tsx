@@ -56,7 +56,7 @@ const statusApi = {
 const perTab = <T,>(value: T): Record<TabId, T> => ({ clients: value, employees: value, products: value });
 
 const statusFilter: FilterDef = { id: "status", label: "Status", options: [{ value: "true", label: "Ativos" }, { value: "false", label: "Inativos" }] };
-const profileFilter: FilterDef = { id: "perfil", label: "Perfil", options: [{ value: "DONO", label: "Dono" }, { value: "GERENTE", label: "Gerente" }, { value: "VENDEDOR", label: "Vendedor" }] };
+const profileFilter: FilterDef = { id: "perfil", label: "Perfil", options: [{ value: "DONO", label: "Dono" }, { value: "GERENTE", label: "Gerente" }, { value: "VENDEDOR", label: "Vendedor" }, { value: "VISITANTE", label: "Visitante" }] };
 const stockFilter: FilterDef = { id: "estoque", label: "Estoque", options: [{ value: "baixo", label: "Estoque baixo" }] };
 
 /** Converte os filtros escolhidos nos parâmetros da listagem da API. */

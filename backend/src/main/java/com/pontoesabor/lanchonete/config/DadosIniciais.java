@@ -116,6 +116,8 @@ public class DadosIniciais implements ApplicationRunner {
                 funcionario("Júlia Ribeiro", "julia", "julia@pontoesabor.com", "81976554411", Perfil.VENDEDOR, hash),
                 funcionario("Bruno Carvalho", "bruno", "bruno@pontoesabor.com", "81975443322", Perfil.VENDEDOR, hash),
                 funcionario("Rafael Mendes", "rafael", "rafael@pontoesabor.com", "81966554400", Perfil.VENDEDOR, hash)));
+        // Acesso de leitura aos Relatórios (fica fora da equipe que vende)
+        usuarioRepository.save(funcionario("Visitante", "visitante", null, null, Perfil.VISITANTE, hash));
 
         List<Cliente> clientes = clienteRepository.saveAll(List.of(
                 cliente("João Silva", "81999991234", "joao@email.com", "Recife", "Prefere contato pelo WhatsApp."),
