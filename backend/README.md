@@ -167,7 +167,17 @@ A documentação completa e interativa fica no Swagger. Resumo:
 
 - Roda os testes unitários e de integração (JUnit 5 + AssertJ).
 - Gera o relatório de cobertura do **JaCoCo** em `target/site/jacoco/index.html`.
+- **Reprova o build** se a cobertura ficar abaixo de **90% das instruções** ou **87% dos branches**
+  (propriedades `cobertura.instrucoes` e `cobertura.branches` no `pom.xml`; em 03/11/2026 estava em 90,8% e 88,1%).
 - Roda a análise estática (**PMD**, **CPD** e **SpotBugs**); detalhes em [docs/analise-estatica.md](../docs/analise-estatica.md).
+
+Por padrão os testes usam o **H2** em memória. No CI, a mesma suíte roda também num **PostgreSQL 17**
+(job *Backend (testes no PostgreSQL)*), o mesmo banco usado em produção. Para rodar assim localmente, com um
+PostgreSQL vazio:
+
+```bash
+SPRING_PROFILES_ACTIVE=prod DB_URL=jdbc:postgresql://localhost:5432/lanchonete DB_USERNAME=<usuario> DB_PASSWORD=<senha> JWT_SECRET=<32+ caracteres> ./mvnw test
+```
 
 ## Estrutura
 
