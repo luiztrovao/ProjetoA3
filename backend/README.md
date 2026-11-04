@@ -179,6 +179,14 @@ PostgreSQL vazio:
 SPRING_PROFILES_ACTIVE=prod DB_URL=jdbc:postgresql://localhost:5432/lanchonete DB_USERNAME=<usuario> DB_PASSWORD=<senha> JWT_SECRET=<32+ caracteres> ./mvnw test
 ```
 
+Por padrão os testes usam o **H2** em memória. No CI, a mesma suíte roda também num **PostgreSQL 17**
+(job *Backend (testes no PostgreSQL)*), o mesmo banco usado em produção. Para rodar assim localmente, com um
+PostgreSQL vazio:
+
+```bash
+SPRING_PROFILES_ACTIVE=prod DB_URL=jdbc:postgresql://localhost:5432/lanchonete DB_USERNAME=<usuario> DB_PASSWORD=<senha> JWT_SECRET=<32+ caracteres> ./mvnw test
+```
+
 ## Estrutura
 
 ```
