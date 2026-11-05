@@ -1,0 +1,20 @@
+<testsuites id="" name="" tests="6" failures="0" skipped="0" errors="0" time="23.049975">
+<testsuite name="acesso.spec.ts" timestamp="2026-11-04T22:01:35.975Z" hostname="chromium" tests="3" failures="0" skipped="0" time="2.589" errors="0">
+<testcase name="senha errada mostra a mensagem e não entra" classname="acesso.spec.ts" time="0.725">
+</testcase>
+<testcase name="Vendedor entra direto em Vendas e não vê Dashboard nem Relatórios" classname="acesso.spec.ts" time="0.765">
+</testcase>
+<testcase name="Dono entra no Dashboard e sai pelo menu da conta" classname="acesso.spec.ts" time="1.099">
+</testcase>
+</testsuite>
+<testsuite name="gestao.spec.ts" timestamp="2026-11-04T22:01:35.975Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.096" errors="0">
+<testcase name="Gerente abre o aviso de estoque baixo e vê os produtos filtrados" classname="gestao.spec.ts" time="1.096">
+</testcase>
+</testsuite>
+<testsuite name="venda.spec.ts" timestamp="2026-11-04T22:01:35.975Z" hostname="chromium" tests="2" failures="0" skipped="0" time="2.525" errors="0">
+<testcase name="Vendedor registra uma venda no PIX e encontra o pedido em Pedidos" classname="venda.spec.ts" time="1.582">
+</testcase>
+<testcase name="Revisar pedido fica desabilitado com o carrinho vazio" classname="venda.spec.ts" time="0.943">
+</testcase>
+</testsuite>
+</testsuites>
