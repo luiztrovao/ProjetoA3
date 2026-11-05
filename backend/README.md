@@ -179,7 +179,6 @@ PostgreSQL vazio:
 SPRING_PROFILES_ACTIVE=prod DB_URL=jdbc:postgresql://localhost:5432/lanchonete DB_USERNAME=<usuario> DB_PASSWORD=<senha> JWT_SECRET=<32+ caracteres> ./mvnw test
 ```
 
-
 ## Estrutura
 
 ```
