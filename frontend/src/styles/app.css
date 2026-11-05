@@ -2782,6 +2782,11 @@ td strong {
   background: #d48a571f;
 }
 
+.role-badge.visitante {
+  color: #5b5f9a;
+  background: #5b5f9a17;
+}
+
 .stock-count {
   font-weight: 600;
 }

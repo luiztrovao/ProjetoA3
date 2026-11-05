@@ -68,6 +68,31 @@ As tabelas não precisam ser criadas à mão: o **Flyway** roda as migrações `
   1. No Neon, em **Branches**, crie um banco vazio ou apague as tabelas.
   2. No Render, use **Manual Deploy → Restart service**.
 
+## Acesso dos alunos na apresentação (perfil Visitante)
+
+O perfil **Visitante** só enxerga a tela **Relatórios**: indicadores, picos de venda, histórico de pedidos e
+exportação em CSV. Ele não abre Dashboard, Vendas, Pedidos, Cadastros nem Configurações, não recebe notificações
+e não consegue trocar os dados nem a senha da própria conta. Todas as rotas de escrita da API devolvem 403 para ele.
+
+**No dia da apresentação:**
+
+1. Entre no site publicado como Dono.
+2. Vá em **Cadastros → Funcionários → Novo funcionário**, com:
+   - Nome: `Turma de Qualidade`;
+   - Usuário: `turma`;
+   - uma senha simples de ditar;
+   - **Perfil: Visitante**.
+3. Passe aos alunos o endereço <https://luiztrovao.github.io/ProjetoA3/>, o usuário e a senha. Vários alunos podem
+   usar a mesma conta ao mesmo tempo.
+4. **Depois da apresentação**, desative o usuário em **Cadastros → Funcionários** (menu ⋯ → **Desativar registro**). O acesso
+   acaba na hora, inclusive para quem ainda estiver com a tela aberta.
+
+No ambiente local, com os dados de demonstração, já existe o usuário `visitante`, com a mesma senha dos outros
+usuários de demonstração.
+
+Abra o site alguns minutos antes de passar o acesso: com muitos alunos entrando ao mesmo tempo, a primeira
+chamada à API "dormindo" no Render leva cerca de 50 segundos.
+
 ## Mostrando o banco por um SGBD (apresentação de Banco de Dados)
 
 O banco do Neon é um PostgreSQL comum, então qualquer SGBD conecta nele com os dados do passo 1.

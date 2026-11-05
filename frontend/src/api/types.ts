@@ -1,6 +1,7 @@
 // Tipos dos contratos da API (ver backend/README.md e o Swagger).
 
-export type Perfil = "DONO" | "GERENTE" | "VENDEDOR";
+/** VISITANTE: acesso só de leitura à tela Relatórios (ex.: alunos na apresentação do projeto). */
+export type Perfil = "DONO" | "GERENTE" | "VENDEDOR" | "VISITANTE";
 export type FormaPagamento = "DINHEIRO" | "PIX" | "CREDITO" | "DEBITO";
 export type StatusVenda = "EM_PREPARO" | "CONCLUIDA" | "CANCELADA";
 

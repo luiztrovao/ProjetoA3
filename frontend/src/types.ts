@@ -1,18 +1,20 @@
 // Tipos compartilhados pelas telas (formato usado na interface, não o da API).
 import type { FormaPagamento, Perfil, StatusVenda } from "./api";
 
-export type UserRole = "owner" | "manager" | "seller";
+export type UserRole = "owner" | "manager" | "seller" | "visitor";
 
-export const roleKey = (role: EmployeeRecord["role"]): UserRole => role === "Dono" ? "owner" : role === "Gerente" ? "manager" : "seller";
+export const roleKey = (role: EmployeeRecord["role"]): UserRole =>
+  role === "Dono" ? "owner" : role === "Gerente" ? "manager" : role === "Visitante" ? "visitor" : "seller";
 
 export const perfilLabels: Record<Perfil, EmployeeRecord["role"]> = {
   DONO: "Dono",
   GERENTE: "Gerente",
   VENDEDOR: "Vendedor",
+  VISITANTE: "Visitante",
 };
 
 export const perfilFromLabel = (role: string): Perfil | null =>
-  role === "Dono" ? "DONO" : role === "Gerente" ? "GERENTE" : role === "Vendedor" ? "VENDEDOR" : null;
+  role === "Dono" ? "DONO" : role === "Gerente" ? "GERENTE" : role === "Vendedor" ? "VENDEDOR" : role === "Visitante" ? "VISITANTE" : null;
 
 export type TabId = "clients" | "employees" | "products";
 export type ModalMode = "create" | "view" | "edit";
@@ -45,7 +47,7 @@ export type EmployeeRecord = {
   email: string;
   phone: string;
   username: string;
-  role: "Dono" | "Gerente" | "Vendedor";
+  role: "Dono" | "Gerente" | "Vendedor" | "Visitante";
   lastAccess: string;
   status: "Ativo" | "Inativo";
 };

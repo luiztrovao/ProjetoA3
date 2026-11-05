@@ -161,6 +161,7 @@ public class GeradorVendasDemo {
             case VENDEDOR -> 30;
             case GERENTE -> 12;
             case DONO -> 5;
+            case VISITANTE -> 0; // só consulta relatórios, nunca vende
         };
     }
 

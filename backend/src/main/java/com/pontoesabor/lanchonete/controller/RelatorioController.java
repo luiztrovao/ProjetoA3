@@ -35,6 +35,7 @@ public class RelatorioController {
     }
 
     @GetMapping("/api/relatorios/resumo")
+    @PreAuthorize(Permissoes.RELATORIOS)
     @Operation(summary = "Relatório de um período: indicadores, evolução, mais vendidos, vendedores e pagamentos")
     public RelatorioResponse relatorio(
             @Parameter(description = "Data inicial (aaaa-mm-dd); padrão: 6 dias antes da final")
@@ -46,6 +47,7 @@ public class RelatorioController {
     }
 
     @GetMapping("/api/relatorios/picos")
+    @PreAuthorize(Permissoes.RELATORIOS)
     @Operation(summary = "Picos de venda na semana, no mês, no semestre ou no ano (com comparação ao período anterior)")
     public PicosResponse picos(
             @RequestParam PeriodoPico periodo,

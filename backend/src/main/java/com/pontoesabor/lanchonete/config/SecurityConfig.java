@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -38,6 +39,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 @EnableConfigurationProperties(JwtProperties.class)
 public class SecurityConfig {
+
+    /**
+     * O Visitante só lê a tela Relatórios: os relatórios, o histórico de pedidos que ela mostra, os próprios dados
+     * (Minha Conta) e as configurações (nome e logo da lanchonete). Qualquer outra rota devolve 403 para ele.
+     */
+    private static final String[] ROTAS_DO_VISITANTE = {"/api/relatorios/**", "/api/vendas", "/api/conta", "/api/configuracoes"};
 
     /** Rotas abertas: login, documentação da API e console do banco de desenvolvimento. */
     private static final String[] ROTAS_PUBLICAS = {
@@ -59,7 +66,9 @@ public class SecurityConfig {
                         .requestMatchers(ROTAS_PUBLICAS).permitAll()
                         // Nome/logo da lanchonete na tela de login e imagens exibidas em <img>
                         .requestMatchers(HttpMethod.GET, "/api/publico/**", "/api/imagens/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(HttpMethod.GET, ROTAS_DO_VISITANTE).authenticated()
+                        .anyRequest().access(new WebExpressionAuthorizationManager(
+                                "isAuthenticated() and !hasRole('VISITANTE')")))
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(conversorToken))
                         .authenticationEntryPoint(respostas.naoAutenticado())

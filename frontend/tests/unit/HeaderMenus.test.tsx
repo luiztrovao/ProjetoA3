@@ -84,6 +84,15 @@ describe("AccountMenu", () => {
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 
+  it("conta compartilhada do Visitante só tem a opção Sair", async () => {
+    const user = userEvent.setup();
+    render(<AccountMenu buttonClassName="user-menu" label="Abrir menu do usuário" isOwner={false} onlyLogout onAction={vi.fn()}>Conta</AccountMenu>);
+
+    await user.click(screen.getByRole("button", { name: "Abrir menu do usuário" }));
+
+    expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual(["Sair"]);
+  });
+
   it("fecha com Esc e com clique fora", async () => {
     const user = userEvent.setup();
     render(<div><p>fora</p><AccountMenu buttonClassName="x" label="Conta" isOwner onAction={vi.fn()}>Conta</AccountMenu></div>);
