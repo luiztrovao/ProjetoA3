@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Falsos positivos do SpotBugs, analisados um a um (ver docs/analise-estatica.md).
+  Falsos positivos do SpotBugs, analisados um a um (ver docs/06-relatorio-de-analise-estatica.md).
   Cada exclusão vale só para o par alerta + classe/campo listado; qualquer caso novo continua aparecendo.
 -->
 <FindBugsFilter

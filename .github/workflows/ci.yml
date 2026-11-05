@@ -42,6 +42,50 @@ jobs:
             backend/target/reports/
           if-no-files-found: ignore
 
+  backend-postgres:
+    name: Backend (testes no PostgreSQL)
+    # Mesma suíte do job Backend, mas no PostgreSQL 17 (o banco de produção), em vez do H2
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: lanchonete
+          POSTGRES_USER: lanchonete
+          POSTGRES_PASSWORD: lanchonete
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lanchonete"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://localhost:5432/lanchonete
+      DB_USERNAME: lanchonete
+      DB_PASSWORD: lanchonete
+      JWT_SECRET: segredo-dos-testes-no-ci-com-mais-de-32-caracteres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Testes no PostgreSQL
+        run: ./mvnw -B test
+      - name: Publica o relatório dos testes no PostgreSQL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorios-backend-postgres
+          path: backend/target/surefire-reports/
+          if-no-files-found: ignore
+
   frontend:
     name: Frontend (tipos e build)
     runs-on: ubuntu-latest
@@ -126,7 +170,7 @@ jobs:
   sonarcloud:
     name: SonarCloud (backend)
     runs-on: ubuntu-latest
-    # Só roda depois que o segredo SONAR_TOKEN for criado no repositório (veja docs/analise-estatica.md)
+    # Só roda depois que o segredo SONAR_TOKEN for criado no repositório (veja docs/06-relatorio-de-analise-estatica.md)
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     defaults:

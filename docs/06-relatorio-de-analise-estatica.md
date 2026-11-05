@@ -1,7 +1,26 @@
-# Análise estática
+# 6. Relatório de análise estática
+
+> Seção 7 do enunciado. Ciclo seguido: **antes da correção → análise estática → correções → nova análise → depois
+> da correção**. Os relatórios reais da última execução estão em
+> [reports/backend/analise-estatica](../reports/backend/analise-estatica) e
+> [reports/frontend/analise-estatica](../reports/frontend/analise-estatica).
 
 Ferramentas que procuram problemas no código **sem executá-lo**. Elas rodam a cada push e PR no GitHub
 Actions e também localmente.
+
+## O que cada ferramenta cobre (categorias do enunciado)
+
+| Categoria pedida | Ferramenta | Resultado antes → depois |
+|---|---|---|
+| Código duplicado | CPD (blocos de 100 tokens ou mais) | 1 bloco de 43 linhas → 0 |
+| Complexidade | JaCoCo (complexidade ciclomática) e PMD | 727 → 706 (principalmente pela refatoração do `Contato`, que eliminou os acessores repetidos); 0 alerta do PMD |
+| Problemas de estilo | PMD e ESLint | 1 (`TooManyStaticImports`) + 1 (`no-irregular-whitespace`) → 0 |
+| Possíveis bugs | SpotBugs | 1 `CT_CONSTRUCTOR_THROW` → 0 |
+| Código morto | PMD (variáveis, campos e métodos não usados) e ESLint (`no-unused-vars`) | 0 → 0 |
+| Vulnerabilidades / exposição de estado | SpotBugs (`EI_EXPOSE_REP*`) | 52 → 0 (32 corrigidos, 20 falsos positivos justificados) |
+| Problemas de manutenção | Todas acima, com o build reprovando problemas novos | 56 → 0 |
+
+## Ferramentas
 
 | Camada | Ferramenta | O que procura | Relatório |
 |---|---|---|---|
