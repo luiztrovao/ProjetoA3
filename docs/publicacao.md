@@ -63,8 +63,10 @@ As tabelas não precisam ser criadas à mão: o **Flyway** roda as migrações `
 - **Render Free "dorme"** depois de 15 minutos sem acesso, e o primeiro acesso depois disso leva **cerca de 1 minuto**.
   Abra o site uns minutos antes de apresentar.
 - **Neon Free** suspende o banco quando ocioso e acorda em segundos. São 0,5 GB de armazenamento, folgado para o projeto.
-- As datas das vendas de demonstração são geradas em relação ao dia da primeira subida da API.
-  Para "renovar" os dados perto da apresentação:
+- As vendas de demonstração se mantêm atualizadas sozinhas: a cada vez que a API sobe (inclusive quando o Render a
+  acorda depois de dormir), ela completa as vendas fictícias desde a última venda até o momento atual. Para forçar
+  isso antes da apresentação, use **Manual Deploy → Restart service** no Render.
+  Para recomeçar do zero (18 meses novos de histórico):
   1. No Neon, em **Branches**, crie um banco vazio ou apague as tabelas.
   2. No Render, use **Manual Deploy → Restart service**.
 

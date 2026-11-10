@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.JoinType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -14,6 +15,13 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface VendaRepository extends JpaRepository<Venda, Long>, JpaSpecificationExecutor<Venda> {
 
     List<Venda> findByStatusAndDataHoraBetween(StatusVenda status, LocalDateTime inicio, LocalDateTime fim);
+
+    /** Primeira e última venda: usadas para completar o histórico de demonstração até hoje. */
+    Optional<Venda> findFirstByOrderByDataHoraAsc();
+
+    Optional<Venda> findFirstByOrderByDataHoraDesc();
+
+    List<Venda> findByStatusAndDataHoraBefore(StatusVenda status, LocalDateTime limite);
 
     // ===== Notificações =====
 

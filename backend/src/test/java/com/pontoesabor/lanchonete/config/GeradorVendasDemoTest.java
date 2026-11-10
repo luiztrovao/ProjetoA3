@@ -84,6 +84,33 @@ class GeradorVendasDemoTest {
     }
 
     @Test
+    void complementarSoGeraVendasDepoisDaUltimaEAteAgora() {
+        Categoria categoria = categoriaRepository.findByAtivoTrueOrderByNome().getFirst();
+        List<Produto> produtos = produtoRepository.saveAll(List.of(
+                new Produto("T1", "Lanche", categoria, new BigDecimal("20.00"), 5, 1)));
+        List<Usuario> equipe = usuarioRepository.saveAll(List.of(new Usuario("Vendedor", "vendedor", "hash", Perfil.VENDEDOR)));
+        LocalDateTime ultimaVenda = LocalDateTime.of(2026, 10, 1, 14, 30);
+        LocalDateTime agora = LocalDateTime.of(2026, 10, 4, 15, 0);
+
+        // Sem clientes cadastrados, todas as vendas saem sem cliente
+        int geradas = gerador.complementar(LocalDate.of(2025, 6, 1), ultimaVenda, agora, produtos, new int[] {1}, equipe, List.of());
+
+        assertThat(geradas).isGreaterThan(40);
+        assertThat(vendaRepository.findAll()).hasSize(geradas).allSatisfy(venda -> {
+            assertThat(venda.getDataHora()).isAfter(ultimaVenda).isBeforeOrEqualTo(agora);
+            assertThat(venda.getCliente()).isNull();
+        });
+    }
+
+    @Test
+    void complementarSemIntervaloNaoGeraNada() {
+        LocalDateTime agora = LocalDateTime.of(2026, 10, 4, 15, 0);
+
+        assertThat(gerador.complementar(LocalDate.of(2026, 1, 1), agora, agora, List.of(), new int[0], List.of(), List.of()))
+                .isZero();
+    }
+
+    @Test
     void sorteioRespeitaOsPesos() {
         Random aleatorio = new Random(1);
         int[] contagem = new int[2];
