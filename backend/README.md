@@ -49,6 +49,11 @@ A geração usa uma **semente fixa**: os números são sempre os mesmos (bom par
 consome o estoque atual dos produtos. Para usar no PostgreSQL (banco vazio), defina `APP_DADOS_DEMO_HABILITADO=true` e
 `APP_DADOS_DEMO_SENHA=<senha>`; `APP_DADOS_DEMO_MESES_DE_HISTORICO` muda o tamanho do histórico (padrão 18).
 
+Com os dados de demonstração ligados e o banco já preenchido, **cada nova subida da API completa as vendas fictícias**
+desde a última venda gravada até o momento atual, com os mesmos padrões de horário, dia da semana e mês. Assim o
+Dashboard do sistema publicado continua mostrando vendas de hoje e dos últimos dias, como se a lanchonete estivesse em
+uso. Na mesma hora, os pedidos de dias anteriores que ficaram "em preparo" são concluídos.
+
 O token vale **8 horas**. Se o funcionário for desativado ou mudar de perfil, a mudança vale na hora.
 
 ### Usando o PostgreSQL (Neon)

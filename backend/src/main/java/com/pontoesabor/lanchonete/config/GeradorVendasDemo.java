@@ -66,15 +66,39 @@ public class GeradorVendasDemo {
      */
     public int gerar(LocalDate inicio, LocalDateTime agora, List<Produto> produtos, int[] pesos,
             List<Usuario> vendedores, List<Cliente> clientes) {
-        Random aleatorio = new Random(SEMENTE);
+        return gerarPeriodo(inicio, inicio, null, agora, produtos, pesos, vendedores, clientes, new Random(SEMENTE));
+    }
+
+    /**
+     * Completa o histórico com as vendas que aconteceriam depois de {@code ultimaVenda} até {@code agora}: assim o
+     * sistema publicado continua parecendo em uso dias depois da primeira subida, inclusive com vendas de hoje.
+     *
+     * @param inicioHistorico primeiro dia do histórico, para manter o crescimento mês a mês da série original
+     * @return quantidade de vendas geradas (zero se não houver intervalo a completar)
+     */
+    public int complementar(LocalDate inicioHistorico, LocalDateTime ultimaVenda, LocalDateTime agora,
+            List<Produto> produtos, int[] pesos, List<Usuario> vendedores, List<Cliente> clientes) {
+        if (!agora.isAfter(ultimaVenda)) {
+            return 0;
+        }
+        // Semente ligada ao dia da última venda: cada complemento sorteia uma sequência diferente
+        Random aleatorio = new Random(SEMENTE + ultimaVenda.toLocalDate().toEpochDay());
+        return gerarPeriodo(inicioHistorico, ultimaVenda.toLocalDate(), ultimaVenda, agora,
+                produtos, pesos, vendedores, clientes, aleatorio);
+    }
+
+    /** Gera as vendas de {@code primeiroDia} até {@code agora}, só as posteriores a {@code depoisDe} (se informado). */
+    private int gerarPeriodo(LocalDate inicioHistorico, LocalDate primeiroDia, LocalDateTime depoisDe,
+            LocalDateTime agora, List<Produto> produtos, int[] pesos, List<Usuario> vendedores,
+            List<Cliente> clientes, Random aleatorio) {
         int[] pesoVendedor = vendedores.stream().mapToInt(GeradorVendasDemo::pesoDoVendedor).toArray();
         int total = 0;
-        for (LocalDate dia = inicio; !dia.isAfter(agora.toLocalDate()); dia = dia.plusDays(1)) {
-            int quantidade = vendasNoDia(dia, inicio, aleatorio);
+        for (LocalDate dia = primeiroDia; !dia.isAfter(agora.toLocalDate()); dia = dia.plusDays(1)) {
+            int quantidade = vendasNoDia(dia, inicioHistorico, aleatorio);
             List<LocalDateTime> horarios = new ArrayList<>();
             for (int i = 0; i < quantidade; i++) {
                 LocalDateTime momento = dia.atTime(sortearHora(aleatorio), aleatorio.nextInt(60));
-                if (!momento.isAfter(agora)) {
+                if (!momento.isAfter(agora) && (depoisDe == null || momento.isAfter(depoisDe))) {
                     horarios.add(momento);
                 }
             }
@@ -82,7 +106,8 @@ public class GeradorVendasDemo {
             for (int i = 0; i < horarios.size(); i++) {
                 boolean recente = dia.equals(agora.toLocalDate()) && i >= horarios.size() - 2;
                 Usuario vendedor = vendedores.get(sortear(pesoVendedor, aleatorio));
-                Cliente cliente = aleatorio.nextInt(100) < 40 ? clientes.get(aleatorio.nextInt(clientes.size())) : null;
+                Cliente cliente = !clientes.isEmpty() && aleatorio.nextInt(100) < 40
+                        ? clientes.get(aleatorio.nextInt(clientes.size())) : null;
                 entityManager.persist(montarVenda(horarios.get(i), vendedor, cliente, produtos, pesos, recente, aleatorio));
                 total++;
             }

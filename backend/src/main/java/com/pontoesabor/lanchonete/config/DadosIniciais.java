@@ -6,12 +6,15 @@ import com.pontoesabor.lanchonete.model.Contato;
 import com.pontoesabor.lanchonete.model.Imagem;
 import com.pontoesabor.lanchonete.model.Perfil;
 import com.pontoesabor.lanchonete.model.Produto;
+import com.pontoesabor.lanchonete.model.StatusVenda;
 import com.pontoesabor.lanchonete.model.Usuario;
+import com.pontoesabor.lanchonete.model.Venda;
 import com.pontoesabor.lanchonete.repository.CategoriaRepository;
 import com.pontoesabor.lanchonete.repository.ClienteRepository;
 import com.pontoesabor.lanchonete.repository.ImagemRepository;
 import com.pontoesabor.lanchonete.repository.ProdutoRepository;
 import com.pontoesabor.lanchonete.repository.UsuarioRepository;
+import com.pontoesabor.lanchonete.repository.VendaRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -21,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -37,7 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Cria dados ao subir a API, apenas quando o banco ainda não tem usuários:
  * <ul>
  *   <li><b>Dados de demonstração</b> ({@code app.dados-demo.habilitado=true}, perfil h2): os funcionários,
- *       clientes e produtos do protótipo do Figma, para testar o sistema localmente.</li>
+ *       clientes e produtos do protótipo do Figma, para testar o sistema localmente. Nas subidas seguintes,
+ *       as vendas fictícias são completadas até o momento atual.</li>
  *   <li><b>Primeiro Dono</b> ({@code ADMIN_USERNAME} e {@code ADMIN_SENHA}): em produção, para que alguém
  *       consiga entrar e cadastrar os demais funcionários.</li>
  * </ul>
@@ -52,6 +57,7 @@ public class DadosIniciais implements ApplicationRunner {
     private final ProdutoRepository produtoRepository;
     private final CategoriaRepository categoriaRepository;
     private final ImagemRepository imagemRepository;
+    private final VendaRepository vendaRepository;
     private final PasswordEncoder passwordEncoder;
     private final GeradorVendasDemo geradorVendas;
     private final Clock relogio;
@@ -67,6 +73,7 @@ public class DadosIniciais implements ApplicationRunner {
             ProdutoRepository produtoRepository,
             CategoriaRepository categoriaRepository,
             ImagemRepository imagemRepository,
+            VendaRepository vendaRepository,
             PasswordEncoder passwordEncoder,
             GeradorVendasDemo geradorVendas,
             Clock relogio,
@@ -80,6 +87,7 @@ public class DadosIniciais implements ApplicationRunner {
         this.produtoRepository = produtoRepository;
         this.categoriaRepository = categoriaRepository;
         this.imagemRepository = imagemRepository;
+        this.vendaRepository = vendaRepository;
         this.passwordEncoder = passwordEncoder;
         this.geradorVendas = geradorVendas;
         this.relogio = relogio;
@@ -93,10 +101,14 @@ public class DadosIniciais implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        boolean demo = demoHabilitado && !senhaDemo.isBlank();
         if (usuarioRepository.count() > 0) {
+            if (demo) {
+                complementarVendasDemonstracao();
+            }
             return;
         }
-        if (demoHabilitado && !senhaDemo.isBlank()) {
+        if (demo) {
             criarDadosDemonstracao();
         } else if (!adminUsername.isBlank() && !adminSenha.isBlank()) {
             usuarioRepository.save(new Usuario(
@@ -168,6 +180,36 @@ public class DadosIniciais implements ApplicationRunner {
         log.info("Dados de demonstração criados: {} funcionários, {} clientes, {} produtos e {} vendas desde {}.",
                 equipe.size(), clientes.size(), produtos.size(), vendas, inicio);
         log.info("Usuários: matheus (Dono), carlos (Gerente), fernanda, julia e bruno (Vendedores).");
+    }
+
+    /**
+     * Com o banco já criado, completa as vendas fictícias desde a última venda até agora. Sem isso, o Dashboard do
+     * sistema publicado ficaria vazio poucos dias depois da primeira subida (os dados eram gerados uma única vez).
+     * Também conclui os pedidos de dias anteriores que ficaram "em preparo", como faria a lanchonete.
+     */
+    void complementarVendasDemonstracao() {
+        Optional<Venda> primeira = vendaRepository.findFirstByOrderByDataHoraAsc();
+        Optional<Venda> ultima = vendaRepository.findFirstByOrderByDataHoraDesc();
+        List<Usuario> equipe = usuarioRepository.findAll().stream()
+                .filter(usuario -> usuario.isAtivo() && usuario.getPerfil() != Perfil.VISITANTE)
+                .toList();
+        List<Produto> produtos = produtoRepository.findByAtivoTrueOrderByNome();
+        if (primeira.isEmpty() || ultima.isEmpty() || equipe.isEmpty() || produtos.isEmpty()) {
+            return;
+        }
+        LocalDateTime agora = LocalDateTime.now(relogio);
+        vendaRepository.findByStatusAndDataHoraBefore(StatusVenda.EM_PREPARO, agora.toLocalDate().atStartOfDay())
+                .forEach(Venda::concluir);
+
+        Map<String, Integer> popularidade = CARDAPIO.stream()
+                .collect(Collectors.toMap(ItemCardapio::codigo, ItemCardapio::popularidade));
+        int[] pesos = produtos.stream().mapToInt(produto -> popularidade.getOrDefault(produto.getCodigo(), 5)).toArray();
+        List<Cliente> clientes = clienteRepository.findAll().stream().filter(Cliente::isAtivo).toList();
+        int vendas = geradorVendas.complementar(primeira.get().getDataHora().toLocalDate(), ultima.get().getDataHora(),
+                agora, produtos, pesos, equipe, clientes);
+        if (vendas > 0) {
+            log.info("Dados de demonstração completados: {} vendas de {} até agora.", vendas, ultima.get().getDataHora());
+        }
     }
 
     /**
