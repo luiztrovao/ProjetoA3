@@ -10,7 +10,8 @@ O que já está no repositório:
 
 - `backend/Dockerfile`: empacota a API com o perfil `prod` (PostgreSQL). O CI confere que a imagem é gerada.
 - `render.yaml`: o *Blueprint* do Render, com as variáveis de ambiente que a API precisa.
-- `.github/workflows/deploy-pages.yml`: gera o build do frontend e publica no GitHub Pages a cada atualização da `main`.
+- `.github/workflows/deploy-pages.yml`: gera o build do frontend e publica no GitHub Pages sempre que algo em
+  `frontend/` muda na `develop` ou na `main`.
 
 As contas e os segredos ficam com a equipe: **nenhuma senha vai para o repositório** (ele é público).
 
@@ -54,8 +55,9 @@ As tabelas não precisam ser criadas à mão: o **Flyway** roda as migrações `
    - Nome: `VITE_API_URL`
    - Valor: o endereço da API, sem barra no final (ex.: `https://ponto-e-sabor-api.onrender.com`).
 2. **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. Publique: abra o PR `develop → main` e faça o merge.
-   O workflow **Publicar frontend (GitHub Pages)** roda sozinho. Ele também pode ser disparado em **Actions → Run workflow**.
+3. Publique: o workflow **Publicar frontend (GitHub Pages)** roda sozinho a cada merge na `develop` (ou na `main`)
+   que mexa em `frontend/`. Para publicar sem esperar um merge, use **Actions → Publicar frontend (GitHub Pages) →
+   Run workflow** e escolha a branch `develop`.
 4. Acesse `https://luiztrovao.github.io/ProjetoA3/` e entre com um usuário de demonstração.
 
 ## Limites do plano gratuito (importante para a apresentação)

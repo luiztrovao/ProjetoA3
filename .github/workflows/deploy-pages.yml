@@ -1,9 +1,14 @@
 name: Publicar frontend (GitHub Pages)
 
-# Publica a cada atualização da main; também pode ser disparado à mão na aba Actions.
+# Publica quando o frontend muda na develop (versão em uso pela equipe) ou na main (entrega final);
+# também pode ser disparado à mão na aba Actions. Sem isso, o site ficava parado numa versão antiga
+# enquanto a API (Render) já tinha funcionalidades novas, como o perfil Visitante.
 on:
   push:
-    branches: [main]
+    branches: [develop, main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
 permissions:
