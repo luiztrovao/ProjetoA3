@@ -1,0 +1,38 @@
+name: Manter API acordada
+
+# O plano Free do Render desliga a API depois de 15 minutos sem acesso, e o primeiro acesso seguinte demora
+# cerca de 1 minuto. Este agendamento chama a rota de ping a cada 10 minutos, das 7h à meia-noite (horário de
+# Brasília, UTC-3), para o sistema responder na hora. De madrugada a API dorme e economiza as horas gratuitas.
+on:
+  schedule:
+    - cron: "*/10 10-23 * * *"
+    - cron: "*/10 0-2 * * *"
+  # Também pode ser disparado à mão (Actions > Manter API acordada > Run workflow), ex.: antes da apresentação
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping na API
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Chama /api/publico/ping
+        env:
+          API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          if [ -z "$API_URL" ]; then
+            echo "::error::Variável VITE_API_URL não encontrada (Settings > Secrets and variables > Actions > Variables)."
+            exit 1
+          fi
+          # Se a API estiver dormindo, a primeira chamada pode levar até ~1 minuto para acordar o Render
+          for tentativa in 1 2 3; do
+            codigo=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 "$API_URL/api/publico/ping" || true)
+            echo "Tentativa $tentativa: HTTP $codigo"
+            # Qualquer resposta da aplicação (2xx/4xx) mostra que a API está no ar
+            if [ "$codigo" != "000" ] && [ "$codigo" -lt 500 ]; then
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::A API não respondeu em $API_URL."
+          exit 1

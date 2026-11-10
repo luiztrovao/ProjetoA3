@@ -27,6 +27,16 @@ public class PublicoController {
         this.imagemService = imagemService;
     }
 
+    /**
+     * Resposta vazia que não toca no banco: o agendamento do GitHub Actions (manter-api-acordada.yml) chama esta rota
+     * para o Render não desligar a API por inatividade, sem manter o banco do Neon ligado o tempo todo.
+     */
+    @GetMapping("/api/publico/ping")
+    @Operation(summary = "Verifica se a API está no ar (não consulta o banco)")
+    public ResponseEntity<Void> ping() {
+        return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
+    }
+
     @GetMapping("/api/publico/identidade")
     @Operation(summary = "Nome e logo da lanchonete (exibidos na tela de login)")
     public IdentidadeResponse identidade() {

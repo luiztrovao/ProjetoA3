@@ -61,7 +61,15 @@ As tabelas não precisam ser criadas à mão: o **Flyway** roda as migrações `
 ## Limites do plano gratuito (importante para a apresentação)
 
 - **Render Free "dorme"** depois de 15 minutos sem acesso, e o primeiro acesso depois disso leva **cerca de 1 minuto**.
-  Abra o site uns minutos antes de apresentar.
+  Para evitar isso, o workflow **Manter API acordada** (`.github/workflows/manter-api-acordada.yml`) chama
+  `GET /api/publico/ping` a cada 10 minutos, das 7h à meia-noite (horário de Brasília). Detalhes:
+  - a rota de ping não consulta o banco, então o Neon continua podendo suspender quando ninguém usa o sistema;
+  - de madrugada a API dorme: são cerca de 17 h por dia, dentro das 750 horas gratuitas por mês do Render;
+  - o GitHub pode atrasar execuções agendadas em alguns minutos. Antes da apresentação, dispare o workflow à mão em
+    **Actions → Manter API acordada → Run workflow** ou abra o site uns minutos antes;
+  - agendamentos só rodam a partir da branch padrão (`develop`) e o GitHub os pausa em repositórios sem commits há 60 dias.
+- **Por que não fazer login de tempos em tempos?** Para acordar o Render basta qualquer requisição. Um login exigiria
+  guardar uma senha nos segredos do GitHub, atualizaria o "último acesso" do usuário e acordaria o banco sem necessidade.
 - **Neon Free** suspende o banco quando ocioso e acorda em segundos. São 0,5 GB de armazenamento, folgado para o projeto.
 - As vendas de demonstração se mantêm atualizadas sozinhas: a cada vez que a API sobe (inclusive quando o Render a
   acorda depois de dormir), ela completa as vendas fictícias desde a última venda até o momento atual. Para forçar
@@ -92,8 +100,8 @@ e não consegue trocar os dados nem a senha da própria conta. Todas as rotas de
 No ambiente local, com os dados de demonstração, já existe o usuário `visitante`, com a mesma senha dos outros
 usuários de demonstração.
 
-Abra o site alguns minutos antes de passar o acesso: com muitos alunos entrando ao mesmo tempo, a primeira
-chamada à API "dormindo" no Render leva cerca de 50 segundos.
+O workflow **Manter API acordada** deixa a API ligada durante o dia. Mesmo assim, dispare-o à mão (ou abra o site)
+alguns minutos antes de passar o acesso: com a API "dormindo", a primeira chamada leva cerca de 1 minuto.
 
 ## Mostrando o banco por um SGBD (apresentação de Banco de Dados)
 
